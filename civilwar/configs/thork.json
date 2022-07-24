@@ -1,0 +1,58 @@
+{
+  "name": "Thork",
+  "armorClass": 16,
+  "lifePoints": 32,
+  "movement": 9,
+  "passivePerception": 13,
+  "weapons": [
+    {
+      "name": "Greathammer",
+      "hit": 5,
+      "dices": 2,
+      "diceType": 6,
+      "additional": 3,
+      "type": "bludge"
+    },
+    {
+      "name": "Javelin",
+      "hit": 5,
+      "dices": 1,
+      "diceType": 6,
+      "additional": 3,
+      "type": "bludge",
+      "minRange": 30,
+      "maxRange": 120,
+      "usages": 30
+    }
+  ],
+  "spells": [
+    {
+      "name": "Lightning",
+      "range": 30,
+      "dices": 8,
+      "diceType": 6,
+      "type": "lightning",
+      "usages": 1,
+      "piercing": true
+    }
+  ],
+  "bonus": [
+    {
+      "name": "Rage",
+      "duration": 10,
+      "modifier": 2,
+      "resistance": [
+        "bludge",
+        "slash",
+        "stab"
+      ]
+    }
+  ],
+  "activeWeapon": "Greathammer",
+  "initiative": 1,
+  "reactions": [
+    {
+      "name": "opportunity"
+    }
+  ]
+}

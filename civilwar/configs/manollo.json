@@ -1,0 +1,55 @@
+{
+  "name": "Thork",
+  "armorClass": 18,
+  "lifePoints": 25,
+  "movement": 9,
+  "passivePerception": 11,
+  "weapons": [
+    {
+      "name": "Dos von Canonnos",
+      "hit": 3,
+      "dices": 2,
+      "diceType": 6,
+      "additional": 6,
+      "type": "slash"
+    },
+    {
+      "name": "Crossbow",
+      "hit": 4,
+      "dices": 1,
+      "diceType": 8,
+      "additional": 2,
+      "type": "slash",
+      "minRange": 80,
+      "maxRange": 320,
+      "usages": 19
+    }
+  ],
+  "spells": [
+    {
+      "name": "Lightning",
+      "range": 30,
+      "dices": 8,
+      "diceType": 6,
+      "type": "lightning",
+      "usages": 1,
+      "piercing": true
+    }
+  ],
+  "bonus": [
+    {
+      "name": "Second Wind",
+      "usages": 1,
+      "dices": 1,
+      "heal": 10,
+      "modifier": 3
+    }
+  ],
+  "activeWeapon": "Dos von Canonnos",
+  "initiative": 1,
+  "reactions": [
+    {
+      "name": "opportunity"
+    }
+  ]
+}

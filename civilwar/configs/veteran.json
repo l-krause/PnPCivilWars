@@ -1,0 +1,38 @@
+{
+  "name": "Veteran",
+  "armorClass": 17,
+  "lifePoints": 58,
+  "movement": 9,
+  "passivePerception": 12,
+  "weapons": [
+    {
+      "name": "Longsword",
+      "hit": 5,
+      "dices": 1,
+      "diceType": 8,
+      "additional": 3,
+      "type": "slash"
+    },
+    {
+      "name": "Shortsword",
+      "hit": 5,
+      "dices": 1,
+      "diceType": 6,
+      "additional": 3,
+      "type": "stab"
+    },
+    {
+      "name": "Crossbow",
+      "hit": 3,
+      "dices": 1,
+      "diceType": 10,
+      "additional": 1,
+      "type": "stab",
+      "minRange": 30,
+      "maxRange": 120,
+      "usages": 30
+    }
+  ],
+  "activeWeapon": "Longsword",
+  "multi": 2
+}

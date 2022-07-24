@@ -1,0 +1,45 @@
+{
+  "name": "Martha",
+  "armorClass": 16,
+  "lifePoints": 24,
+  "movement": 9,
+  "passivePerception": 15,
+  "weapons": [
+    {
+      "name": "Quarterstaff",
+      "hit": 2,
+      "dices": 1,
+      "diceType": 6,
+      "additional": 0,
+      "type": "bludge"
+    }
+  ],
+  "spells": [
+    {
+      "name": "Fire Bolt",
+      "range": 120,
+      "dices": 1,
+      "diceType": 10,
+      "type": "fire"
+    },
+    {
+      "name": "Transform",
+      "usages": 2,
+      "condition": "human"
+    }
+  ],
+  "bonus": [
+    {
+      "name": "Transform",
+      "condition": "animal"
+    }
+  ],
+  "activeWeapon": "Quarterstaff",
+  "initiative": 2,
+  "reactions": [
+    {
+      "name": "opportunity"
+    }
+  ],
+  "species": "human"
+}
