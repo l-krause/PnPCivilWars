@@ -12,10 +12,10 @@ class GameController:
         self._og_x = 1000
         self._og_y = 683
         self._og_meter = 152.5 / 434
-        self._pcs = []
-        self._allies = []
-        self._enemies = []
-        self._chars = []
+        self._pcs = {}
+        self._allies = {}
+        self._enemies = {}
+        self._chars = {}
 
     def create_pc(self, config_path):
         name = config_path.split("/")[1].replace(".json", "")
@@ -26,8 +26,8 @@ class GameController:
             data = reader.read()
             data = json.loads(data)
             character = PlayerCharacter(data, data["name"])
-            self._pcs += [character]
-            self._chars += [character]
+            self._pcs[name] = character
+            self._chars[name] = character
             return {"success": True, "msg": "", "data": data}
 
     def create_npc(self, amount=20, allies=True):
@@ -41,13 +41,15 @@ class GameController:
                 data = reader.read()
                 data = json.loads(data)
                 name = data["name"] + str(len(self._allies))
+                name = name + "_ally" if allies else + "_enemy"
                 x = random.randint(0, self._og_x - 1)
                 y = random.randint(0, self._og_y - 100)
                 c = NPC(data, name, (x, y))
                 if allies:
-                    self._allies += [c]
+                    self._allies[name] = c
                 else:
-                    self._enemies += [c]
+                    self._enemies[name] = c
+                self._chars[name] = c
         return {"success": True, "msg": "", "data": {}}
 
     def get_characters_aoe(self, start_pos, r, real_pixels):
@@ -108,3 +110,14 @@ class GameController:
         if not pierce and first_c is not None:
             response += [first_c]
         return response
+
+    def _calc_distance(self, pos1, pos2):
+        x_dist = pos1[0] - pos2[0]
+        y_dist = pos1[0] - pos2[0]
+        return math.hypot(x_dist ** 2, y_dist ** 2) * self._og_meter
+
+    def attack(self, actor: str, target: str):
+        pc = self._pcs[actor]
+        tar = self._chars[target]
+        weapon = self._pcs[actor].get_active_weapon()
+        return weapon.attack(self._calc_distance(pc.get_pos(), tar.get_pos()), self._chars[target])

@@ -18,26 +18,23 @@ class Weapon:
     def get_name(self):
         return self._name
 
-    def attack(self, pos, target: Character):
-        distance = target.calc_distance(pos)
+    def attack(self, distance, target: Character):
         if distance > self._max_range or distance < self._min_range:
-            print("Can't reach target")
-            return
+            return {"success": False, "msg": "Can't reach target", "data": {}}
         if self._usages == 0:
-            print("Can't attack")
-            return
+            return {"success": False, "msg": "No ammo", "data": {}}
         if self._usages > 0:
             self._usages -= 1
         hit = random.randint(1, 20) + self._hit
         print(hit)
         if hit < target.get_armor():
-            print("Missed")
-            return
+            return {"success": False, "msg": "Missed target: " + str(hit), "data": {}}
         damage = self._additional
         for i in range(self._dices):
             damage += random.randint(1, self._dice_type)
         if self._type in target.get_resistances():
             damage = damage // 2
         damage *= -1
-        print("Damage " + str(damage))
         target.change_health(damage)
+        return {"success": True, "msg": "",
+                "data": {"hit": "Hit for " + str(hit), "damage": str(damage) + " damage", "target": target.to_json()}}

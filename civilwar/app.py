@@ -3,7 +3,6 @@ import json
 import re
 
 import gamecontroller
-from utils.characters.character import Character
 
 CHARACTERS = ["configs/manollo.json", "configs/thork.json", "configs/martha.json", "configs/bart.json"]
 gc = gamecontroller.GameController()
@@ -47,7 +46,7 @@ def choose_character(data):
 
 
 def api_attack(data):
-    pass
+    return gc.attack(data["character"]["name"])
 
 
 def api_cast(data):

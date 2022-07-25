@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-
+import json
 
 class Character(ABC):
 
@@ -46,3 +46,6 @@ class Character(ABC):
         if tmp_health <= self._max_life * -2:
             return
         self._curr_life = tmp_health
+
+    def to_json(self):
+        return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
