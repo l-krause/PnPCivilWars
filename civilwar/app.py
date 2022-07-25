@@ -36,21 +36,6 @@ def has_character():
     return decorator
 
 
-@app.route('/test')
-def test_route():
-    return Response("test")
-
-
-@app.route('/')
-def index():
-    return send_from_directory('static', "index.html")
-
-
-@app.route('/static/<path:path>')
-def serve_static(path):
-    return send_from_directory('static', path)
-
-
 @socketio.on('chooseCharacter')
 def choose_character(data):
     if session.get("character", None) is not None:

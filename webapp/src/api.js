@@ -7,6 +7,10 @@ export default class API {
     }
 
     reconnect() {
+        if (this.io) {
+            this.io.removeAllListeners();
+        }
+        
         this.io = io({transports: ["websocket"]});
 
         /*
@@ -58,7 +62,7 @@ export default class API {
 
         if (callback) {
             // this.callbackHandlers[packet.messageId] = callback;
-            this.io.on(action, callback);
+            this.io.once(action, callback);
         }
 
         console.log("->",action, params);
