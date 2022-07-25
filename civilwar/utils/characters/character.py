@@ -11,24 +11,32 @@ class Character(ABC):
         self._passivePerception = dictionary["passivePerception"]
         self._active_weapon = dictionary["activeWeapon"]
         self._weapons = dictionary["weapons"]
+        self._resistances = [] if "resistances" not in dictionary.keys() else dictionary["resistance"]
 
     @abstractmethod
     def get_name(self):
         pass
 
-    @abstractmethod
     def get_armor(self):
-        pass
+        return self._armor
 
-    @abstractmethod
     def get_resistances(self):
-        pass
+        return self._resistances
 
     def get_pos(self):
         return self._pos
 
     def save_roll(self, attribute: str):
         pass
+
+    def get_active_weapon(self):
+        return self._active_weapon
+
+    def switch_weapon(self, name: str):
+        for weapon in self._weapons:
+            if name == weapon.get_name():
+                self._active_weapon = weapon
+                return
 
     def change_health(self, health):
         tmp_health = self._curr_life + health

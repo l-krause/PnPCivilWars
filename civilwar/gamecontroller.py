@@ -3,6 +3,7 @@ from utils.characters.player_character import PlayerCharacter
 from utils.characters.npc import NPC
 import json
 import math
+import random
 
 
 class GameController:
@@ -29,7 +30,7 @@ class GameController:
             self._chars += [character]
             return {"success": True, "msg": "", "data": data}
 
-    def create_allies(self, amount=20):
+    def create_npc(self, amount=20, allies=True):
         villager = "configs/villager.json"
         veteran = "configs/veteran.json"
         for i in range(amount):
@@ -40,9 +41,14 @@ class GameController:
                 data = reader.read()
                 data = json.loads(data)
                 name = data["name"] + str(len(self._allies))
-                c = NPC(data, name, )
-                self._allies += [c]
-
+                x = random.randint(0, self._og_x - 1)
+                y = random.randint(0, self._og_y - 100)
+                c = NPC(data, name, (x, y))
+                if allies:
+                    self._allies += [c]
+                else:
+                    self._enemies += [c]
+        return {"success": True, "msg": "", "data": {}}
 
     def get_characters_aoe(self, start_pos, r, real_pixels):
         x = self._og_x / real_pixels[0]
@@ -86,7 +92,7 @@ class GameController:
             if 0 < x_dist < 2 and 0 < y_dist < 2:
                 continue
             cross = x_dist * start_y - y_dist * start_x
-            char_dist = math.hypot(x_dist**2, y_dist**2)
+            char_dist = math.hypot(x_dist ** 2, y_dist ** 2)
             if cross > 3 or char_dist > dist:
                 continue
             if pierce:

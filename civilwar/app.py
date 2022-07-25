@@ -8,21 +8,43 @@ gc = gamecontroller.GameController()
 
 
 def new_client(client, server):
-	print("New client connected and was given id %d" % client['id'])
+    print("New client connected and was given id %d" % client['id'])
 
 
 def client_left(client, server):
-	print("Client(%d) disconnected" % client['id'])
+    print("Client(%d) disconnected" % client['id'])
 
 
 def message_received(client, server: websocket_server.WebsocketServer, message):
     message = json.loads(message)
     data = message["params"]
     resp = {"success": False, "msg": "Invalid message", "data": {}}
-    if message["action"] == "chooseCharacter":
+    action = message["action"]
+    if action == "chooseCharacter":
         resp = choose_character(int(data))
-    if message["action"] == "createNpcs":
-        resp = createNpcs(data)
+    if action == "attack":
+        pass
+    if action == "cast":
+        pass
+    if action == "move":
+        pass
+    if action == "pass":
+        pass
+    if action == "switch_weapon":
+        pass
+    # dm
+    if action == "start":
+        pass
+    if action == "changeHealth":
+        pass
+    if action == "setPosition":
+        pass
+    if action == "reset":
+        pass
+    if action == "createNpcs":
+        resp = create_npcs(data)
+    if action == "continue":
+        pass
     resp["messageId"] = message["messageId"]
     server.send_message(client, resp)
 
@@ -41,8 +63,10 @@ def choose_character(index: int):
     return gc.create_pc(CHARACTERS[index])
 
 
-def createNpcs(data):
-    pass
+def create_npcs(data):
+    if not ("allies" in data.keys() and "amount" in data.keys()):
+        return {"success": False, "msg": "Missing keys: allies or amount", "data": {}}
+    return gc.create_npc(data["amount"], data["allies"])
 
 
 if __name__ == "__main__":
