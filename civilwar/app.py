@@ -1,6 +1,7 @@
-import websocket_server
 import json
 import re
+
+import websocket_server
 
 import gamecontroller
 
@@ -46,7 +47,7 @@ def choose_character(data):
 
 
 def api_attack(data):
-    return gc.attack(data["character"]["name"])
+    return gc.attack(data["character"]["name"], data["target"]["name"])
 
 
 def api_cast(data):
