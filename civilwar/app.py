@@ -1,7 +1,9 @@
 import websocket_server
 import json
+import re
 
 import gamecontroller
+from utils.characters.character import Character
 
 CHARACTERS = ["configs/manollo.json", "configs/thork.json", "configs/martha.json", "configs/bart.json"]
 gc = gamecontroller.GameController()
@@ -20,31 +22,11 @@ def message_received(client, server: websocket_server.WebsocketServer, message):
     data = message["params"]
     resp = {"success": False, "msg": "Invalid message", "data": {}}
     action = message["action"]
-    if action == "chooseCharacter":
-        resp = choose_character(int(data))
-    if action == "attack":
-        pass
-    if action == "cast":
-        pass
-    if action == "move":
-        pass
-    if action == "pass":
-        pass
-    if action == "switch_weapon":
-        pass
-    # dm
-    if action == "start":
-        pass
-    if action == "changeHealth":
-        pass
-    if action == "setPosition":
-        pass
-    if action == "reset":
-        pass
-    if action == "createNpcs":
-        resp = create_npcs(data)
-    if action == "continue":
-        pass
+    player_func = "api_" + re.sub(r'(?<!^)(?=[A-Z])', '_', action).lower()
+    if player_func in globals():
+        fn = globals()[player_func]
+        if callable(player_func) in fn:
+            resp = fn(data)
     resp["messageId"] = message["messageId"]
     server.send_message(client, resp)
 
@@ -57,13 +39,53 @@ def main():
     server.run_forever()
 
 
-def choose_character(index: int):
+def choose_character(data):
+    index = int(data)
     if 0 > index or index > len(CHARACTERS):
         return {"success": False, "msg": "Invalid character: " + str(index), "data": {}}
     return gc.create_pc(CHARACTERS[index])
 
 
-def create_npcs(data):
+def api_attack(data):
+    pass
+
+
+def api_cast(data):
+    pass
+
+
+def api_move(data):
+    pass
+
+
+def api_pass_turn(data):
+    pass
+
+
+def api_switch_weapon(data):
+    pass
+
+
+### DM methods
+
+
+def api_start(data):
+    pass
+
+
+def api_change_health(data):
+    pass
+
+
+def api_reset(data):
+    pass
+
+
+def api_continue(data):
+    pass
+
+
+def api_create_npcs(data):
     if not ("allies" in data.keys() and "amount" in data.keys()):
         return {"success": False, "msg": "Missing keys: allies or amount", "data": {}}
     return gc.create_npc(data["amount"], data["allies"])
