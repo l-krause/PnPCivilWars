@@ -38,6 +38,8 @@ class GameController:
             char_x, char_y = c.get_pos()
             x_dist = char_x - start_x
             y_dist = char_y - start_y
+            if 0 < x_dist < 2 and 0 < y_dist < 2:
+                continue
             if x_dist ** 2 + y_dist ** 2 <= pixel_dist:
                 response += [c]
         return response
@@ -57,4 +59,29 @@ class GameController:
                 break
             dest_x -= 1
             dest_y -= 1
-        
+        response = []
+        first_c = None
+        first_dist = 0
+        for c in self._chars:
+            char_x, char_y = c.get_pos()
+            x_dist = char_x - start_x
+            y_dist = char_y - start_y
+            if 0 < x_dist < 2 and 0 < y_dist < 2:
+                continue
+            cross = x_dist * start_y - y_dist * start_x
+            char_dist = math.hypot(x_dist**2, y_dist**2)
+            if cross > 3 or char_dist > dist:
+                continue
+            if pierce:
+                response += [c]
+            else:
+                if first_c is None:
+                    first_c = c
+                    first_dist = char_dist
+                else:
+                    if first_dist > char_dist:
+                        first_c = c
+                        first_dist = char_dist
+        if not pierce and first_c is not None:
+            response += [first_c]
+        return response
