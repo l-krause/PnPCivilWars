@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 
 class Character(ABC):
 
-    def __init__(self, dictionary):
+    def __init__(self, dictionary, pos):
         self._max_life = dictionary["lifePoints"]
         self._curr_life = dictionary["lifePoints"]
         self._armor = dictionary["armorClass"]
@@ -11,6 +11,7 @@ class Character(ABC):
         self._passivePerception = dictionary["passivePerception"]
         self._active_weapon = dictionary["activeWeapon"]
         self._weapons = dictionary["weapons"]
+        self._pos = pos
 
     @abstractmethod
     def get_name(self):
@@ -24,8 +25,10 @@ class Character(ABC):
     def get_resistances(self):
         pass
 
-    @abstractmethod
-    def calc_distance(self, pos):
+    def get_pos(self):
+        return self._pos
+
+    def save_roll(self, attribute: str):
         pass
 
     def change_health(self, health):
