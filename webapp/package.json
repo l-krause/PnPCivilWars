@@ -1,21 +1,28 @@
 {
-  "name": "webapp",
+  "name": "dnd.romanh.de",
   "version": "0.1.0",
   "private": true,
+  "source": "src/index.js",
   "dependencies": {
+    "@emotion/react": "^11.9.3",
+    "@emotion/styled": "^11.9.3",
+    "@mui/icons-material": "^5.8.4",
+    "@mui/material": "^5.9.1",
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.3.0",
     "@testing-library/user-event": "^13.5.0",
+    "babel-polyfill": "^6.26.0",
+    "http-proxy-middleware": "^2.0.6",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-scripts": "5.0.1",
-    "web-vitals": "^2.1.4"
+    "react-scripts": "^4.0.3",
+    "socket.io-client": "^4.5.1",
+    "websocket": "^1.0.34"
   },
   "scripts": {
-    "start": "FAST_REFRESH=false react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "build": "npx parcel build",
+    "debug": "HTTPS=true react-scripts start",
+    "deploy": "scp -r dist root@romanh.de:/var/www/dnd.romanh.de/static/"
   },
   "eslintConfig": {
     "extends": [
@@ -36,6 +43,12 @@
     ]
   },
   "devDependencies": {
-    "npm-watch": "^0.11.0"
+    "parcel": "^2.6.2",
+    "stream-browserify": "^3.0.0"
+  },
+  "@parcel/bundler-default": {
+    "minBundles": 1,
+    "minBundleSize": 3000,
+    "maxParallelRequests": 1
   }
 }

@@ -8,13 +8,13 @@ class Spell:
     def __init__(self, dictionary):
         self._name = dictionary["name"]
         self._spell_type = dictionary["spellType"]
-        self._usages = -1 if "usages" not in dictionary.keys() else dictionary["usages"]
-        self._dices = 0 if "dices" not in dictionary.keys() else dictionary["dices"]
-        self._dice_type = 0 if "diceType" not in dictionary.keys() else dictionary["diceType"]
-        self._additional = 0 if "additional" not in dictionary.keys() else dictionary["additional"]
-        self._save = 0 if "save" not in dictionary.keys() else dictionary["save"]
-        self._save_att = "" if "saveAttribute" not in dictionary.keys() else dictionary["saveAttribute"]
-        self._hit = 0 if "hit" not in dictionary.keys() else dictionary["hit"]
+        self._usages = dictionary.get("usages", -1)
+        self._dices = dictionary.get("dices", 0)
+        self._dice_type = dictionary.get("diceType", 0)
+        self._additional = dictionary.get("additional", 0)
+        self._save = dictionary.get("save", 0)
+        self._save_att = dictionary.get("saveAttribute", "")
+        self._hit = dictionary.get("hit", 0)
 
     def cast(self, targets: list[Character], advantage: list[bool]):
         if self._usages == 0:

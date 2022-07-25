@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="85926906-54d8-4134-a21b-aca50bb9148b" name="dnd.romanh.de" url="https://dnd.romanh.de">
+        <fileTransfer accessType="SFTP" host="romanh.de" port="22" sshConfigId="8f43e74f-0326-4835-933d-9fc610b57a31" sshConfig="root@romanh.de:22 agent" authAgent="true">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" keepAliveTimeout="0" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>

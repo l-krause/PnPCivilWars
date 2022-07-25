@@ -2,6 +2,7 @@ import json
 from abc import ABC, abstractmethod
 
 
+
 class Character(ABC):
 
     def __init__(self, dictionary):
@@ -13,7 +14,7 @@ class Character(ABC):
         self._passivePerception = dictionary["passivePerception"]
         self._active_weapon = dictionary["activeWeapon"]
         self._weapons = dictionary["weapons"]
-        self._resistances = [] if "resistances" not in dictionary.keys() else dictionary["resistance"]
+        self._resistances = dictionary.get("resistance", [])
         self._pos = (0, 0)
         self._action_points = 1
         self._stunned = False
