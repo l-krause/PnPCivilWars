@@ -55,7 +55,9 @@ def api_cast(data):
 
 
 def api_move(data):
-    pass
+    if "target" not in data.keys() or "pos" not in data.keys() or "real_pixels" not in data.keys():
+        return {"success": "false", "msg": "Missing keys: target, pos or real_pixels", "data": {}}
+    gc.move(data["target"], data["pos"], data["real_pixels"])
 
 
 def api_pass_turn(data):

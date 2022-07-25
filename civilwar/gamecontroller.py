@@ -90,14 +90,10 @@ class GameController:
         start_y = round(start_pos[1] * y)
         dest_x = round(dest_pos[0] * x)
         dest_y = round(dest_pos[1] * y)
-        dist = r // self._og_meter
-        while True:
-            x_dist = start_x - dest_x
-            y_dist = start_y - dest_y
-            if x_dist ** 2 + y_dist ** 2 <= dist:
-                break
-            dest_x -= 1
-            dest_y -= 1
+        max_dist = r // self._og_meter
+        dist = self._calc_distance((start_x, start_y), (dest_x, dest_y))
+        if dist > max_dist:
+            dest_x, dest_y = self._normalize_distance((start_x, start_y), (dest_x, dest_y), max_dist)
         response = []
         first_c = None
         first_dist = 0
@@ -107,7 +103,7 @@ class GameController:
             y_dist = char_y - start_y
             if 0 < x_dist < 2 and 0 < y_dist < 2:
                 continue
-            cross = x_dist * start_y - y_dist * start_x
+            cross = x_dist * dest_y - y_dist * dest_x
             char_dist = math.hypot(x_dist ** 2, y_dist ** 2)
             if cross > 3 or char_dist > dist:
                 continue
@@ -130,8 +126,28 @@ class GameController:
         y_dist = pos1[0] - pos2[0]
         return math.hypot(x_dist ** 2, y_dist ** 2) * self._og_meter
 
+    def _normalize_distance(self, pos1, pos2, max_dist):
+        x_dir = pos1[0] - pos2[1]
+        y_dir = pos1[1] - pos2[1]
+        length = math.sqrt(x_dir ** 2 + y_dir ** 2)
+        dest_x = int(max(min((x_dir / length) * max_dist, self._og_x), 0))
+        dest_y = int(max(min((y_dir / length) * max_dist), self._og_y, 0))
+        return dest_x, dest_y
+
     def attack(self, actor: str, target: str):
         pc = self._pcs[actor]
         tar = self._chars[target]
         weapon = self._pcs[actor].get_active_weapon()
         return weapon.attack(self._calc_distance(pc.get_pos(), tar.get_pos()), self._chars[target])
+
+    def move(self, target: str, pos, real_pixels):
+        c = self._chars[target]
+        max_dist = c.get_movement_left()
+        new_pos = self._normalize_distance(c.get_pos, pos, max_dist)
+        dist = math.ceil(self._calc_distance(c.get_pos, new_pos))
+        c.move(new_pos, dist)
+        x = self._og_x / real_pixels[0]
+        y = self._og_y / real_pixels[1]
+        x = round(x * new_pos[0])
+        y = round(y * new_pos[1])
+        return {"success": True, "msg": "", "data": {"x": x, "y": y}}
