@@ -1,11 +1,11 @@
-import gamecontroller
 from functools import update_wrapper
 
 from flask import Flask, send_from_directory, Response, session
+from flask_cors import CORS
 from flask_session import Session
-from flask_socketio import SocketIO, send, emit
-from flask_cors import CORS, cross_origin
+from flask_socketio import SocketIO, emit
 
+import gamecontroller
 
 CHARACTERS = ["configs/manollo.json", "configs/thork.json", "configs/martha.json", "configs/bart.json"]
 ORIGINS = ["https://dnd.romanh.de", "https://localhost:3000", "http://localhost:3000"]
@@ -30,7 +30,9 @@ def has_character():
                 return {"success": False, "msg": "No character chosen yet"}
 
             return fn(*args, **kwargs)
+
         return update_wrapper(wrapped_function, fn)
+
     return decorator
 
 
@@ -62,6 +64,12 @@ def choose_character(data):
             response = gc.create_pc(CHARACTERS[index])
 
     emit("chooseCharacter", response)
+
+
+@socketio.on("getCharacters")
+def get_characters(data):
+    response = gc.get_all_characters()
+    emit("getCharacter", response)
 
 
 @socketio.on('info')

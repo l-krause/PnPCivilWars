@@ -66,6 +66,9 @@ class GameController:
                 self._chars[name] = c
         return {"success": True, "msg": "", "data": {}}
 
+    def get_all_characters(self):
+        return self._chars
+
     def get_characters_aoe(self, start_pos, r, real_pixels):
         x = self._og_x / real_pixels[0]
         y = self._og_y / real_pixels[1]
