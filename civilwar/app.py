@@ -69,23 +69,23 @@ def api_switch_weapon(data):
 ### DM methods
 
 
-def api_start(data):
+def dm_start(data):
     pass
 
 
-def api_change_health(data):
+def dm_change_health(data):
     pass
 
 
-def api_reset(data):
+def dm_reset(data):
     pass
 
 
-def api_continue(data):
+def dm_continue(data):
     pass
 
 
-def api_create_npcs(data):
+def dm_create_npcs(data):
     if not ("allies" in data.keys() and "amount" in data.keys()):
         return {"success": False, "msg": "Missing keys: allies or amount", "data": {}}
     return gc.create_npc(data["amount"], data["allies"])
