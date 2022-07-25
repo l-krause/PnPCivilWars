@@ -69,6 +69,15 @@ class GameController:
     def get_all_characters(self):
         return self._chars
 
+    def get_pcs(self):
+        return self._pcs
+
+    def get_allies(self):
+        return self._allies
+
+    def get_enemies(self):
+        return self._enemies
+
     def get_characters_aoe(self, start_pos, r, real_pixels):
         x = self._og_x / real_pixels[0]
         y = self._og_y / real_pixels[1]

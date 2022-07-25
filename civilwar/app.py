@@ -72,6 +72,24 @@ def get_characters(data):
     emit("getCharacter", response)
 
 
+@socketio.on("getPCs")
+def get_characters(data):
+    response = gc.get_pcs()
+    emit("getPCs", response)
+
+
+@socketio.on("getAllies")
+def get_characters(data):
+    response = gc.get_allies()
+    emit("getAllies", response)
+
+
+@socketio.on("getEnemies")
+def get_characters(data):
+    response = gc.get_enemies()
+    emit("getEnemies", response)
+
+
 @socketio.on('info')
 def api_info(*args):
     print("INFO received", args)
