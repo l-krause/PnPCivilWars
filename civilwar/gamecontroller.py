@@ -16,6 +16,20 @@ class GameController:
         self._allies = {}
         self._enemies = {}
         self._chars = {}
+        self._round = 0
+        self._queue = []
+        self._full_queue = []
+
+    def start(self):
+        int_rolls = []
+        for pc in self._pcs:
+            int_rolls.append(pc.int_roll())
+            self._full_queue.append(pc)
+        int_rolls, self._full_queue = zip(*sorted(zip(int_rolls, self._full_queue)))
+        self._full_queue.append(self._allies)
+        self._queue = self._full_queue.copy()
+        self._round = 1
+        return {"success": True, "msg": "", "data": {"first": self._queue.pop().get_name()}}
 
     def create_pc(self, config_path):
         name = config_path.split("/")[1].replace(".json", "")

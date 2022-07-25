@@ -10,3 +10,5 @@ class PlayerCharacter(Character):
     def get_name(self):
         return self._name
 
+    def int_roll(self):
+        pass

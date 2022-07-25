@@ -70,7 +70,7 @@ def api_switch_weapon(data):
 
 
 def dm_start(data):
-    pass
+    return gc.start()
 
 
 def dm_change_health(data):
