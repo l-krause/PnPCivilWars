@@ -1,5 +1,6 @@
 from utils.characters.character import Character
 from utils.characters.player_character import PlayerCharacter
+from utils.characters.npc import NPC
 import json
 import math
 
@@ -15,17 +16,33 @@ class GameController:
         self._enemies = []
         self._chars = []
 
-    def create_pc(self, config_path, pos):
+    def create_pc(self, config_path):
         name = config_path.split("/")[1].replace(".json", "")
         for c in self._pcs:
             if name in c.get_name().tolower():
-                return
+                return {"success": False, "msg": "Config: " + config_path + "was not found", "data": {}}
         with open(config_path, "r") as reader:
             data = reader.read()
             data = json.loads(data)
-            character = PlayerCharacter(data)
+            character = PlayerCharacter(data, data["name"])
             self._pcs += [character]
             self._chars += [character]
+            return {"success": True, "msg": "", "data": data}
+
+    def create_allies(self, amount=20):
+        villager = "configs/villager.json"
+        veteran = "configs/veteran.json"
+        for i in range(amount):
+            conf = villager
+            if i % 5 == 0:
+                conf = veteran
+            with open(conf, "r") as reader:
+                data = reader.read()
+                data = json.loads(data)
+                name = data["name"] + str(len(self._allies))
+                c = NPC(data, name, )
+                self._allies += [c]
+
 
     def get_characters_aoe(self, start_pos, r, real_pixels):
         x = self._og_x / real_pixels[0]

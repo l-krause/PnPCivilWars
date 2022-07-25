@@ -1,24 +1,48 @@
-import asyncio
-import websockets
+import websocket_server
 import json
 
+import gamecontroller
+
 CHARACTERS = ["configs/manollo.json", "configs/thork.json", "configs/martha.json", "configs/bart.json"]
+gc = gamecontroller.GameController()
 
 
-async def chooseCharacter(message, websocket):
-    await websocket.send()
+def new_client(client, server):
+	print("New client connected and was given id %d" % client['id'])
 
 
-async def handler(websocket):
-    while True:
-        message = await websocket.recv()
-        message = json.loads(message)
-        if message["action"] == "chooseCharacter":
-            await chooseCharacter(message, websocket)
+def client_left(client, server):
+	print("Client(%d) disconnected" % client['id'])
 
-async def main():
-    async with websockets.serve(handler, "localhost", 8001):
-        await asyncio.Future()  # run forever
+
+def message_received(client, server: websocket_server.WebsocketServer, message):
+    message = json.loads(message)
+    data = message["params"]
+    resp = {"success": False, "msg": "Invalid message", "data": {}}
+    if message["action"] == "chooseCharacter":
+        resp = choose_character(int(data))
+    if message["action"] == "createNpcs":
+        resp = createNpcs(data)
+    resp["messageId"] = message["messageId"]
+    server.send_message(client, resp)
+
+
+def main():
+    server = websocket_server.WebsocketServer(port=8001)
+    server.set_fn_new_client(new_client)
+    server.set_fn_client_left(client_left)
+    server.set_fn_message_received(message_received)
+    server.run_forever()
+
+
+def choose_character(index: int):
+    if 0 > index or index > len(CHARACTERS):
+        return {"success": False, "msg": "Invalid character: " + str(index), "data": {}}
+    return gc.create_pc(CHARACTERS[index])
+
+
+def createNpcs(data):
+
 
 
 if __name__ == "__main__":
