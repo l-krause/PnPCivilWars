@@ -42,7 +42,7 @@ def choose_character(index: int):
 
 
 def createNpcs(data):
-
+    pass
 
 
 if __name__ == "__main__":
