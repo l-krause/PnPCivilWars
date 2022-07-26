@@ -85,7 +85,16 @@ def api_info(*args):
 
 @socketio.on('attack')
 def api_attack(data):
-    return gc.attack(data["character"]["name"], data["target"]["name"])
+    resp = None
+    character = data.get("character", None)
+    if character is None:
+        resp = create_error("No character selected")
+    target = data.get("target", None)
+    if character is None:
+        resp = create_error("No target selected")
+    if resp is None:
+        resp = gc.attack(character, target)
+    emit("attack", resp, broadcast=True)
 
 
 @socketio.on('cast')
@@ -96,9 +105,12 @@ def api_cast(data):
 # Also for DM
 @socketio.on('move')
 def api_move(data):
+    resp = None
     if "target" not in data.keys() or "pos" not in data.keys() or "real_pixels" not in data.keys():
-        return {"success": "false", "msg": "Missing keys: target, pos or real_pixels", "data": {}}
-    gc.move(data["target"], data["pos"], data["real_pixels"])
+        resp = {"success": "false", "msg": "Missing keys: target, pos or real_pixels", "data": {}}
+    if resp is None:
+        resp = gc.move(data["target"], data["pos"], data["real_pixels"])
+    emit("move", resp, broadcast=True)
 
 
 @socketio.on('turn')
@@ -108,13 +120,16 @@ def api_pass_turn(data):
 
 @socketio.on('switchWeapon')
 def api_switch_weapon(data):
+    resp = None
     character = data.get("character", None)
     weapon_name = data.get("name", None)
     if weapon_name is None:
-        return create_error("No weapon selected")
+        resp = create_error("No weapon selected")
     if character is None:
-        return create_error("No character selected")
-    return gc.switch_weapon(name, character)
+        resp = create_error("No character selected")
+    if resp is None:
+        resp = gc.switch_weapon(name, character)
+    emit("switchWeapon", resp)
 
 
 ### DM methods
@@ -125,17 +140,20 @@ def dm_start(data):
 
 @socketio.on('changeHealth')
 def dm_change_health(data):
+    resp = None
     character = data.get("character", None)
     if character is None:
-        return create_error("No character selected")
+        resp = create_error("No character selected")
     life_points = data.get("life", 0)
-    return gc.change_health(character, life_points)
+    if resp is None:
+        resp = gc.change_health(character, life_points)
+    emit("changeHealth", resp, broadcast=True)
 
 
 @socketio.on('reset')
 def dm_reset(data):
     gc = gamecontroller.GameController()
-    return create_response()
+    emit("reset", create_response(), broadcast=True)
 
 
 @socketio.on('continue')
@@ -150,17 +168,23 @@ def dm_add_turn(data):
 
 @socketio.on('stun')
 def dm_stun(data):
+    resp = None
     character = data.get("character", None)
     if character is None:
-        return create_error("No character selected")
-
+        resp = create_error("No character selected")
+    if resp is None:
+        resp = gc.stun(character)
+    emit("stun", resp, broadcast=True)
 
 
 @socketio.on('createNPCs')
 def dm_create_npcs(data):
+    resp = None
     if not ("allies" in data.keys() and "amount" in data.keys()):
-        return {"success": False, "msg": "Missing keys: allies or amount", "data": {}}
-    return gc.create_npc(data["amount"], data["allies"])
+        resp = {"success": False, "msg": "Missing keys: allies or amount", "data": {}}
+    if resp is None:
+        resp = gc.create_npc(data["amount"], data["allies"])
+    emit("createNPCs". resp, broadcast=True)
 
 
 if __name__ == "__main__":
