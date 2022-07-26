@@ -1,9 +1,10 @@
 import json
 from abc import ABC, abstractmethod
 
+from utils.json_serializable import JsonSerializable
 
 
-class Character(ABC):
+class Character(JsonSerializable):
 
     def __init__(self, dictionary):
         self._max_life = dictionary["lifePoints"]
@@ -15,6 +16,7 @@ class Character(ABC):
         self._active_weapon = dictionary["activeWeapon"]
         self._weapons = dictionary["weapons"]
         self._resistances = dictionary.get("resistance", [])
+        self._token = dictionary.get("token", "")
         self._pos = (0, 0)
         self._action_points = 1
         self._stunned = False
@@ -61,4 +63,8 @@ class Character(ABC):
         self._movement_left -= dist
 
     def to_json(self):
-        return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
+        # return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
+        return {
+            "name": self.get_name(),
+            "token": self._token
+        }

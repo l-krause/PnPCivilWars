@@ -4,6 +4,7 @@
   "lifePoints": 24,
   "movement": 9,
   "passivePerception": 15,
+  "token": "/img/martha.png",
   "weapons": [
     {
       "name": "Quarterstaff",

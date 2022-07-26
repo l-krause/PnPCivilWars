@@ -12,25 +12,6 @@ export default class API {
         }
         
         this.io = io({transports: ["websocket"]});
-
-        /*
-        this.websocketClient.onmessage = (message) => {
-            console.log('message', message);
-            try {
-                const obj = JSON.parse(message);
-                const messageId = obj.messageId || null;
-                if (messageId && typeof this.callbackHandlers[messageId] === 'function') {
-                    this.callbackHandlers[messageId](obj);
-                    if (!obj.hasOwnProperty("done") || obj["done"] === true) {
-                        delete this.callbackHandlers[messageId];
-                    }
-                }
-            } catch (e) {
-                console.log(e);
-            }
-        };
-        */
-
         return this.io;
     }
 
@@ -55,17 +36,11 @@ export default class API {
     }
 
     sendRequest(action, params = {}, callback = null) {
-        /*if (!this.io.connected) {
-            console.log("Error: tried to send a packet when websocket is not connected:", action, params)
-            return;
-        }*/
-
         if (callback) {
-            // this.callbackHandlers[packet.messageId] = callback;
             this.io.once(action, callback);
         }
 
-        console.log("->",action, params);
+        console.log("->", action, params);
         this.io.emit(action, params);
     }
 
@@ -73,7 +48,7 @@ export default class API {
         this.sendRequest("info", {}, callback);
     }
 
-    getCharacters(callback) {
-        this.sendRequest("getCharacters", {}, callback);
+    getPlayableCharacters(callback) {
+        this.sendRequest("getPCs", {}, callback);
     }
 }

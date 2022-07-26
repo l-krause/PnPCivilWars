@@ -4,6 +4,7 @@
   "lifePoints": 32,
   "movement": 9,
   "passivePerception": 13,
+  "token": "/img/thork.png",
   "weapons": [
     {
       "name": "Greathammer",

@@ -1,9 +1,10 @@
 {
-  "name": "Thork",
+  "name": "Manollo",
   "armorClass": 18,
   "lifePoints": 25,
   "movement": 9,
   "passivePerception": 11,
+  "token": "/img/manollo.png",
   "weapons": [
     {
       "name": "Dos von Canonnos",

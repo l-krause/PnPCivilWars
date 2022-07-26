@@ -1,4 +1,6 @@
-from utils.characters.character import Character
+import os.path
+
+from utils.api import create_response, create_error
 from utils.characters.player_character import PlayerCharacter
 from utils.characters.npc import NPC
 import json
@@ -7,6 +9,8 @@ import random
 
 
 class GameController:
+
+    CHARACTERS = ["manollo", "thork", "martha", "bart"]
 
     def __init__(self):
         self._og_x = 1000
@@ -19,6 +23,7 @@ class GameController:
         self._round = 0
         self._queue = []
         self._full_queue = []
+        self._load_characters()
 
     def start(self):
         int_rolls = []
@@ -31,18 +36,22 @@ class GameController:
         self._round = 1
         return {"success": True, "msg": "", "data": {"first": self._queue.pop().get_name()}}
 
-    def create_pc(self, config_path):
-        name = config_path.split("/")[1].replace(".json", "")
-        for c in self._pcs:
-            if name in c.get_name().tolower():
-                return {"success": False, "msg": "Config: " + config_path + "was not found", "data": {}}
+    def load_pc(self, character_name):
+
+        # cache
+        if character_name in self._pcs:
+            return create_response(data=self._pcs[character_name])
+
+        config_path = os.path.join("configs", character_name + ".json")
+        if not os.path.isfile(config_path):
+            return create_error(f"Config: '{config_path}' was not found")
+
         with open(config_path, "r") as reader:
-            data = reader.read()
-            data = json.loads(data)
+            data = json.loads(reader.read())
             character = PlayerCharacter(data, data["name"])
-            self._pcs[name] = character
-            self._chars[name] = character
-            return {"success": True, "msg": "", "data": data}
+            self._pcs[character_name] = character
+            self._chars[character_name] = character
+            return create_response(data=self._pcs[character_name])
 
     def create_npc(self, amount=20, allies=True):
         villager = "configs/villager.json"
@@ -163,3 +172,7 @@ class GameController:
         x = round(x * new_pos[0])
         y = round(y * new_pos[1])
         return {"success": True, "msg": "", "data": {"x": x, "y": y}}
+
+    def _load_characters(self):
+        for name in GameController.CHARACTERS:
+            self.load_pc(name)

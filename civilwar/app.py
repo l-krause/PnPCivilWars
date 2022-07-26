@@ -1,13 +1,13 @@
 from functools import update_wrapper
 
-from flask import Flask, send_from_directory, Response, session
+from flask import Flask, session
 from flask_cors import CORS
 from flask_session import Session
 from flask_socketio import SocketIO, emit
+from utils.api import create_response, create_error
 
 import gamecontroller
 
-CHARACTERS = ["configs/manollo.json", "configs/thork.json", "configs/martha.json", "configs/bart.json"]
 ORIGINS = ["https://dnd.romanh.de", "https://localhost:3000", "http://localhost:3000"]
 gc = gamecontroller.GameController()
 app = Flask(__name__)
@@ -16,10 +16,6 @@ app.config.from_object(__name__)
 socketio = SocketIO(app, cors_allowed_origins=ORIGINS)
 cors = CORS(app, origins=ORIGINS)
 Session(app)
-
-
-def create_error(msg=""):
-    return {"success": False, "msg": msg}
 
 
 def has_character():
@@ -41,12 +37,15 @@ def choose_character(data):
     if session.get("character", None) is not None:
         response = create_error("You already chose a character")
     else:
-        index = int(data["characterIndex"])
-        if 0 > index or index > len(CHARACTERS):
-            response = create_error(f"Invalid character: {index}")
+        playable_characters = gc.get_pcs()
+        character_name = data.get("name", None)
+        if character_name is None:
+            response = create_error("You have to specify the character's name you want to play")
+        elif character_name not in playable_characters:
+            response = create_error(f"Invalid character: {character_name}")
         else:
-            session["character"] = index
-            response = gc.create_pc(CHARACTERS[index])
+            session["character"] = playable_characters[character_name]
+            response = create_response()
 
     emit("chooseCharacter", response)
 
@@ -58,21 +57,18 @@ def get_characters(data):
 
 
 @socketio.on("getPCs")
-def get_characters(data):
-    response = gc.get_pcs()
-    emit("getPCs", response)
+def get_playable_characters(data):
+    emit("getPCs", create_response(data=gc.get_pcs()))
 
 
 @socketio.on("getAllies")
-def get_characters(data):
-    response = gc.get_allies()
-    emit("getAllies", response)
+def get_allies(data):
+    emit("getAllies", create_response(data=gc.get_allies()))
 
 
 @socketio.on("getEnemies")
-def get_characters(data):
-    response = gc.get_enemies()
-    emit("getEnemies", response)
+def get_enemies(data):
+    emit("getEnemies", create_response(data=gc.get_enemies()))
 
 
 @socketio.on('info')
