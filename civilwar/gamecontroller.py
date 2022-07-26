@@ -9,7 +9,6 @@ import random
 
 
 class GameController:
-
     CHARACTERS = ["manollo", "thork", "martha", "bart"]
 
     def __init__(self):
@@ -158,8 +157,13 @@ class GameController:
     def attack(self, actor: str, target: str):
         pc = self._pcs[actor]
         tar = self._chars[target]
+        if not pc.has_action():
+            return create_error("No Action Points available")
         weapon = self._pcs[actor].get_active_weapon()
-        return weapon.attack(self._calc_distance(pc.get_pos(), tar.get_pos()), self._chars[target])
+        resp = weapon.attack(self._calc_distance(pc.get_pos(), tar.get_pos()), self._chars[target])
+        if resp["success"]:
+            pc.use_action()
+        return resp
 
     def move(self, target: str, pos, real_pixels):
         c = self._chars[target]
@@ -181,7 +185,25 @@ class GameController:
         character = self._chars.get(target, None)
         if character is None:
             return create_error("Character does not exist")
+        if not character.has_action():
+            return create_error("No Action Points available")
         weapon = character.switch_weapon(name)
         if weapon is None:
             return create_error("No suitable weapon found")
+        character.use_action()
         return create_response(weapon)
+
+    def change_health(self, target: str, life: int):
+        c = self._chars.get(target, None)
+        if c is None:
+            return create_error("Character does not exist")
+        c.change_health(life)
+        return create_response(c)
+
+    def stun(self, target: str):
+        c = self._chars.get(target, None)
+        if c is None:
+            return create_error("Character does not exist")
+        c.stun()
+        return create_response(c)
+

@@ -43,6 +43,18 @@ class Character(JsonSerializable):
     def get_active_weapon(self):
         return self._active_weapon
 
+    def has_action(self):
+        return self._action_points > 0
+
+    def use_action(self):
+        if not self.has_action():
+            return False
+        self._action_points -= 1
+        return True
+
+    def stun(self):
+        self._stunned = not self._stunned
+
     def switch_weapon(self, name: str):
         for weapon in self._weapons:
             if name == weapon.get_name():

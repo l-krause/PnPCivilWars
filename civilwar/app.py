@@ -93,6 +93,7 @@ def api_cast(data):
     pass
 
 
+# Also for DM
 @socketio.on('move')
 def api_move(data):
     if "target" not in data.keys() or "pos" not in data.keys() or "real_pixels" not in data.keys():
@@ -115,6 +116,7 @@ def api_switch_weapon(data):
         return create_error("No character selected")
     return gc.switch_weapon(name, character)
 
+
 ### DM methods
 @socketio.on('start')
 def dm_start(data):
@@ -123,7 +125,11 @@ def dm_start(data):
 
 @socketio.on('changeHealth')
 def dm_change_health(data):
-    pass
+    character = data.get("character", None)
+    if character is None:
+        return create_error("No character selected")
+    life_points = data.get("life", 0)
+    return gc.change_health(character, life_points)
 
 
 @socketio.on('reset')
@@ -134,6 +140,19 @@ def dm_reset(data):
 @socketio.on('continue')
 def dm_continue(data):
     pass
+
+
+@socketio.on('addTurn')
+def dm_add_turn(data):
+    pass
+
+
+@socketio.on('stun')
+def dm_stun(data):
+    character = data.get("character", None)
+    if character is None:
+        return create_error("No character selected")
+
 
 
 @socketio.on('createNPCs')
