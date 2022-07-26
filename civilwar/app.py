@@ -134,7 +134,8 @@ def dm_change_health(data):
 
 @socketio.on('reset')
 def dm_reset(data):
-    pass
+    gc = gamecontroller.GameController()
+    return create_response()
 
 
 @socketio.on('continue')
