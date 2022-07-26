@@ -171,8 +171,17 @@ class GameController:
         y = self._og_y / real_pixels[1]
         x = round(x * new_pos[0])
         y = round(y * new_pos[1])
-        return {"success": True, "msg": "", "data": {"x": x, "y": y}}
+        return create_response({"x": x, "y": y})
 
     def _load_characters(self):
         for name in GameController.CHARACTERS:
             self.load_pc(name)
+
+    def switch_weapon(self, name: str, target: str):
+        character = self._chars.get(target, None)
+        if character is None:
+            return create_error("Character does not exist")
+        weapon = character.switch_weapon(name)
+        if weapon is None:
+            return create_error("No suitable weapon found")
+        return create_response(weapon)

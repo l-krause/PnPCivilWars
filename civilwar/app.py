@@ -107,8 +107,13 @@ def api_pass_turn(data):
 
 @socketio.on('switchWeapon')
 def api_switch_weapon(data):
-    pass
-
+    character = data.get("character", None)
+    weapon_name = data.get("name", None)
+    if weapon_name is None:
+        return create_error("No weapon selected")
+    if character is None:
+        return create_error("No character selected")
+    return gc.switch_weapon(name, character)
 
 ### DM methods
 @socketio.on('start')

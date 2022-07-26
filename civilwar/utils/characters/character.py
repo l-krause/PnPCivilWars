@@ -47,7 +47,8 @@ class Character(JsonSerializable):
         for weapon in self._weapons:
             if name == weapon.get_name():
                 self._active_weapon = weapon
-                return
+                return weapon
+        return None
 
     def change_health(self, health):
         tmp_health = self._curr_life + health
