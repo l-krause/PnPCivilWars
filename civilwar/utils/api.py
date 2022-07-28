@@ -32,6 +32,13 @@ def create_error(msg=""):
     return create_response(success=False, msg=msg)
 
 
+def broadcast_response(response):
+    event = request.event["message"]
+    emit(event, response)
+    if response["success"]:
+        emit(event, response["data"], broadcast=True, include_self=False)
+
+
 def has_character():
     def decorator(fn):
         def wrapped_function(*args, **kwargs):

@@ -3,11 +3,11 @@ import logging
 import os
 from dotenv import load_dotenv
 
-from flask import Flask, session, send_from_directory
+from flask import Flask, session, send_from_directory, request
 from flask_cors import CORS
 from flask_session import Session
 from flask_socketio import SocketIO, emit
-from utils.api import create_response, create_error, json_serialize, param, has_role, has_character
+from utils.api import create_response, create_error, json_serialize, param, has_role, has_character, broadcast_response
 
 import gamecontroller
 from utils.characters.character import Character
@@ -135,9 +135,7 @@ def api_attack(data):
     character = GAME_CONTROLLER.get_character(session["character"])
     target = GAME_CONTROLLER.get_character(data["target"])
     response = GAME_CONTROLLER.attack(character, target)
-    emit("attack", response)
-    if response["success"]:
-        emit("attack", response["data"], broadcast=True)
+    broadcast_response(response)
 
 
 @socketio.on('cast')
@@ -152,7 +150,7 @@ def api_cast(data):
 @param("real_pixels", required_type=Position)
 def api_move(data):
     resp = create_response(GAME_CONTROLLER.move(data["target"], data["pos"], data["real_pixels"]))
-    emit("move", resp, broadcast=True)
+    broadcast_response(resp)
 
 
 @socketio.on('turn')
@@ -188,7 +186,7 @@ def dm_change_health(data):
     character = GAME_CONTROLLER.get_character(data["character"])
     life_points = data["life"]
     resp = GAME_CONTROLLER.change_health(character, life_points)
-    emit("changeHealth", resp, broadcast=True)
+    broadcast_response(resp)
 
 
 @socketio.on('reset')
