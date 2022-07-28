@@ -1,9 +1,11 @@
+import logging
 from abc import abstractmethod
 
+from utils.api import create_error, ApiParameter
 from utils.json_serializable import JsonSerializable
 
 
-class Character(JsonSerializable):
+class Character(JsonSerializable, ApiParameter):
 
     def __init__(self, character_id, dictionary, pos=(0, 0)):
         self._id = character_id
@@ -85,3 +87,11 @@ class Character(JsonSerializable):
 
     def get_id(self):
         return self._id
+
+    @staticmethod
+    def api_validate(game_controller, value):
+        if not isinstance(value, int):
+            return create_error(f"Invalid type, required: int, got: {type(value)}")
+        elif game_controller.get_character(value) is None:
+            return create_error(f"No such character id={value}")
+

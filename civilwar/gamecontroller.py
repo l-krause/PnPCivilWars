@@ -49,12 +49,13 @@ class GameController:
             x = random.randint(0, self._og_x - 1)
             y = random.randint(0, self._og_y - 100)
             name = character_config["name"] + str(len(self._allies)) + ("_ally" if allies else "_enemy")
-            npc = NPC(self.next_char_id(), character_config, name, (x, y))
+            character_id = self.next_char_id()
+            npc = NPC(character_id, character_config, name, (x, y))
             if allies:
-                self._allies[npc.get_id()] = npc
+                self._allies[character_id] = npc
             else:
-                self._enemies[npc.get_id()] = npc
-            self._chars[npc.get_id()] = npc
+                self._enemies[character_id] = npc
+            self._chars[character_id] = npc
         return True
 
     def create_pc(self, character_name):
@@ -64,9 +65,10 @@ class GameController:
         elif character_config["type"] != "player":
             return create_error(f"Chosen character is not a playable character")
 
-        character = PlayerCharacter(self.next_char_id(), character_config)
-        self._pcs[character.get_id()] = character
-        self._chars[character.get_id()] = character
+        character_id = self.next_char_id()
+        character = PlayerCharacter(character_id, character_config)
+        self._pcs[character_id] = character
+        self._chars[character_id] = character
         return character
 
     def get_all_characters(self):

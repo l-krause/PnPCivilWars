@@ -1,6 +1,8 @@
 from characters.character import Character
 import random
 
+from utils.api import create_response
+
 
 class Weapon:
 
@@ -36,5 +38,4 @@ class Weapon:
             damage = damage // 2
         damage *= -1
         target.change_health(damage)
-        return {"success": True, "msg": "",
-                "data": {"hit": "Hit for " + str(hit), "damage": str(damage) + " damage", "target": target.to_json()}}
+        return create_response({"hit": "Hit for " + str(hit), "damage": str(damage) + " damage", "target": target.get_id()})
