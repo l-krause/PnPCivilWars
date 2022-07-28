@@ -1,5 +1,5 @@
 import {useCallback, useEffect, useState} from "react";
-import {Box, CircularProgress, styled, TextField} from "@mui/material";
+import {Alert, Box, Button, CircularProgress, styled, TextField} from "@mui/material";
 
 const CharacterToken = styled(Box)(({theme}) => ({
     "& img": {
@@ -30,7 +30,17 @@ const CharacterContainer = styled(Box)(({theme}) => ({
 
 const CharacterName = styled(TextField)(({theme}) => ({
     width: 300,
-    marginTop: theme.spacing(2)
+    display: "block",
+    marginTop: theme.spacing(2),
+    marginLeft: "auto",
+    marginRight: "auto",
+}));
+
+const StartButton = styled(Button)(({theme}) => ({
+    display: "block",
+    marginTop: theme.spacing(2),
+    marginLeft: "auto",
+    marginRight: "auto",
 }));
 
 export default function CharacterSelection(props) {
@@ -45,18 +55,26 @@ export default function CharacterSelection(props) {
 
     const onFetchCharacters = useCallback((force = false) => {
         setFetchCharacters(false);
-        api.getPlayableCharacters((data) => {
-            if (data.success) {
-                setCharacters(data.data);
+        setError(null);
+        api.getSelectableCharacters((response) => {
+            if (response.success) {
+                setCharacters(response.data);
             } else {
-                setError(data.msg);
+                setError(response.msg);
             }
         });
     }, [api]);
 
-    const onRequestCharacter = useCallback((c) => {
-
-    }, []);
+    const onChooseCharacter = useCallback(() => {
+        setError(null);
+        api.onChooseCharacter(selectedCharacter, (response) => {
+            if (response.success) {
+                onSelectCharacter(response.data);
+            } else {
+                setError(response.msg);
+            }
+        })
+    }, [api, onSelectCharacter, selectedCharacter]);
 
     useEffect(() => {
         if (characters === null || fetchCharacters) {
@@ -66,7 +84,7 @@ export default function CharacterSelection(props) {
 
     const renderCharacter = (name, character) => {
         let style = selectedCharacter === name ? { borderColor: "red" } : {};
-        return <CharacterToken onClick={() => setSelectedCharacter(selectedCharacter === name ? null : name)} style={style}>
+        return <CharacterToken key={`character-${character.name}`} onClick={() => setSelectedCharacter(selectedCharacter === name ? null : name)} style={style}>
                 <img src={character.token} alt={`[token of ${character.name}]`} title={`Choose ${character.name}`} />
             </CharacterToken>
     };
@@ -85,10 +103,16 @@ export default function CharacterSelection(props) {
                                        placeholder={"Charactername"}
                                        inputProps={{min: 0, style: { textAlign: 'center' }}}
                                        readOnly={true} value={characters[selectedCharacter]?.name || ""} />
+                        <StartButton variant={"outlined"} onClick={() => onChooseCharacter()} disabled={selectedCharacter === null}>
+                            Start
+                        </StartButton>
                     </>
                     : <CircularProgress />
                 }
             </div>
+            {error ?
+                <Alert severity={"error"} title={"An error occured"}>{error}</Alert> : <></>
+            }
         </CharacterContainer>
     </>
 

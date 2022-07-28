@@ -9,7 +9,7 @@ import random
 
 
 class GameController:
-    CHARACTERS = ["manollo", "thork", "martha", "bart"]
+    CHARACTER_ID = 1
 
     def __init__(self):
         self._og_x = 1000
@@ -22,7 +22,13 @@ class GameController:
         self._round = 0
         self._queue = []
         self._full_queue = []
-        self._load_characters()
+        self._character_configs = {}
+        self._load_character_configs()
+
+    def next_char_id(self):
+        next_id = self.CHARACTER_ID
+        self.CHARACTER_ID += 1
+        return next_id
 
     def start(self):
         int_rolls = []
@@ -35,44 +41,33 @@ class GameController:
         self._round = 1
         return {"success": True, "msg": "", "data": {"first": self._queue.pop().get_name()}}
 
-    def load_pc(self, character_name):
-
-        # cache
-        if character_name in self._pcs:
-            return create_response(data=self._pcs[character_name])
-
-        config_path = os.path.join("configs", character_name + ".json")
-        if not os.path.isfile(config_path):
-            return create_error(f"Config: '{config_path}' was not found")
-
-        with open(config_path, "r") as reader:
-            data = json.loads(reader.read())
-            character = PlayerCharacter(data, data["name"])
-            self._pcs[character_name] = character
-            self._chars[character_name] = character
-            return create_response(data=self._pcs[character_name])
-
     def create_npc(self, amount=20, allies=True):
-        villager = "configs/villager.json"
-        veteran = "configs/veteran.json"
+        villager_config = self._character_configs["villager"]
+        veteran_config = self._character_configs["veteran"]
         for i in range(amount):
-            conf = villager
-            if i % 5 == 0:
-                conf = veteran
-            with open(conf, "r") as reader:
-                data = reader.read()
-                data = json.loads(data)
-                name = data["name"] + str(len(self._allies))
-                name = name + "_ally" if allies else + "_enemy"
-                x = random.randint(0, self._og_x - 1)
-                y = random.randint(0, self._og_y - 100)
-                c = NPC(data, name, (x, y))
-                if allies:
-                    self._allies[name] = c
-                else:
-                    self._enemies[name] = c
-                self._chars[name] = c
-        return {"success": True, "msg": "", "data": {}}
+            character_config = (veteran_config if i % 5 == 0 else villager_config).copy()
+            x = random.randint(0, self._og_x - 1)
+            y = random.randint(0, self._og_y - 100)
+            name = character_config["name"] + str(len(self._allies)) + ("_ally" if allies else "_enemy")
+            npc = NPC(self.next_char_id(), character_config, name, (x, y))
+            if allies:
+                self._allies[npc.get_id()] = npc
+            else:
+                self._enemies[npc.get_id()] = npc
+            self._chars[npc.get_id()] = npc
+        return True
+
+    def create_pc(self, character_name):
+        character_config = self._character_configs.get(character_name, None)
+        if not character_config:
+            return create_error(f"Invalid character: {character_name}")
+        elif character_config["type"] != "player":
+            return create_error(f"Chosen character is not a playable character")
+
+        character = PlayerCharacter(self.next_char_id(), character_config)
+        self._pcs[character.get_id()] = character
+        self._chars[character.get_id()] = character
+        return character
 
     def get_all_characters(self):
         return self._chars
@@ -85,6 +80,11 @@ class GameController:
 
     def get_enemies(self):
         return self._enemies
+
+    def get_character(self, character_id):
+        if character_id is None:
+            return None
+        return self._chars.get(character_id, None)
 
     def get_characters_aoe(self, start_pos, r, real_pixels):
         x = self._og_x / real_pixels[0]
@@ -177,9 +177,16 @@ class GameController:
         y = round(y * new_pos[1])
         return create_response({"x": x, "y": y})
 
-    def _load_characters(self):
-        for name in GameController.CHARACTERS:
-            self.load_pc(name)
+    def _load_character_configs(self):
+        config_dir = "./configs"
+        for file in os.listdir(config_dir):
+            config_path = os.path.join(config_dir, file)
+            if os.path.isfile(config_path) and file.endswith(".json"):
+                config_name = os.path.splitext(file)[0]
+                with open(config_path, "r") as reader:
+                    data = json.loads(reader.read())
+                    self._character_configs[config_name] = data
+                    print("Loaded character config:", config_name)
 
     def switch_weapon(self, name: str, target: str):
         character = self._chars.get(target, None)
@@ -207,3 +214,14 @@ class GameController:
         c.stun()
         return create_response(c)
 
+    def get_character_configs(self, fn_filter=None):
+        character_configs = self._character_configs
+        if fn_filter is not None:
+            character_configs = dict((k, v) for (k, v) in self._character_configs.items() if fn_filter(v))
+        return character_configs
+
+    def remove_character(self, character_id):
+        dicts = [self._chars, self._pcs, self._enemies, self._allies]
+        for d in dicts:
+            if character_id in d:
+                del d[character_id]

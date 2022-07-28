@@ -3,10 +3,8 @@ import CharacterSelection from "./views/character-selection";
 import {Alert, AlertTitle, Box, Button, CircularProgress, styled} from "@mui/material";
 import ReplayIcon from '@mui/icons-material/Replay';
 import API from "./api";
+import BattleMap from "./views/battlemap";
 
-function BattleMap(props) {
-  return <></>
-}
 
 const ConnectingDialog = styled(Box)(({theme }) => ({
   textAlign: "center",
@@ -49,12 +47,13 @@ function App() {
 
   useEffect(() => {
     if (!loaded && wsConnected) {
-      api.info((data) => {
-        if (data.success) {
+      api.info((response) => {
+        if (response.success) {
           setLoaded(true);
+          setCharacter(response.data.player.character);
         } else {
           setWsConnected(false);
-          setWsError("Error fetching character info: " + data.msg);
+          setWsError("Error fetching character info: " + response.msg);
         }
       });
     }
@@ -73,7 +72,7 @@ function App() {
   return <div className="App">
     {wsConnected ?
         (loaded ?
-          (character ?
+          (character !== null ?
                   <BattleMap api={api} character={character}/> :
                   <CharacterSelection api={api} onSelectCharacter={(c) => setCharacter(c)}/>
           ) :

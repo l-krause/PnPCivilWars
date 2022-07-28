@@ -5,6 +5,7 @@
   "movement": 9,
   "passivePerception": 15,
   "token": "/img/martha.png",
+  "type": "player",
   "weapons": [
     {
       "name": "Quarterstaff",

@@ -5,6 +5,7 @@
   "movement": 9,
   "passivePerception": 13,
   "token": "/img/thork.png",
+  "type": "player",
   "weapons": [
     {
       "name": "Greathammer",

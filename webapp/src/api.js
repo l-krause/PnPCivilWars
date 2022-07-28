@@ -11,7 +11,7 @@ export default class API {
             this.io.removeAllListeners();
         }
         
-        this.io = io({transports: ["websocket"]});
+        this.io = io({transports: ["websocket"], withCredentials: true});
         return this.io;
     }
 
@@ -44,11 +44,27 @@ export default class API {
         this.io.emit(action, params);
     }
 
+    registerEvent(event, callback) {
+        this.io.on(event, callback);
+    }
+
+    unregisterEvent(event) {
+        this.io.off(event);
+    }
+
     info(callback) {
         this.sendRequest("info", {}, callback);
     }
 
-    getPlayableCharacters(callback) {
-        this.sendRequest("getPCs", {}, callback);
+    getSelectableCharacters(callback) {
+        this.sendRequest("getSelectableCharacters", {}, callback);
+    }
+
+    onChooseCharacter(characterName, callback) {
+        this.sendRequest("chooseCharacter", {name: characterName}, callback);
+    }
+
+    fetchAllCharacters(callback) {
+        this.sendRequest("getCharacters", {}, callback);
     }
 }

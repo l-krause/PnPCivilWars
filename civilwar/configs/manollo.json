@@ -5,6 +5,7 @@
   "movement": 9,
   "passivePerception": 11,
   "token": "/img/manollo.png",
+  "type": "player",
   "weapons": [
     {
       "name": "Dos von Canonnos",

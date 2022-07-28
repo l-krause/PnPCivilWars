@@ -4,6 +4,7 @@
   "lifePoints": 58,
   "movement": 9,
   "passivePerception": 12,
+  "type": "npc",
   "weapons": [
     {
       "name": "Longsword",
