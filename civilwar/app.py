@@ -26,9 +26,19 @@ def has_character():
                 return {"success": False, "msg": "No character chosen yet"}
 
             return fn(*args, **kwargs)
-
         return update_wrapper(wrapped_function, fn)
+    return decorator
 
+
+def has_role(role):
+    def decorator(fn):
+        def wrapped_function(*args, **kwargs):
+            # First check if user is authenticated.
+            if session.get("role", None) != role:
+                return {"success": False, "msg": "You need to have the role: " + role}
+
+            return fn(*args, **kwargs)
+        return update_wrapper(wrapped_function, fn)
     return decorator
 
 

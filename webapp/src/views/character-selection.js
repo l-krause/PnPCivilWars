@@ -66,7 +66,7 @@ export default function CharacterSelection(props) {
 
     const renderCharacter = (name, character) => {
         let style = selectedCharacter === name ? { borderColor: "red" } : {};
-        return <CharacterToken onClick={() => setSelectedCharacter(name)} style={style}>
+        return <CharacterToken onClick={() => setSelectedCharacter(selectedCharacter === name ? null : name)} style={style}>
                 <img src={character.token} alt={`[token of ${character.name}]`} title={`Choose ${character.name}`} />
             </CharacterToken>
     };
@@ -81,6 +81,7 @@ export default function CharacterSelection(props) {
                             {Object.keys(characters).map((name) => renderCharacter(name, characters[name]))}
                         </div>
                         <CharacterName size={"small"} variant={"outlined"}
+                                       sx={{ input: { color: 'white', borderColor: 'white' } }}
                                        placeholder={"Charactername"}
                                        inputProps={{min: 0, style: { textAlign: 'center' }}}
                                        readOnly={true} value={characters[selectedCharacter]?.name || ""} />
