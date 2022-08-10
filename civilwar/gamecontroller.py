@@ -16,14 +16,20 @@ class GameController:
         self._og_y = 683
         self._og_meter = 152.5 / 434
         self._pcs = {}
+        self._dead_pcs = {}
         self._allies = {}
+        self._ko_allies = {}
+        self._dead_allies = {}
         self._enemies = {}
+        self._ko_enemies = {}
+        self._dead_enemies = {}
         self._chars = {}
         self._round = 0
         self._queue = []
         self._full_queue = []
         self._character_configs = {}
         self._load_character_configs()
+        self._active_char = None
 
     def next_char_id(self):
         next_id = self.CHARACTER_ID
@@ -39,7 +45,8 @@ class GameController:
         self._full_queue.append(self._allies)
         self._queue = self._full_queue.copy()
         self._round = 1
-        return {"success": True, "msg": "", "data": {"first": self._queue.pop().get_name()}}
+        self._active_char = self._queue.pop()
+        return {"success": True, "msg": "", "data": {"first": self._active_char.get_name()}}
 
     def create_npc(self, amount=20, allies=True):
         villager_config = self._character_configs["villager"]
@@ -227,3 +234,49 @@ class GameController:
         for d in dicts:
             if character_id in d:
                 del d[character_id]
+
+    def add_turn(self, name):
+        c = self._chars.get(name, None)
+        if c is None:
+            return create_error("Character does not exist")
+        self._queue.append(c)
+        return create_response()
+
+    def next_turn(self):
+        if len(self._queue) == 0:
+            self._round += 1
+            self._queue = self._full_queue.copy()
+        self._active_char.turn_over()
+        name = self._active_char.get_name()
+        resp = {"state": "ongoing"}
+        if self._active_char.is_dead():
+            self._full_queue = list(filter(lambda a: a.get_name() != self._active_char.get_name(), self._full_queue))
+            self._queue = list(filter(lambda a: a.get_name() != self._active_char.get_name(), self._queue))
+            if name in self._enemies.keys():
+                self._dead_enemies[name] = self._active_char
+                del self._enemies[name]
+                del self._ko_enemies[name]
+            elif name in self._enemies.keys():
+                self._dead_allies[name] = self._active_char
+                del self._allies[name]
+                del self._ko_allies[name]
+            else:
+                self._dead_pcs["name"] = self._active_char
+            resp["died"] = name
+        if self._active_char.get_hp() == 0:
+            if name in self._enemies.keys():
+                self._ko_enemies[name] = self._active_char
+                del self._enemies[name]
+                resp["ko"] = name
+            if name in self._enemies.keys():
+                self._ko_allies[name] = self._active_char
+                del self._allies[name]
+                resp["ko"] = name
+        next_char = self._queue.pop()
+        self._active_char = next_char
+        if len(self._enemies.keys()) == 0:
+            resp["state"] = "won"
+        elif len(self._allies) == 0 and len(self._dead_pcs) == len(self._pcs):
+            resp["state"] = "lost"
+
+        return resp

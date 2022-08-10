@@ -175,7 +175,7 @@ def api_switch_weapon(data):
 @socketio.on('start')
 @has_role("dm")
 def dm_start(data):
-    return GAME_CONTROLLER.start()
+    broadcast_response(GAME_CONTROLLER.start())
 
 
 @socketio.on('changeHealth')
@@ -192,8 +192,8 @@ def dm_change_health(data):
 @socketio.on('reset')
 @has_role("dm")
 def dm_reset(data):
-    global gc
-    gc = gamecontroller.GameController()
+    global GAME_CONTROLLER
+    GAME_CONTROLLER = gamecontroller.GameController()
     emit("reset", create_response(), broadcast=True)
 
 
@@ -205,8 +205,10 @@ def dm_continue(data):
 
 @socketio.on('addTurn')
 @has_role("dm")
+@param("name")
 def dm_add_turn(data):
-    pass
+    resp = GAME_CONTROLLER.add_turn(data["name"])
+    emit("addTurn", resp)
 
 
 @socketio.on('stun')

@@ -1,4 +1,5 @@
 import logging
+import random
 from abc import abstractmethod
 
 from utils.api import create_error, ApiParameter
@@ -18,14 +19,25 @@ class Character(JsonSerializable, ApiParameter):
         self._active_weapon = dictionary["activeWeapon"]
         self._weapons = dictionary["weapons"]
         self._resistances = dictionary.get("resistance", [])
+        self._std_resistances = dictionary.get("resistance", [])
+        self._res_buff = 0
         self._token = dictionary.get("token", "")
         self._pos = pos
         self._action_points = 1
-        self._stunned = False
+        self._action_points_max = 1
+        self._ap_buff = 0
+        self._stunned = 0
+        self._death_advantage = False
+        self._dead = False
+        self._won_death = 0
+        self._lost_death = 0
 
     @abstractmethod
     def get_name(self):
         pass
+
+    def get_hp(self):
+        return self._curr_life
 
     def get_armor(self):
         return self._armor
@@ -54,8 +66,8 @@ class Character(JsonSerializable, ApiParameter):
         self._action_points -= 1
         return True
 
-    def stun(self):
-        self._stunned = not self._stunned
+    def stun(self, rounds):
+        self._stunned += rounds
 
     def switch_weapon(self, name: str):
         for weapon in self._weapons:
@@ -87,6 +99,42 @@ class Character(JsonSerializable, ApiParameter):
 
     def get_id(self):
         return self._id
+
+    def turn_over(self):
+        self._death_roll()
+        self._movement_left = self._movement
+        self._action_points = self._action_points_max
+        if self._ap_buff > 0:
+            self._ap_buff -= 1
+            if self._ap_buff == 0:
+                self._action_points_max = 1
+        if self._res_buff > 0 :
+            self._res_buff -= 1
+            if self._res_buff == 0:
+                self._resistances = self._std_resistances.copy()
+
+    def _death_roll(self):
+        roll = random.randint(1, 20)
+        if self._death_advantage:
+            roll = max(roll, random.randint(1, 20))
+        if roll > 10:
+            if roll == 20:
+                self._curr_life = 1
+            else:
+                self._won_death += 1
+                if self._won_death == 3:
+                    self._curr_life = random.randint(1, 4)
+                    self._won_death = 0
+                    self._lost_death = 0
+        else:
+            self._lost_death += 1
+            if roll == 1:
+                self._lost_death += 1
+            if self._lost_death == 3:
+                self._dead = True
+
+    def is_dead(self):
+        return self._dead
 
     @staticmethod
     def api_validate(game_controller, value):
