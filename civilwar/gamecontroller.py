@@ -1,11 +1,11 @@
-import os.path
-
-from utils.api import create_response, create_error
-from utils.characters.player_character import PlayerCharacter
-from utils.characters.npc import NPC
 import json
 import math
+import os.path
 import random
+
+from utils.api import create_response, create_error
+from utils.characters.npc import NPC
+from utils.characters.player_character import PlayerCharacter
 
 
 class GameController:
@@ -174,8 +174,9 @@ class GameController:
             pc.use_action()
         return resp
 
-    def move(self, target: str, pos, real_pixels):
-        c = self._chars[target]
+    def move(self, target, pos, real_pixels):
+        id = target["id"]
+        c = self._chars[id]
         max_dist = c.get_movement_left()
         new_pos = self._normalize_distance(c.get_pos, pos, max_dist)
         dist = math.ceil(self._calc_distance(c.get_pos, new_pos))
@@ -184,7 +185,7 @@ class GameController:
         y = self._og_y / real_pixels[1]
         x = round(x * new_pos[0])
         y = round(y * new_pos[1])
-        return create_response({"x": x, "y": y})
+        return create_response({"char": target, "x": x, "y": y, "og_x": self._og_x, "og_y": self._og_y})
 
     def _load_character_configs(self):
         config_dir = "./configs"

@@ -1,0 +1,73 @@
+{
+  "name": "Bart",
+  "armorClass": 15,
+  "lifePoints": 31,
+  "movement": 10,
+  "passivePerception": 13,
+  "token": "/img/bart.png",
+  "type": "player",
+  "weapons": [
+    {
+      "name": "Dagger",
+      "hit": 6,
+      "dices": 1,
+      "diceType": 4,
+      "additional": 4,
+      "type": "pierce"
+    },
+    {
+      "name": "Rapier",
+      "hit": 6,
+      "dices": 1,
+      "diceType": 8,
+      "additional": 4,
+      "type": "pierce"
+    }
+  ],
+  "spellSlots": [
+    4,
+    3
+  ],
+  "spells": [
+    {
+      "name": "Charm Person",
+      "range": 30,
+      "type": "lightning",
+      "levels": [
+        1,
+        2
+      ],
+      "save": 15
+    },
+    {
+      "name": "Healing Word",
+      "dice": 1,
+      "range": 60,
+      "diceType": 4,
+      "additional": 5,
+      "levels": [
+        1,
+        2
+      ]
+    },
+    {
+      "name": "Healing Word",
+      "spellType": "heal",
+      "dice": 2,
+      "range": 60,
+      "diceType": 8,
+      "levels": [
+        1,
+        2
+      ],
+      "save": 15
+    }
+  ],
+  "activeWeapon": "Rapier",
+  "initiative": 5,
+  "reactions": [
+    {
+      "name": "opportunity"
+    }
+  ]
+}

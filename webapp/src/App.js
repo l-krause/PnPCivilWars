@@ -28,6 +28,7 @@ function App() {
   const [wsConnected, setWsConnected] = useState(false);
   const [wsError, setWsError] = useState(null);
   const [loaded, setLoaded] = useState(false);
+  const [role, setRole] = useState("player")
 
   const onConnect = useCallback(() => {
     console.log('SocketIO Client Connected');
@@ -51,6 +52,7 @@ function App() {
         if (response.success) {
           setLoaded(true);
           setCharacter(response.data.player.character);
+          setRole(response.data.player.role)
         } else {
           setWsConnected(false);
           setWsError("Error fetching character info: " + response.msg);
@@ -73,7 +75,7 @@ function App() {
     {wsConnected ?
         (loaded ?
           (character !== null ?
-                  <BattleMap api={api} character={character}/> :
+                  <BattleMap api={api} character={character} role={role}/> :
                   <CharacterSelection api={api} onSelectCharacter={(c) => setCharacter(c)}/>
           ) :
             <ConnectingDialog>

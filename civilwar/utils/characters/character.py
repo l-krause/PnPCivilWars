@@ -31,6 +31,9 @@ class Character(JsonSerializable, ApiParameter):
         self._dead = False
         self._won_death = 0
         self._lost_death = 0
+        self._spells = dictionary.get(["spells"], [])
+        self._spell_slots = dictionary.get(["spellSlots"], [])
+        self._available_slots = dictionary.get(["spellSlots"], [])
 
     @abstractmethod
     def get_name(self):
