@@ -9,14 +9,13 @@ from flask_session import Session
 from flask_socketio import SocketIO, emit
 from utils.api import create_response, create_error, json_serialize, param, has_role, has_character, broadcast_response
 
-import gamecontroller
+from gamecontroller import GameController
 from utils.characters.character import Character
 from utils.position import Position
 
 load_dotenv()
 
 ORIGINS = ["https://dnd.romanh.de", "https://localhost:3000", "http://localhost:3000"]
-GAME_CONTROLLER = gamecontroller.GameController()
 
 app = Flask(__name__)
 # app.config.from_object(__name__)
@@ -50,7 +49,7 @@ def serve_static(path):
 @socketio.on("disconnect")
 def on_disconnect(*args):
     character_id = session.get("character", None)
-    character = GAME_CONTROLLER.get_character(character_id)
+    character = GameController.instance().get_character(character_id)
     if character:
         # GAME_CONTROLLER.remove_character(character_id)
         character.is_online = False
@@ -59,7 +58,7 @@ def on_disconnect(*args):
 @socketio.on("connect")
 def on_connect(*args):
     character_id = session.get("character", None)
-    character = GAME_CONTROLLER.get_character(character_id)
+    character = GameController.instance().get_character(character_id)
     if character:
         character.is_online = True
 #        emit("characterJoin", json_serialize(character), broadcast=True)
@@ -68,11 +67,14 @@ def on_connect(*args):
 @socketio.on('chooseCharacter')
 @param("name", required_type=str)
 def choose_character(data):
+    logging.debug("socketIO chooseCharacter")
     character_id = session.get("character", None)
-    if GAME_CONTROLLER.get_character(character_id) is not None:
+    game_controller = GameController.instance()
+
+    if game_controller.get_character(character_id) is not None:
         response = create_error("You already chose a character")
     else:
-        character = GAME_CONTROLLER.create_pc(data["name"])
+        character = game_controller.create_pc(data["name"])
         if isinstance(character, dict):  # error
             response = character
         else:
@@ -85,29 +87,29 @@ def choose_character(data):
 
 @socketio.on('getSelectableCharacters')
 def get_selectable_characters(data):
-    pc_configs = GAME_CONTROLLER.get_character_configs(lambda c: c["type"] == "player")
+    pc_configs = GameController.instance().get_character_configs(lambda c: c["type"] == "player")
     emit("getSelectableCharacters", create_response(data=pc_configs))
 
 
 @socketio.on("getCharacters")
 def get_characters(data):
-    response = create_response(data=GAME_CONTROLLER.get_all_characters())
+    response = create_response(data=GameController.instance().get_all_characters())
     emit("getCharacters", response)
 
 
 @socketio.on("getPCs")
 def get_playable_characters(data):
-    emit("getPCs", create_response(data=GAME_CONTROLLER.get_pcs()))
+    emit("getPCs", create_response(data=GameController.instance().get_pcs()))
 
 
 @socketio.on("getAllies")
 def get_allies(data):
-    emit("getAllies", create_response(data=GAME_CONTROLLER.get_allies()))
+    emit("getAllies", create_response(data=GameController.instance().get_allies()))
 
 
 @socketio.on("getEnemies")
 def get_enemies(data):
-    emit("getEnemies", create_response(data=GAME_CONTROLLER.get_enemies()))
+    emit("getEnemies", create_response(data=GameController.instance().get_enemies()))
 
 
 @socketio.on('info')
@@ -118,7 +120,7 @@ def api_info(data):
     }
 
     character_id = session.get("character", None)
-    character = GAME_CONTROLLER.get_character(character_id)
+    character = GameController.instance().get_character(character_id)
     player["character"] = character_id
     if character is not None:
         player["character"] = character
@@ -132,9 +134,10 @@ def api_info(data):
 @has_character()
 @param("target", required_type=Character)
 def api_attack(data):
-    character = GAME_CONTROLLER.get_character(session["character"])
-    target = GAME_CONTROLLER.get_character(data["target"])
-    response = GAME_CONTROLLER.attack(character, target)
+    game_controller = GameController.instance()
+    character = game_controller.get_character(session["character"])
+    target = game_controller.get_character(data["target"])
+    response = game_controller.attack(character, target)
     broadcast_response(response)
 
 
@@ -146,10 +149,16 @@ def api_cast(data):
 # Also for DM
 @socketio.on('move')
 @param("target", required_type=Character)
-@param("pos", required_type=Position)
+@param("pos", required_type=Position, optional=True)
 @param("real_pixels", required_type=Position)
 def api_move(data):
-    resp = create_response(GAME_CONTROLLER.move(data["target"], data["pos"], data["real_pixels"]))
+    game_controller = GameController.instance()
+    character = game_controller.get_character(data["target"])
+    pos = data.get("pos", None)
+    if pos is None:
+        pos = character.get_pos()
+
+    resp = game_controller.move(character, pos, data["real_pixels"])
     broadcast_response(resp)
 
 
@@ -167,7 +176,7 @@ def api_switch_weapon(data):
     if weapon_name is None:
         resp = create_error("No weapon selected")
     if resp is None:
-        resp = GAME_CONTROLLER.switch_weapon(weapon_name, character)
+        resp = GameController.instance().switch_weapon(weapon_name, character)
     emit("switchWeapon", resp)
 
 
@@ -175,7 +184,7 @@ def api_switch_weapon(data):
 @socketio.on('start')
 @has_role("dm")
 def dm_start(data):
-    broadcast_response(GAME_CONTROLLER.start())
+    broadcast_response(GameController.instance().start())
 
 
 @socketio.on('changeHealth')
@@ -183,17 +192,17 @@ def dm_start(data):
 @param("character", required_type=Character)
 @param("life", required_type=int, default=0, optional=True)
 def dm_change_health(data):
-    character = GAME_CONTROLLER.get_character(data["character"])
+    game_controller = GameController.instance()
+    character = game_controller.get_character(data["character"])
     life_points = data["life"]
-    resp = GAME_CONTROLLER.change_health(character, life_points)
+    resp = game_controller.change_health(character, life_points)
     broadcast_response(resp)
 
 
 @socketio.on('reset')
 @has_role("dm")
 def dm_reset(data):
-    global GAME_CONTROLLER
-    GAME_CONTROLLER = gamecontroller.GameController()
+    GameController.instance().reset()
     emit("reset", create_response(), broadcast=True)
 
 
@@ -207,7 +216,7 @@ def dm_continue(data):
 @has_role("dm")
 @param("name")
 def dm_add_turn(data):
-    resp = GAME_CONTROLLER.add_turn(data["name"])
+    resp = GameController.instance().add_turn(data["name"])
     emit("addTurn", resp)
 
 
@@ -219,7 +228,7 @@ def dm_stun(data):
     if character is None:
         resp = create_error("No character selected")
     if resp is None:
-        resp = GAME_CONTROLLER.stun(character)
+        resp = GameController.instance().stun(character)
     emit("stun", resp, broadcast=True)
 
 
@@ -228,7 +237,7 @@ def dm_stun(data):
 @param("allies", required_type=bool)
 @param("amount", required_type=int)
 def dm_create_npcs(data):
-    resp = GAME_CONTROLLER.create_npc(data["amount"], data["allies"])
+    resp = GameController.instance().create_npc(data["amount"], data["allies"])
     emit("createNPCs", resp, broadcast=True)
 
 

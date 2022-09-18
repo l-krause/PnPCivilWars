@@ -1,4 +1,5 @@
 import json
+import logging
 import math
 import os.path
 import random
@@ -9,6 +10,9 @@ from utils.characters.player_character import PlayerCharacter
 
 
 class GameController:
+
+    _instance = None
+
     CHARACTER_ID = 1
 
     def __init__(self):
@@ -66,6 +70,7 @@ class GameController:
         return True
 
     def create_pc(self, character_name):
+        logging.debug("GameController.create_pc")
         character_config = self._character_configs.get(character_name, None)
         if not character_config:
             return create_error(f"Invalid character: {character_name}")
@@ -156,6 +161,7 @@ class GameController:
         return math.hypot(x_dist ** 2, y_dist ** 2) * self._og_meter
 
     def _normalize_distance(self, pos1, pos2, max_dist):
+        print("_normalize_distance pos1=", pos1, "pos2=", pos2, "max_dist=", max_dist)
         x_dir = pos1[0] - pos2[1]
         y_dir = pos1[1] - pos2[1]
         length = math.sqrt(x_dir ** 2 + y_dir ** 2)
@@ -175,12 +181,10 @@ class GameController:
         return resp
 
     def move(self, target, pos, real_pixels):
-        id = target["id"]
-        c = self._chars[id]
-        max_dist = c.get_movement_left()
-        new_pos = self._normalize_distance(c.get_pos, pos, max_dist)
-        dist = math.ceil(self._calc_distance(c.get_pos, new_pos))
-        c.move(new_pos, dist)
+        max_dist = target.get_movement_left()
+        new_pos = self._normalize_distance(target.get_pos(), pos, max_dist)
+        dist = math.ceil(self._calc_distance(target.get_pos(), new_pos))
+        target.move(new_pos, dist)
         x = self._og_x / real_pixels[0]
         y = self._og_y / real_pixels[1]
         x = round(x * new_pos[0])
@@ -281,3 +285,13 @@ class GameController:
             resp["state"] = "lost"
 
         return resp
+
+    @classmethod
+    def instance(cls):
+        if cls._instance is None:
+            cls._instance = GameController()
+        return cls._instance
+
+    def reset(self):
+        # TODO: reset
+        pass

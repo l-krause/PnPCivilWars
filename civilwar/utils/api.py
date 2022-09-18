@@ -82,16 +82,21 @@ def param(param_name, required_type=None, optional=False, default=None):
             elif required_type is not None:
                 value = data[param_name]
                 if issubclass(required_type, ApiParameter):
-                    from app import GAME_CONTROLLER
-                    res = required_type.api_validate(GAME_CONTROLLER, value)
+                    from gamecontroller import GameController
+                    res = required_type.api_validate(GameController.instance(), value)
                     if res is not None:
                         res["msg"] = f"Error validating parameter '{param_name}': " + res["msg"]
                         emit(event, res)
                         return
                 elif not isinstance(value, required_type):
-                    emit(event, create_error(f"Invalid type for parameter {param_name}, "
-                                             f"required: {required_type}, got: {type(value)}"))
-                    return
+                    if (required_type == tuple and isinstance(value, list)) or \
+                            (required_type == list and isinstance(value, tuple)):
+                        pass
+                    else:
+
+                        emit(event, create_error(f"Invalid type for parameter {param_name}, "
+                                                 f"required: {required_type}, got: {type(value)}"))
+                        return
 
             return fn(*args, **kwargs)
         return update_wrapper(wrapped_function, fn)

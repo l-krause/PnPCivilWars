@@ -9,6 +9,9 @@ class Position(ApiParameter):
 
     @staticmethod
     def api_validate(game_controller, value):
+        if isinstance(value, list):
+            value = tuple(value)
+
         if not isinstance(value, tuple):
             return create_error(f"Invalid type, required: tuple, got: {type(value)}")
         elif len(value) != 2:

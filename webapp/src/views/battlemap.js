@@ -51,13 +51,17 @@ export default function BattleMap(props) {
     }, [characters]);
 
     const onCharacterMoved = useCallback((response) => {
-        let relWidth = Math.floor(mapRef.current.clientWidth / response.og_x);
-        let relHeight = Math.floor(mapRef.current.clientHeight / response.og_y);
-        let trueX = relWidth * response.x;
-        let trueY = relHeight * response.y;
-        setCharacters({...characters, [response.char.id]: {...characters[response.char.id], pos: [trueX, trueY]}});
-    })
 
+        if (response.success) {
+            let relWidth = Math.floor(mapRef.current.clientWidth / response.og_x);
+            let relHeight = Math.floor(mapRef.current.clientHeight / response.og_y);
+            let trueX = relWidth * response.x;
+            let trueY = relHeight * response.y;
+            setCharacters({...characters, [response.char.id]: {...characters[response.char.id], pos: [trueX, trueY]}});
+        } else {
+            alert("Error moving character: " + response.msg);
+        }
+    }, []);
 
     useEffect(() => {
         onFetchCharacters();
@@ -65,29 +69,26 @@ export default function BattleMap(props) {
 
     useEffect(() => {
         api.registerEvent("characterJoin", onCharacterJoin);
+        api.registerEvent("move", onCharacterMoved);
+
         return () => {
             // dismount
             api.unregisterEvent("characterJoin");
+            api.unregisterEvent("move");
         }
     }, [api, onCharacterJoin]);
 
-    useEffect(() => {
-        api.registerEvent("move", onCharacterMoved)
-    })
-
     const onTokenDrag = useCallback((event, char) => {
+        let pos = event.target.getBoundingClientRect();
         if (character.id === char.id) {
-            let pos = event.target.current.getBoundingClientRect();
-            params = {
-                "target": char,
-
+            let params = {
+                "target": char.id,
                 "real_pixels": [mapRef.current.clientHeight, mapRef.current.clientWidth]
             }
             api.sendRequest("move", params)
         } else if (role === "dm") {
-            let pos = event.target.current.getBoundingClientRect();
-            params = {
-                "target": char,
+            let params = {
+                "target": char.id,
                 "pos": [pos.x, pos.y],
                 "real_pixels": [mapRef.current.clientHeight, mapRef.current.clientWidth]
             }
@@ -97,7 +98,7 @@ export default function BattleMap(props) {
 
     const renderCharacter = (character) => {
         return <Token key={"character-" + character.id} style={{left: character.pos[0], top: character.pos[1]}}>
-            <img alt={"token of " + character.id} src={character.token} onDrag={(e) => onTokenDrag(e, character)}/>
+            <img alt={"token of " + character.id} src={character.token} onDragEnd={(e) => onTokenDrag(e, character)}/>
         </Token>
     };
 
