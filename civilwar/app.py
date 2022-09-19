@@ -189,6 +189,11 @@ def api_switch_weapon(data):
     emit("switchWeapon", resp)
 
 
+@socketio.on("login")
+def login(data):
+    if data == "lukasstinktmegahart":
+        session["role"] = "dm"
+
 ### DM methods
 @socketio.on('start')
 @has_role("dm")
