@@ -229,6 +229,10 @@ def dm_continue(data):
 def place(data):
     game_controller = GameController.instance()
     target = data.get("target", None)
+    if target is None:
+        emit("place", create_error("Target does not exist"))
+        return
+    character = game_controller.get_character(target)
     game_controller.place(character, data["pos"])
     emit('place', create_response())
     emit("characterUpdate", json_serialize(character), broadcast=True)
