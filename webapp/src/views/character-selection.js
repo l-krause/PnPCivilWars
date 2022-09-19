@@ -47,11 +47,13 @@ export default function CharacterSelection(props) {
 
     const onSelectCharacter = props.onSelectCharacter;
     const api = props.api;
+    const onSelectRole = props.onSelectRole;
 
     const [characters, setCharacters] = useState(null);
     const [fetchCharacters, setFetchCharacters] = useState(true);
     const [selectedCharacter, setSelectedCharacter] = useState(null);
     const [error, setError] = useState(null);
+    const [dmPw, setDmPw] = useState(false);
 
     const onFetchCharacters = useCallback((force = false) => {
         setFetchCharacters(false);
@@ -91,6 +93,11 @@ export default function CharacterSelection(props) {
         </CharacterToken>
     };
 
+    const isDm = (pw) => {
+
+
+    };
+
     return <>
         <CharacterContainer>
             <div><h2>Choose your character first!</h2></div>
@@ -112,9 +119,23 @@ export default function CharacterSelection(props) {
                     </>
                     : <CircularProgress/>
                 }
-                <CharacterToken>
-                    <img src={"webapp/public/img/crab.png"} alt="Crab"/>
+                <CharacterToken key={`crab`}
+                                onClick={() => setSelectedCharacter(selectedCharacter === "crab" ? null : "crab")}
+                                style={selectedCharacter === "crab" ? {borderColor: "red"} : {}}>
+                    <img src={"/img/crab.png"} alt="Crab"/>
                 </CharacterToken>
+                {dmPw ? <TextField type={"password"} ref="pass" onKeyPress={(ev) => {
+                    if (ev.key === "Enter") {
+                        api.sendRequest("login", this.refs.pass.getValue(), (resp) => {
+                            if (resp.success) {
+                                onSelectRole("dm")
+                                onSelectCharacter("crab")
+                            }
+                        })
+                        ev.preventDefault()
+                    }
+                }
+                }></TextField> : null}
             </div>
             {error ?
                 <Alert severity={"error"} title={"An error occured"}>{error}</Alert> : <></>
