@@ -119,8 +119,8 @@ export default function CharacterSelection(props) {
                     </>
                     : <CircularProgress/>
                 }
-                <CharacterToken key={`crab`}
-                                onClick={() => setSelectedCharacter(selectedCharacter === "crab" ? null : "crab")}
+                <CharacterToken key={`Crab`}
+                                onClick={() => setSelectedCharacter(selectedCharacter === "Crab" ? null : "Crab")}
                                 style={selectedCharacter === "crab" ? {borderColor: "red"} : {}}>
                     <img src={"/img/crab.png"} alt="Crab"/>
                 </CharacterToken>
