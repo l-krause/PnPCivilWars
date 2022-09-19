@@ -54,7 +54,8 @@ export default function CharacterSelection(props) {
     const [fetchCharacters, setFetchCharacters] = useState(true);
     const [selectedCharacter, setSelectedCharacter] = useState(null);
     const [error, setError] = useState(null);
-    const [dmPw, setDmPw] = useState(false);
+    const [showPasswordPrompt, setShowPasswordPrompt] = useState(false);
+    const [password, setPassword] = useState("");
 
     const onFetchCharacters = useCallback((force = false) => {
         setFetchCharacters(false);
@@ -71,7 +72,7 @@ export default function CharacterSelection(props) {
     const onChooseCharacter = useCallback(() => {
         setError(null);
         if (selectedCharacter === "Crab") {
-            setDmPw(true);
+            setShowPasswordPrompt(true);
             return;
         }
         api.onChooseCharacter(selectedCharacter, (response) => {
@@ -81,7 +82,7 @@ export default function CharacterSelection(props) {
                 setError(response.msg);
             }
         })
-    }, [api, onSelectCharacter, selectedCharacter]);
+    }, [api, onSelectCharacter, selectedCharacter, setShowPasswordPrompt]);
 
     useEffect(() => {
         if (characters === null || fetchCharacters) {
@@ -96,11 +97,6 @@ export default function CharacterSelection(props) {
                                style={style}>
             <img src={character.token} alt={`[token of ${character.name}]`} title={`Choose ${character.name}`}/>
         </CharacterToken>
-    };
-
-    const isDm = (pw) => {
-
-
     };
 
     return <>
@@ -129,18 +125,22 @@ export default function CharacterSelection(props) {
                                 style={selectedCharacter === "crab" ? {borderColor: "red"} : {}}>
                     <img src={"/img/crab.png"} alt="Crab"/>
                 </CharacterToken>
-                {dmPw ? <div><TextField type={"password"} ref="pass" onKeyPress={(ev) => {
-                        if (ev.key === "Enter") {
-                            api.sendRequest("login", this.refs.pass.getValue(), (resp) => {
-                                if (resp.success) {
-                                    onSelectRole("dm")
-                                    onSelectCharacter("crab")
-                                }
-                            })
-                            ev.preventDefault()
-                        }
-                    }
-                    }></TextField><CloseIcon onClick={() => setDmPw(false)}></CloseIcon></div>
+                {showPasswordPrompt ? <>
+                            <TextField type={"password"} value={password} onChange={e => setPassword(e.target.value)}
+                                       onKeyPress={(ev) => {
+                                           if (ev.key === "Enter") {
+                                                api.sendRequest("login", this.refs.pass.getValue(), (resp) => {
+                                                    if (resp.success) {
+                                                        onSelectRole("dm")
+                                                        onSelectCharacter("crab")
+                                                    }
+                                                })
+                                                ev.preventDefault()
+                                            }
+                                        }
+                            }/>
+                            <CloseIcon onClick={() => setShowPasswordPrompt(false)}/>
+                        </>
                     : null}
             </div>
             {error ?
