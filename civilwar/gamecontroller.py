@@ -186,6 +186,8 @@ class GameController:
 
     def move(self, target, pos, real_pixels):
         print("GameController.move, target:", target, "pos:", pos, "real_pixels:", real_pixels)
+        if target != self._active_char:
+            return create_error("It's not your characters turn yet")
         max_dist = target.get_movement_left()
         new_pos = self._normalize_distance(target.get_pos(), pos, max_dist)
         print("new pos:", new_pos)
