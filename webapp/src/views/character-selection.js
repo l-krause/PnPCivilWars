@@ -3,9 +3,9 @@ import {Alert, Box, Button, CircularProgress, styled, TextField} from "@mui/mate
 
 const CharacterToken = styled(Box)(({theme}) => ({
     "& img": {
-      width: 128,
-      height: 128,
-      padding: theme.spacing(2),
+        width: 128,
+        height: 128,
+        padding: theme.spacing(2),
     },
     cursor: "pointer",
     display: "inline-block",
@@ -83,32 +83,38 @@ export default function CharacterSelection(props) {
     }, [fetchCharacters, characters, onFetchCharacters]);
 
     const renderCharacter = (name, character) => {
-        let style = selectedCharacter === name ? { borderColor: "red" } : {};
-        return <CharacterToken key={`character-${character.name}`} onClick={() => setSelectedCharacter(selectedCharacter === name ? null : name)} style={style}>
-                <img src={character.token} alt={`[token of ${character.name}]`} title={`Choose ${character.name}`} />
-            </CharacterToken>
+        let style = selectedCharacter === name ? {borderColor: "red"} : {};
+        return <CharacterToken key={`character-${character.name}`}
+                               onClick={() => setSelectedCharacter(selectedCharacter === name ? null : name)}
+                               style={style}>
+            <img src={character.token} alt={`[token of ${character.name}]`} title={`Choose ${character.name}`}/>
+        </CharacterToken>
     };
 
     return <>
         <CharacterContainer>
             <div><h2>Choose your character first!</h2></div>
             <div>
-                { characters
+                {characters
                     ? <>
                         <div>
                             {Object.keys(characters).map((name) => renderCharacter(name, characters[name]))}
                         </div>
                         <CharacterName size={"small"} variant={"outlined"}
-                                       sx={{ input: { color: 'white', borderColor: 'white' } }}
+                                       sx={{input: {color: 'white', borderColor: 'white'}}}
                                        placeholder={"Charactername"}
-                                       inputProps={{min: 0, style: { textAlign: 'center' }}}
-                                       readOnly={true} value={characters[selectedCharacter]?.name || ""} />
-                        <StartButton variant={"outlined"} onClick={() => onChooseCharacter()} disabled={selectedCharacter === null}>
+                                       inputProps={{min: 0, style: {textAlign: 'center'}}}
+                                       readOnly={true} value={characters[selectedCharacter]?.name || ""}/>
+                        <StartButton variant={"outlined"} onClick={() => onChooseCharacter()}
+                                     disabled={selectedCharacter === null}>
                             Start
                         </StartButton>
                     </>
-                    : <CircularProgress />
+                    : <CircularProgress/>
                 }
+                <CharacterToken>
+                    <img src={"webapp/public/img/crab.png"} alt="Crab"/>
+                </CharacterToken>
             </div>
             {error ?
                 <Alert severity={"error"} title={"An error occured"}>{error}</Alert> : <></>

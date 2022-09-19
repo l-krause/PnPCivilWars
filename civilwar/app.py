@@ -146,7 +146,6 @@ def api_cast(data):
     pass
 
 
-# Also for DM
 @socketio.on('move')
 @param("target", required_type=Character, optional=True)
 @param("pos", required_type=Position)
@@ -219,7 +218,8 @@ def dm_reset(data):
 @socketio.on('continue')
 @has_role("dm")
 def dm_continue(data):
-    pass
+    resp = GameController.instance().next_turn()
+
 
 
 @socketio.on("place")

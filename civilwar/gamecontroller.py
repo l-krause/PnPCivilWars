@@ -287,6 +287,7 @@ class GameController:
                 resp["ko"] = name
         next_char = self._queue.pop()
         self._active_char = next_char
+        resp["acitve_char"] = self._active_char._id
         if len(self._enemies.keys()) == 0:
             resp["state"] = "won"
         elif len(self._allies) == 0 and len(self._dead_pcs) == len(self._pcs):
