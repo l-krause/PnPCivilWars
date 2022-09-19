@@ -166,9 +166,11 @@ def api_move(data):
         return
 
     character = game_controller.get_character(target)
-    game_controller.move(character, data["pos"], data["real_pixels"])
-    emit('move', create_response())
-    emit("characterUpdate", json_serialize(character), broadcast=True)
+    response = game_controller.move(character, data["pos"], data["real_pixels"])
+    emit('move', response)
+
+    if response["success"]:
+        emit("characterUpdate", json_serialize(character), broadcast=True)
 
 
 @socketio.on('turn')

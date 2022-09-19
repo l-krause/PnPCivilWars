@@ -5,6 +5,7 @@ import os.path
 import random
 
 from utils.api import create_response, create_error
+from utils.characters.character import Character
 from utils.characters.npc import NPC
 from utils.characters.player_character import PlayerCharacter
 
@@ -197,6 +198,7 @@ class GameController:
         y = self._og_y / real_pixels[1]
         x = round(x * new_pos[0])
         y = round(y * new_pos[1])
+        return create_response()
         # return create_response({"char": target, "x": x, "y": y, "og_x": self._og_x, "og_y": self._og_y})
 
     def _load_character_configs(self):
