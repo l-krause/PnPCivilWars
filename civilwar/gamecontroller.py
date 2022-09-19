@@ -162,6 +162,8 @@ class GameController:
 
     def _normalize_distance(self, pos1, pos2, max_dist):
         print("_normalize_distance pos1=", pos1, "pos2=", pos2, "max_dist=", max_dist)
+        if max_dist <= 0:
+            return pos1[0], pos1[1]
         x_dir = pos2[0] - pos1[1]
         y_dir = pos2[1] - pos1[1]
         print("x_dir:", x_dir, "y_dir:", y_dir)
