@@ -86,7 +86,7 @@ export default function BattleMap(props) {
                 "real_pixels": [img.clientHeight, img.clientWidth]
             }
 
-            if (character.id !== char.id) {
+            if (!character || character.id !== char.id) {
                 if (role === "dm") {
                     params["target"] = char.id;
                     api.sendRequest("place", params, (response) => {
@@ -109,7 +109,7 @@ export default function BattleMap(props) {
         }
 
 
-    }, [api, character.id, role]);
+    }, [api, character, role]);
 
     const renderCharacter = (character) => {
         return <Token key={"character-" + character.id} style={{left: character.pos[0], top: character.pos[1]}}>
