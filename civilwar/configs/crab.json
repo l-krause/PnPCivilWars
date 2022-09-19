@@ -4,5 +4,6 @@
   "lifePoints": 31,
   "movement": 10,
   "passivePerception": 13,
-  "token": "/img/crab.png"
+  "token": "/img/crab.png",
+  "type": "player"
 }
