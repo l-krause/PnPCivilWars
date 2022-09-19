@@ -74,7 +74,7 @@ function App() {
   return <div className="App">
     {wsConnected ?
         (loaded ?
-          (character !== null || role !== null ?
+          (character !== null ?
                   <BattleMap api={api} character={character} role={role}/> :
                   <CharacterSelection api={api} onSelectCharacter={(c) => setCharacter(c)} onSelectRole={(r) => setRole(r)}/>
           ) :
