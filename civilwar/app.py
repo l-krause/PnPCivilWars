@@ -193,6 +193,9 @@ def api_switch_weapon(data):
 def login(data):
     if data == "lukasstinktmegahart":
         session["role"] = "dm"
+        emit("login", create_response())
+    else:
+        emit("login", create_error("Wrong Password"))
 
 ### DM methods
 @socketio.on('start')
