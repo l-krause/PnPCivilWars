@@ -22,7 +22,7 @@
   "scripts": {
     "build": "npx parcel build",
     "debug": "HTTPS=true react-scripts start",
-    "deploy": "scp -r dist root@romanh.de:/var/www/dnd.romanh.de/static/"
+    "deploy": "scp -r dist public/img root@romanh.de:/var/www/dnd.romanh.de/static/"
   },
   "eslintConfig": {
     "extends": [
