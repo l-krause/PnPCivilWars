@@ -72,6 +72,7 @@ export default function CharacterSelection(props) {
         setError(null);
         if (selectedCharacter === "Crab") {
             setDmPw(true);
+            return;
         }
         api.onChooseCharacter(selectedCharacter, (response) => {
             if (response.success) {
