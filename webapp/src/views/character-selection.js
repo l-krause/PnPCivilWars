@@ -129,10 +129,12 @@ export default function CharacterSelection(props) {
                             <TextField type={"password"} value={password} onChange={e => setPassword(e.target.value)}
                                        onKeyPress={(ev) => {
                                            if (ev.key === "Enter") {
-                                                api.sendRequest("login", this.refs.pass.getValue(), (resp) => {
+                                                api.sendRequest("login", {password: password}, (resp) => {
                                                     if (resp.success) {
                                                         onSelectRole("dm")
                                                         onSelectCharacter("crab")
+                                                    } else {
+                                                        alert(resp.msg)
                                                     }
                                                 })
                                                 ev.preventDefault()
