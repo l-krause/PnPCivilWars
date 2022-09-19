@@ -1,5 +1,6 @@
 import {useCallback, useEffect, useState} from "react";
 import {Alert, Box, Button, CircularProgress, styled, TextField} from "@mui/material";
+import CloseIcon from '@mui/icons-material/Close';
 
 const CharacterToken = styled(Box)(({theme}) => ({
     "& img": {
@@ -127,18 +128,19 @@ export default function CharacterSelection(props) {
                                 style={selectedCharacter === "crab" ? {borderColor: "red"} : {}}>
                     <img src={"/img/crab.png"} alt="Crab"/>
                 </CharacterToken>
-                {dmPw ? <TextField type={"password"} ref="pass" onKeyPress={(ev) => {
-                    if (ev.key === "Enter") {
-                        api.sendRequest("login", this.refs.pass.getValue(), (resp) => {
-                            if (resp.success) {
-                                onSelectRole("dm")
-                                onSelectCharacter("crab")
-                            }
-                        })
-                        ev.preventDefault()
+                {dmPw ? <div><TextField type={"password"} ref="pass" onKeyPress={(ev) => {
+                        if (ev.key === "Enter") {
+                            api.sendRequest("login", this.refs.pass.getValue(), (resp) => {
+                                if (resp.success) {
+                                    onSelectRole("dm")
+                                    onSelectCharacter("crab")
+                                }
+                            })
+                            ev.preventDefault()
+                        }
                     }
-                }
-                }></TextField> : null}
+                    }></TextField><CloseIcon onClick={() => setDmPw(false)}></CloseIcon></div>
+                    : null}
             </div>
             {error ?
                 <Alert severity={"error"} title={"An error occured"}>{error}</Alert> : <></>
