@@ -69,6 +69,9 @@ export default function CharacterSelection(props) {
 
     const onChooseCharacter = useCallback(() => {
         setError(null);
+        if (selectedCharacter === "Crab") {
+            setDmPw(true);
+        }
         api.onChooseCharacter(selectedCharacter, (response) => {
             if (response.success) {
                 onSelectCharacter(response.data);
