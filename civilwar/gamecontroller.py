@@ -162,11 +162,13 @@ class GameController:
 
     def _normalize_distance(self, pos1, pos2, max_dist):
         print("_normalize_distance pos1=", pos1, "pos2=", pos2, "max_dist=", max_dist)
-        x_dir = pos1[0] - pos2[1]
-        y_dir = pos1[1] - pos2[1]
+        x_dir = pos2[0] - pos1[1]
+        y_dir = pos2[1] - pos1[1]
+        print("x_dir:", x_dir, "y_dir:", y_dir)
         length = math.sqrt(x_dir ** 2 + y_dir ** 2)
+        print("length:", length)
         dest_x = int(max(min((x_dir / length) * max_dist, self._og_x), 0))
-        dest_y = int(max(min((y_dir / length) * max_dist), self._og_y, 0))
+        dest_y = int(max(min((y_dir / length) * max_dist, self._og_y), 0))
         return dest_x, dest_y
 
     def attack(self, actor: str, target: str):
@@ -181,15 +183,17 @@ class GameController:
         return resp
 
     def move(self, target, pos, real_pixels):
+        print("GameController.move, target:", target, "pos:", pos, "real_pixels:", real_pixels)
         max_dist = target.get_movement_left()
         new_pos = self._normalize_distance(target.get_pos(), pos, max_dist)
+        print("new pos:", new_pos)
         dist = math.ceil(self._calc_distance(target.get_pos(), new_pos))
         target.move(new_pos, dist)
         x = self._og_x / real_pixels[0]
         y = self._og_y / real_pixels[1]
         x = round(x * new_pos[0])
         y = round(y * new_pos[1])
-        return create_response({"char": target, "x": x, "y": y, "og_x": self._og_x, "og_y": self._og_y})
+        # return create_response({"char": target, "x": x, "y": y, "og_x": self._og_x, "og_y": self._og_y})
 
     def _load_character_configs(self):
         config_dir = "./configs"

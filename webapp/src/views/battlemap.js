@@ -1,6 +1,5 @@
 import {Box, styled} from "@mui/material";
 import {useCallback, useEffect, useRef, useState} from "react";
-import {target} from "../../webpack.config";
 
 const TOKEN_SIZE = 48;
 
@@ -50,18 +49,11 @@ export default function BattleMap(props) {
         }
     }, [characters]);
 
-    const onCharacterMoved = useCallback((response) => {
-
-        if (response.success) {
-            let relWidth = Math.floor(mapRef.current.clientWidth / response.og_x);
-            let relHeight = Math.floor(mapRef.current.clientHeight / response.og_y);
-            let trueX = relWidth * response.x;
-            let trueY = relHeight * response.y;
-            setCharacters({...characters, [response.char.id]: {...characters[response.char.id], pos: [trueX, trueY]}});
-        } else {
-            alert("Error moving character: " + response.msg);
-        }
-    }, []);
+    const onCharacterUpdate = useCallback((char) => {
+        let newState = { ...characters };
+        newState[char.id] = char;
+        setCharacters(newState);
+    }, [characters]);
 
     useEffect(() => {
         onFetchCharacters();
@@ -69,32 +61,49 @@ export default function BattleMap(props) {
 
     useEffect(() => {
         api.registerEvent("characterJoin", onCharacterJoin);
-        api.registerEvent("move", onCharacterMoved);
+        api.registerEvent("characterUpdate", onCharacterUpdate);
 
         return () => {
             // dismount
             api.unregisterEvent("characterJoin");
-            api.unregisterEvent("move");
+            api.unregisterEvent("characterUpdate");
         }
-    }, [api, onCharacterJoin]);
+    }, [api, onCharacterJoin, onCharacterUpdate]);
 
-    const onTokenDrag = useCallback((event, char) => {
-        let pos = event.target.getBoundingClientRect();
-        if (character.id === char.id) {
+    const onTokenDrag = useCallback((e, char) => {
+        let img = mapRef.current;
+        if (img) {
+            console.log(e);
+            let rect = e.target.getBoundingClientRect();
+            let pos = {x: e.clientX - rect.left, y: e.clientY - rect.top};
+            let relWidth = Math.floor(img.clientWidth / img.naturalWidth);
+            let relHeight = Math.floor(img.clientHeight / img.naturalHeight);
+            let trueX = relWidth * pos.x;
+            let trueY = relHeight * pos.y;
+
             let params = {
-                "target": char.id,
-                "real_pixels": [mapRef.current.clientHeight, mapRef.current.clientWidth]
+                "pos": [trueX, trueY],
+                "real_pixels": [img.clientHeight, img.clientWidth]
             }
-            api.sendRequest("move", params)
-        } else if (role === "dm") {
-            let params = {
-                "target": char.id,
-                "pos": [pos.x, pos.y],
-                "real_pixels": [mapRef.current.clientHeight, mapRef.current.clientWidth]
+
+            if (character.id !== char.id) {
+                if (role === "dm") {
+                    params["target"] = char.id;
+                } else {
+                    e.preventDefault();
+                    return;
+                }
             }
-            api.sendRequest("dm_move", params)
+
+            api.sendRequest("move", params, (response) => {
+                if (!response.success) {
+                    alert("Error moving character: " + response.msg);
+                }
+            });
         }
-    }, [api]);
+
+
+    }, [api, character.id, role]);
 
     const renderCharacter = (character) => {
         return <Token key={"character-" + character.id} style={{left: character.pos[0], top: character.pos[1]}}>

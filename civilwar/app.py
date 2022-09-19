@@ -148,18 +148,28 @@ def api_cast(data):
 
 # Also for DM
 @socketio.on('move')
-@param("target", required_type=Character)
-@param("pos", required_type=Position, optional=True)
+@param("target", required_type=Character, optional=True)
+@param("pos", required_type=Position)
 @param("real_pixels", required_type=Position)
 def api_move(data):
     game_controller = GameController.instance()
-    character = game_controller.get_character(data["target"])
-    pos = data.get("pos", None)
-    if pos is None:
-        pos = character.get_pos()
+    target = data.get("target", None)
+    own_character = session.get("character", None)
 
-    resp = game_controller.move(character, pos, data["real_pixels"])
-    broadcast_response(resp)
+    if target is None:
+        if own_character is None:
+            emit("move", create_error("No character given or chosen yet"))
+            return
+        else:
+            target = own_character
+    elif session.get("role", "player") != "dm" and (own_character is None or own_character != target):
+        emit("move", create_error("Insufficient permissions to move other characters"))
+        return
+
+    character = game_controller.get_character(target)
+    game_controller.move(character, data["pos"], data["real_pixels"])
+    emit('move', create_response())
+    emit("characterUpdate", json_serialize(character), broadcast=True)
 
 
 @socketio.on('turn')

@@ -1,4 +1,3 @@
-import logging
 import random
 from abc import abstractmethod
 
@@ -14,7 +13,7 @@ class Character(JsonSerializable, ApiParameter):
         self._curr_life = dictionary["lifePoints"]
         self._armor = dictionary["armorClass"]
         self._movement = dictionary["movement"]
-        self._movement_left = dictionary["movement"]
+        self._movement_left = dictionary["movement"] * 10
         self._passivePerception = dictionary["passivePerception"]
         self._active_weapon = dictionary["activeWeapon"]
         self._weapons = dictionary["weapons"]
@@ -31,9 +30,9 @@ class Character(JsonSerializable, ApiParameter):
         self._dead = False
         self._won_death = 0
         self._lost_death = 0
-        self._spells = dictionary.get(["spells"], [])
-        self._spell_slots = dictionary.get(["spellSlots"], [])
-        self._available_slots = dictionary.get(["spellSlots"], [])
+        self._spells = dictionary.get("spells", [])
+        self._spell_slots = dictionary.get("spellSlots", [])
+        self._available_slots = dictionary.get("spellSlots", [])
 
     @abstractmethod
     def get_name(self):
@@ -90,7 +89,8 @@ class Character(JsonSerializable, ApiParameter):
 
     def move(self, new_pos, dist):
         self._pos = new_pos
-        self._movement_left -= dist
+        self._movement_left = max(0, self._movement_left - dist)
+        print("character.move(", new_pos, ",", dist, "), movement_left:", self._movement_left)
 
     def to_json(self):
         return {
