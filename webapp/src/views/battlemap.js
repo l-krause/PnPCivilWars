@@ -50,7 +50,7 @@ export default function BattleMap(props) {
     }, [characters]);
 
     const onCharacterUpdate = useCallback((char) => {
-        let newState = { ...characters };
+        let newState = {...characters};
         newState[char.id] = char;
         setCharacters(newState);
     }, [characters]);
@@ -89,6 +89,12 @@ export default function BattleMap(props) {
             if (character.id !== char.id) {
                 if (role === "dm") {
                     params["target"] = char.id;
+                    api.sendRequest("place", params, (response) => {
+                        if (!response.success) {
+                            alert("Error placing: " + response.msg);
+                        }
+                    })
+                    return;
                 } else {
                     e.preventDefault();
                     return;

@@ -2,14 +2,13 @@ import datetime
 import logging
 import os
 from dotenv import load_dotenv
-
 from flask import Flask, session, send_from_directory, request
 from flask_cors import CORS
 from flask_session import Session
 from flask_socketio import SocketIO, emit
-from utils.api import create_response, create_error, json_serialize, param, has_role, has_character, broadcast_response
 
 from gamecontroller import GameController
+from utils.api import create_response, create_error, json_serialize, param, has_role, has_character, broadcast_response
 from utils.characters.character import Character
 from utils.position import Position
 
@@ -61,6 +60,8 @@ def on_connect(*args):
     character = GameController.instance().get_character(character_id)
     if character:
         character.is_online = True
+
+
 #        emit("characterJoin", json_serialize(character), broadcast=True)
 
 
@@ -114,7 +115,6 @@ def get_enemies(data):
 
 @socketio.on('info')
 def api_info(data):
-
     player = {
         "role": session.get("role", "player"),
     }
@@ -220,6 +220,18 @@ def dm_reset(data):
 @has_role("dm")
 def dm_continue(data):
     pass
+
+
+@socketio.on("place")
+@has_role("dm")
+@param("target")
+@param("pos")
+def place(data):
+    game_controller = GameController.instance()
+    target = data.get("target", None)
+    game_controller.place(character, data["pos"])
+    emit('place', create_response())
+    emit("characterUpdate", json_serialize(character), broadcast=True)
 
 
 @socketio.on('addTurn')

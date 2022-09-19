@@ -92,6 +92,10 @@ class Character(JsonSerializable, ApiParameter):
         self._movement_left = max(0, self._movement_left - dist)
         print("character.move(", new_pos, ",", dist, "), movement_left:", self._movement_left)
 
+    def place(self, new_pos):
+        self._pos = new_pos
+        print("character.move(", new_pos, ")")
+
     def to_json(self):
         return {
             "id": self._id,
@@ -111,7 +115,7 @@ class Character(JsonSerializable, ApiParameter):
             self._ap_buff -= 1
             if self._ap_buff == 0:
                 self._action_points_max = 1
-        if self._res_buff > 0 :
+        if self._res_buff > 0:
             self._res_buff -= 1
             if self._res_buff == 0:
                 self._resistances = self._std_resistances.copy()
@@ -145,4 +149,3 @@ class Character(JsonSerializable, ApiParameter):
             return create_error(f"Invalid type, required: int, got: {type(value)}")
         elif game_controller.get_character(value) is None:
             return create_error(f"No such character id={value}")
-

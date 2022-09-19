@@ -294,6 +294,12 @@ class GameController:
 
         return resp
 
+    def place(self, target: Character, pos, real_pixels):
+        target.place(pos)
+
+        data = {"new_pos": pos}
+        create_response()
+
     @classmethod
     def instance(cls):
         if cls._instance is None:
