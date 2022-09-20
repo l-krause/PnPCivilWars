@@ -308,5 +308,4 @@ class GameController:
         return cls._instance
 
     def reset(self):
-        # TODO: reset
-        pass
+        self._instance = None

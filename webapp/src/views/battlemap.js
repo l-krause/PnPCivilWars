@@ -33,6 +33,7 @@ export default function BattleMap(props) {
     const [characters, setCharacters] = useState({});
     const [selectedCharacter, setSelectedCharacter] = useState(null);
     const [buttonDisabled, setButtonDisabled] = useState(true);
+    const [activeChar, setActiveChar] = useState(null);
     const mapRef = useRef(null);
 
     const onFetchCharacters = useCallback(() => {
@@ -61,6 +62,13 @@ export default function BattleMap(props) {
     useEffect(() => {
         onFetchCharacters();
     }, [fetchCharacters, onFetchCharacters]);
+
+    useEffect(() => {
+        api.registerEvent("start", onStartGame);
+        return () => {
+            api.unregisterEvent("start");
+        }
+    }, [api])
 
     useEffect(() => {
         api.registerEvent("characterJoin", onCharacterJoin);
@@ -130,12 +138,11 @@ export default function BattleMap(props) {
     }
 
     const onPassTurn = () => {
-        api.sendRequest("continue")
     }
 
-    const onStartGame = () => {
-
-    }
+    const onStartGame = useCallback((response) => {
+        setActiveChar(response.data["first"])
+    }, [setActiveChar])
 
     return <div>
         <MapContainer>
@@ -146,15 +153,20 @@ export default function BattleMap(props) {
         </MapContainer>
         <div><h2>How do you want to spend your action point?</h2></div>
         {role !== "dm" ? <div>
-                <Button variant="contained" onClick={() => onAction("attack")} disabled={buttonDisabled}>Attack</Button>
-                <Button variant="contained" onClick={() => onAction("spell")} disabled={buttonDisabled}>Spell</Button>
-                <Button variant="contained" onClick={() => api.sendRequest("dash")} disabled={buttonDisabled}>Dash</Button>
-                <Button variant="contained" disabled={buttonDisabled}>Change Weapon</Button>
-                <Button variant="contained" onClick={() => onPassTurn()} disabled={buttonDisabled}>Pass Turn</Button>
+                <Button variant="contained" onClick={() => onAction("attack")}
+                        disabled={activeChar !== character}>Attack</Button>
+                <Button variant="contained" onClick={() => onAction("spell")}
+                        disabled={activeChar !== character}>Spell</Button>
+                <Button variant="contained" onClick={() => api.sendRequest("dash")}
+                        disabled={activeChar !== character}>Dash</Button>
+                <Button variant="contained" disabled={activeChar !== character}>Change Weapon</Button>
+                <Button variant="contained" onClick={() => onPassTurn()} disabled={activeChar !== character}>Pass
+                    Turn</Button>
             </div> :
             <div>
-                <Button variant="contained" onClick={() => onStartGame()}>Start</Button>
-                <Button variant="contained" onClick={() => onPassTurn()}>Continue</Button>
+                <Button variant="contained" onClick={() => onAction("start")}>Start</Button>
+                <Button variant="contained" onClick={() => onAction("continue")}>Continue</Button>
+                <Button variant="contained">Test</Button>
             </div>}
     </div>
 
