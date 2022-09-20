@@ -58,37 +58,26 @@ export default function BattleMap(props) {
         let newState = {...characters};
         newState[char.id] = char;
         setCharacters(newState);
-    }, [characters]);
+    }, [setCharacters, characters]);
 
     useEffect(() => {
         onFetchCharacters();
     }, [fetchCharacters, onFetchCharacters]);
 
     useEffect(() => {
-        api.registerEvent("start", onStartGame);
-        return () => {
-            api.unregisterEvent("start");
-        }
-    }, [api]);
-
-    useEffect(() => {
-        api.registerEvent("reset", onReset);
-
-        return () => {
-            api.unregisterEvent("reset")
-        }
-    })
-
-    useEffect(() => {
         api.registerEvent("characterJoin", onCharacterJoin);
         api.registerEvent("characterUpdate", onCharacterUpdate);
+        api.registerEvent("start", onStartGame);
+        api.registerEvent("reset", onReset);
 
         return () => {
             // dismount
             api.unregisterEvent("characterJoin");
             api.unregisterEvent("characterUpdate");
+            api.unregisterEvent("start");
+            api.unregisterEvent("reset");
         }
-    }, [api, onCharacterJoin, onCharacterUpdate]);
+    }, [api, onCharacterJoin, onCharacterUpdate, onStartGame, onReset]);
 
     const onTokenDrag = useCallback((e, char) => {
         let img = mapRef.current;
