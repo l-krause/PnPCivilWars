@@ -60,6 +60,14 @@ export default function BattleMap(props) {
         setCharacters(newState);
     }, [setCharacters, characters]);
 
+    const onStartGame = useCallback((response) => {
+        setActiveChar(response.data["first"])
+    }, [setActiveChar])
+
+    const onReset = useCallback((response) => {
+        setCharacter(null);
+    }, [setCharacter])
+
     useEffect(() => {
         onFetchCharacters();
     }, [fetchCharacters, onFetchCharacters]);
@@ -138,13 +146,7 @@ export default function BattleMap(props) {
     const onPassTurn = () => {
     }
 
-    const onStartGame = useCallback((response) => {
-        setActiveChar(response.data["first"])
-    }, [setActiveChar])
 
-    const onReset = useCallback((response) => {
-        setCharacter(null);
-    }, [setCharacter])
 
     return <div>
         <MapContainer>
