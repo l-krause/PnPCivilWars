@@ -21,7 +21,7 @@
   },
   "scripts": {
     "build": "npx parcel build",
-    "debug": "HTTPS=true react-scripts start",
+    "debug": "react-scripts --openssl-legacy-provider start",
     "deploy": "scp -r dist public/img root@romanh.de:/var/www/dnd.romanh.de/static/"
   },
   "eslintConfig": {

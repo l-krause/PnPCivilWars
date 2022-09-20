@@ -1,5 +1,6 @@
 import {Box, styled} from "@mui/material";
 import {useCallback, useEffect, useRef, useState} from "react";
+import Button from '@mui/material/Button';
 
 const TOKEN_SIZE = 48;
 
@@ -30,6 +31,8 @@ export default function BattleMap(props) {
 
     const [fetchCharacters, setFetchCharacters] = useState(true);
     const [characters, setCharacters] = useState({});
+    const [selectedCharacter, setSelectedCharacter] = useState(null);
+    const [buttonDisabled, setButtonDisabled] = useState(true);
     const mapRef = useRef(null);
 
     const onFetchCharacters = useCallback(() => {
@@ -122,11 +125,37 @@ export default function BattleMap(props) {
     const tokens = Object.values(characters).map(c => renderCharacter(c));
     /*tokens.push(renderCharacter(character));*/
 
-    return <MapContainer>
-        <div>
-            <img src={"/img/battlemap.png"} alt="BattleMap" ref={mapRef}/>
-            {tokens}
-        </div>
-    </MapContainer>
+    const onAction = (action) => {
+        api.sendRequest(action, {"target": selectedCharacter})
+    }
+
+    const onPassTurn = () => {
+        api.sendRequest("continue")
+    }
+
+    const onStartGame = () => {
+
+    }
+
+    return <div>
+        <MapContainer>
+            <div>
+                <img src={"/img/battlemap.png"} alt="BattleMap" ref={mapRef}/>
+                {tokens}
+            </div>
+        </MapContainer>
+        <div><h2>How do you want to spend your action point?</h2></div>
+        {role !== "dm" ? <div>
+                <Button variant="contained" onClick={() => onAction("attack")} disabled={buttonDisabled}>Attack</Button>
+                <Button variant="contained" onClick={() => onAction("spell")} disabled={buttonDisabled}>Spell</Button>
+                <Button variant="contained" onClick={() => api.sendRequest("dash")} disabled={buttonDisabled}>Dash</Button>
+                <Button variant="contained" disabled={buttonDisabled}>Change Weapon</Button>
+                <Button variant="contained" onClick={() => onPassTurn()} disabled={buttonDisabled}>Pass Turn</Button>
+            </div> :
+            <div>
+                <Button variant="contained" onClick={() => onStartGame()}>Start</Button>
+                <Button variant="contained" onClick={() => onPassTurn()}>Continue</Button>
+            </div>}
+    </div>
 
 }

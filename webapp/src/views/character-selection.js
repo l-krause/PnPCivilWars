@@ -101,7 +101,7 @@ export default function CharacterSelection(props) {
 
     return <>
         <CharacterContainer>
-            <div><h2>Choose your character first!</h2></div>
+            <div><h2>Choose your character</h2></div>
             <div>
                 {characters
                     ? <>
@@ -126,23 +126,23 @@ export default function CharacterSelection(props) {
                     <img src={"/img/crab.png"} alt="Crab"/>
                 </CharacterToken>
                 {showPasswordPrompt ? <>
-                            <TextField type={"password"} value={password} onChange={e => setPassword(e.target.value)}
-                                       onKeyPress={(ev) => {
-                                           if (ev.key === "Enter") {
-                                                api.sendRequest("login", {password: password}, (resp) => {
-                                                    if (resp.success) {
-                                                        onSelectRole("dm")
-                                                        onSelectCharacter("crab")
-                                                    } else {
-                                                        alert(resp.msg)
-                                                    }
-                                                })
-                                                ev.preventDefault()
-                                            }
-                                        }
-                            }/>
-                            <CloseIcon onClick={() => setShowPasswordPrompt(false)}/>
-                        </>
+                        <TextField type={"password"} value={password} onChange={e => setPassword(e.target.value)}
+                                   onKeyPress={(ev) => {
+                                       if (ev.key === "Enter") {
+                                           api.sendRequest("login", {password: password}, (resp) => {
+                                               if (resp.success) {
+                                                   onSelectRole("dm")
+                                                   onSelectCharacter("crab")
+                                               } else {
+                                                   alert(resp.msg)
+                                               }
+                                           })
+                                           ev.preventDefault()
+                                       }
+                                   }
+                                   }/>
+                        <CloseIcon onClick={() => setShowPasswordPrompt(false)}/>
+                    </>
                     : null}
             </div>
             {error ?

@@ -171,7 +171,7 @@ def api_move(data):
     emit("characterUpdate", json_serialize(character), broadcast=True)
 
 
-@socketio.on('turn')
+@socketio.on('pass')
 def api_pass_turn(data):
     pass
 
