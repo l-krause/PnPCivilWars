@@ -309,5 +309,6 @@ class GameController:
             cls._instance = GameController()
         return cls._instance
 
-    def reset(self):
-        self._instance = None
+    @classmethod
+    def reset(cls):
+        cls._instance = None

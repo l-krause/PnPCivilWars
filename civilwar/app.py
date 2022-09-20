@@ -1,8 +1,9 @@
 import datetime
 import logging
 import os
+
 from dotenv import load_dotenv
-from flask import Flask, session, send_from_directory, request
+from flask import Flask, session, send_from_directory
 from flask_cors import CORS
 from flask_session import Session
 from flask_socketio import SocketIO, emit
@@ -223,7 +224,7 @@ def dm_change_health(data):
 @socketio.on('reset')
 @has_role("dm")
 def dm_reset(data):
-    GameController.instance().reset()
+    GameController.reset()
     emit("reset", {}, broadcast=True)
 
 
@@ -231,7 +232,6 @@ def dm_reset(data):
 @has_role("dm")
 def dm_continue(data):
     resp = GameController.instance().next_turn()
-
 
 
 @socketio.on("place")
