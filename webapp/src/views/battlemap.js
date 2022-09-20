@@ -28,6 +28,7 @@ export default function BattleMap(props) {
     const api = props.api;
     const character = props.character;
     const role = props.role;
+    const setCharacter = props.setCharacter;
 
     const [fetchCharacters, setFetchCharacters] = useState(true);
     const [characters, setCharacters] = useState({});
@@ -68,7 +69,15 @@ export default function BattleMap(props) {
         return () => {
             api.unregisterEvent("start");
         }
-    }, [api])
+    }, [api]);
+
+    useEffect(() => {
+        api.registerEvent("reset", onReset);
+
+        return () => {
+            api.unregisterEvent("reset")
+        }
+    })
 
     useEffect(() => {
         api.registerEvent("characterJoin", onCharacterJoin);
@@ -144,6 +153,10 @@ export default function BattleMap(props) {
         setActiveChar(response.data["first"])
     }, [setActiveChar])
 
+    const onReset = useCallback((response) => {
+        setCharacter(null);
+    }, [setCharacter])
+
     return <div>
         <MapContainer>
             <div>
@@ -166,7 +179,7 @@ export default function BattleMap(props) {
             <div>
                 <Button variant="contained" onClick={() => onAction("start")}>Start</Button>
                 <Button variant="contained" onClick={() => onAction("continue")}>Continue</Button>
-                <Button variant="contained">Test</Button>
+                <Button variant="contained" onClick={() => onAction("reset")}>Reset</Button>
             </div>}
     </div>
 

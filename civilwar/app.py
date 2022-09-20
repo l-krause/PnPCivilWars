@@ -224,7 +224,7 @@ def dm_change_health(data):
 @has_role("dm")
 def dm_reset(data):
     GameController.instance().reset()
-    emit("reset", create_response(), broadcast=True)
+    emit("reset", {}, broadcast=True)
 
 
 @socketio.on('continue')
