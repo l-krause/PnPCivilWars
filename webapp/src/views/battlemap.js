@@ -146,8 +146,6 @@ export default function BattleMap(props) {
     const onPassTurn = () => {
     }
 
-
-
     return <div>
         <MapContainer>
             <div>
