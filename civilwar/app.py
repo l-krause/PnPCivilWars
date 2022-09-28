@@ -176,7 +176,7 @@ def api_move(data):
 
 @socketio.on('pass')
 def api_pass_turn(data):
-    pass
+    broadcast_response(GameController.instance().next_turn())
 
 
 @socketio.on('switchWeapon')

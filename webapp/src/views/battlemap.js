@@ -58,7 +58,7 @@ export default function BattleMap(props) {
         let newState = {...characters};
         newState[char.id] = char;
         setCharacters(newState);
-    }, [setCharacters, characters]);
+    }, [characters]);
 
     const onStartGame = useCallback((response) => {
         setActiveChar(response.data["first"])
@@ -128,9 +128,13 @@ export default function BattleMap(props) {
 
     }, [api, character, role]);
 
+
     const renderCharacter = (character) => {
         return <Token key={"character-" + character.id} style={{left: character.pos[0], top: character.pos[1]}}>
-            <img alt={"token of " + character.id} src={character.token} onDragEnd={(e) => onTokenDrag(e, character)}/>
+            <img alt={"token of " + character.id} src={character.token}
+                 onDragEnd={(e) => onTokenDrag(e, character)}
+                 onClick={() => setSelectedCharacter(character.id)}
+                 style={character.id === selectedCharacter.id ? { border: "1px solid red"} : {}}/>
         </Token>
     };
 
@@ -139,12 +143,13 @@ export default function BattleMap(props) {
     const tokens = Object.values(characters).map(c => renderCharacter(c));
     /*tokens.push(renderCharacter(character));*/
 
-    const onAction = (action) => {
+    const onAction = useCallback((action) => {
         api.sendRequest(action, {"target": selectedCharacter})
-    }
+    }, [api]);
 
-    const onPassTurn = () => {
-    }
+    const onPassTurn = useCallback((data) => {
+        setActiveChar(data.active_char.id)
+    }, [setActiveChar()]);
 
     return <div>
         <MapContainer>
