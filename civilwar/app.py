@@ -232,6 +232,7 @@ def dm_reset(data):
 @has_role("dm")
 def dm_continue(data):
     resp = GameController.instance().next_turn()
+    broadcast_response(resp)
 
 
 @socketio.on("place")
