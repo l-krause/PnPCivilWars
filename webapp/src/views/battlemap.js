@@ -33,7 +33,6 @@ export default function BattleMap(props) {
     const [fetchCharacters, setFetchCharacters] = useState(true);
     const [characters, setCharacters] = useState({});
     const [selectedCharacter, setSelectedCharacter] = useState(null);
-    const [buttonDisabled, setButtonDisabled] = useState(true);
     const [activeChar, setActiveChar] = useState(null);
     const mapRef = useRef(null);
 
@@ -46,19 +45,19 @@ export default function BattleMap(props) {
                 }
             });
         }
-    }, [api, fetchCharacters]);
+    }, [api, fetchCharacters, setFetchCharacters]);
 
     const onCharacterJoin = useCallback((character) => {
         if (!characters.hasOwnProperty(character.id)) {
             setCharacters({...characters, [character.id]: character})
         }
-    }, [characters]);
+    }, [characters, setCharacters]);
 
     const onCharacterUpdate = useCallback((char) => {
         let newState = {...characters};
         newState[char.id] = char;
         setCharacters(newState);
-    }, [characters]);
+    }, [characters, setCharacters]);
 
     const onStartGame = useCallback((response) => {
         setActiveChar(response.data["first"])
@@ -70,7 +69,7 @@ export default function BattleMap(props) {
 
     useEffect(() => {
         onFetchCharacters();
-    }, [fetchCharacters, onFetchCharacters]);
+    }, [ onFetchCharacters]);
 
     useEffect(() => {
         api.registerEvent("characterJoin", onCharacterJoin);
@@ -134,7 +133,7 @@ export default function BattleMap(props) {
             <img alt={"token of " + character.id} src={character.token}
                  onDragEnd={(e) => onTokenDrag(e, character)}
                  onClick={() => setSelectedCharacter(character.id)}
-                 style={character.id === selectedCharacter.id ? { border: "1px solid red"} : {}}/>
+                 style={character.id === selectedCharacter ? { border: "1px solid red"} : {}}/>
         </Token>
     };
 
@@ -145,11 +144,11 @@ export default function BattleMap(props) {
 
     const onAction = useCallback((action) => {
         api.sendRequest(action, {"target": selectedCharacter})
-    }, [api]);
+    }, [api, selectedCharacter]);
 
     const onPassTurn = useCallback((data) => {
         setActiveChar(data.active_char.id)
-    }, [setActiveChar()]);
+    }, [setActiveChar]);
 
     return <div>
         <MapContainer>
