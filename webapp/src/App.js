@@ -75,7 +75,7 @@ function App() {
     {wsConnected ?
         (loaded ?
           (character !== null ?
-                  <BattleMap api={api} character={character} role={role} setCharacter={setCharacter()}/> :
+                  <BattleMap api={api} character={character} role={role} setCharacter={setCharacter}/> :
                   <CharacterSelection api={api} onSelectCharacter={(c) => setCharacter(c)} onSelectRole={(r) => setRole(r)}/>
           ) :
             <ConnectingDialog>

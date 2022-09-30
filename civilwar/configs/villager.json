@@ -4,6 +4,7 @@
   "lifePoints": 4,
   "movement": 9,
   "passivePerception": 10,
+  "token": "/img/villager.png",
   "type": "npc",
   "weapons": [
     {

@@ -42,40 +42,54 @@ export default function BattleMap(props) {
             api.fetchAllCharacters((response) => {
                 if (response.success) {
                     setCharacters(response.data);
+                } else {
+                    alert("Error fetching characters: " + response.msg);
                 }
             });
         }
-    }, [api, fetchCharacters, setFetchCharacters]);
+    }, [api, fetchCharacters]);
 
     const onCharacterJoin = useCallback((character) => {
         if (!characters.hasOwnProperty(character.id)) {
             setCharacters({...characters, [character.id]: character})
         }
-    }, [characters, setCharacters]);
+    }, [characters]);
 
     const onCharacterUpdate = useCallback((char) => {
         let newState = {...characters};
         newState[char.id] = char;
         setCharacters(newState);
-    }, [characters, setCharacters]);
+    }, [characters]);
 
     const onStartGame = useCallback((response) => {
-        setActiveChar(response.data["first"])
-    }, [setActiveChar])
+        setActiveChar(response.data["first"]);
+
+    }, [setActiveChar]);
 
     const onReset = useCallback((response) => {
         setCharacter(null);
-    }, [setCharacter])
+    }, [setCharacter]);
+
+    const onAction = useCallback((action) => {
+        api.sendRequest(action, {"target": selectedCharacter})
+    }, [api, selectedCharacter]);
+
+    const onPassTurn = useCallback((data) => {
+        setActiveChar(data.active_char.id)
+    }, [setActiveChar]);
+
 
     useEffect(() => {
         onFetchCharacters();
-    }, [ onFetchCharacters]);
+    }, [onFetchCharacters]);
 
     useEffect(() => {
+        console.log("useEffect called");
         api.registerEvent("characterJoin", onCharacterJoin);
         api.registerEvent("characterUpdate", onCharacterUpdate);
         api.registerEvent("start", onStartGame);
         api.registerEvent("reset", onReset);
+        api.registerEvent("pass", onPassTurn);
 
         return () => {
             // dismount
@@ -83,6 +97,7 @@ export default function BattleMap(props) {
             api.unregisterEvent("characterUpdate");
             api.unregisterEvent("start");
             api.unregisterEvent("reset");
+            api.unregisterEvent("pass");
         }
     }, [api, onCharacterJoin, onCharacterUpdate, onStartGame, onReset]);
 
@@ -117,6 +132,7 @@ export default function BattleMap(props) {
                 }
             }
 
+
             api.sendRequest("move", params, (response) => {
                 if (!response.success) {
                     alert("Error moving character: " + response.msg);
@@ -127,7 +143,6 @@ export default function BattleMap(props) {
 
     }, [api, character, role]);
 
-
     const renderCharacter = (character) => {
         return <Token key={"character-" + character.id} style={{left: character.pos[0], top: character.pos[1]}}>
             <img alt={"token of " + character.id} src={character.token}
@@ -137,18 +152,8 @@ export default function BattleMap(props) {
         </Token>
     };
 
-    console.log(characters);
-
     const tokens = Object.values(characters).map(c => renderCharacter(c));
-    /*tokens.push(renderCharacter(character));*/
 
-    const onAction = useCallback((action) => {
-        api.sendRequest(action, {"target": selectedCharacter})
-    }, [api, selectedCharacter]);
-
-    const onPassTurn = useCallback((data) => {
-        setActiveChar(data.active_char.id)
-    }, [setActiveChar]);
 
     return <div>
         <MapContainer>
@@ -166,13 +171,17 @@ export default function BattleMap(props) {
                 <Button variant="contained" onClick={() => api.sendRequest("dash")}
                         disabled={activeChar !== character}>Dash</Button>
                 <Button variant="contained" disabled={activeChar !== character}>Change Weapon</Button>
-                <Button variant="contained" onClick={() => onPassTurn()} disabled={activeChar !== character}>Pass
+                <Button variant="contained" onClick={() => onAction("pass")} disabled={activeChar !== character}>Pass
                     Turn</Button>
             </div> :
             <div>
                 <Button variant="contained" onClick={() => onAction("start")}>Start</Button>
                 <Button variant="contained" onClick={() => onAction("continue")}>Continue</Button>
                 <Button variant="contained" onClick={() => onAction("reset")}>Reset</Button>
+                <Button variant="contained" onClick={() => onAction("changeHealth")}>Change HP</Button>
+                <Button variant="contained" onClick={() => onAction("kill")}>Kill</Button>
+                <Button variant="contained" onClick={() => onAction("stun")}>Stun</Button>
+                <Button variant="contained" onClick={() => onAction("createNPCs")}>Create NPCs</Button>
             </div>}
     </div>
 

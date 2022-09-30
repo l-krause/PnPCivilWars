@@ -47,7 +47,8 @@ class GameController:
             int_rolls.append(pc.int_roll())
             self._full_queue.append(pc)
         int_rolls, self._full_queue = zip(*sorted(zip(int_rolls, self._full_queue)))
-        self._full_queue.append(self._allies)
+        self._full_queue = self._full_queue.append(self._allies)
+        self._full_queue = self._full_queue.append(self._enemies)
         self._queue = self._full_queue.copy()
         self._round = 1
         self._active_char = self._queue.pop()
@@ -302,6 +303,13 @@ class GameController:
 
         data = {"new_pos": pos}
         create_response()
+
+    def _ai_turn(self, ally: bool):
+        enemies = []
+        if ally:
+            enemies = self._enemies
+        else:
+            enemies = self._allies
 
     @classmethod
     def instance(cls):

@@ -5,6 +5,7 @@
   "movement": 9,
   "passivePerception": 12,
   "type": "npc",
+  "token": "/img/veteran.png",
   "weapons": [
     {
       "name": "Longsword",

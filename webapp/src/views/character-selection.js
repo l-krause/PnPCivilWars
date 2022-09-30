@@ -91,12 +91,14 @@ export default function CharacterSelection(props) {
     }, [fetchCharacters, characters, onFetchCharacters]);
 
     const renderCharacter = (name, character) => {
-        let style = selectedCharacter === name ? {borderColor: "red"} : {};
-        return <CharacterToken key={`character-${character.name}`}
-                               onClick={() => setSelectedCharacter(selectedCharacter === name ? null : name)}
-                               style={style}>
-            <img src={character.token} alt={`[token of ${character.name}]`} title={`Choose ${character.name}`}/>
-        </CharacterToken>
+        if (character.name.toLowerCase() !== "crab") {
+            let style = selectedCharacter === name ? {borderColor: "red"} : {};
+            return <CharacterToken key={`character-${character.name}`}
+                                   onClick={() => setSelectedCharacter(selectedCharacter === name ? null : name)}
+                                   style={style}>
+                <img src={character.token} alt={`[token of ${character.name}]`} title={`Choose ${character.name}`}/>
+            </CharacterToken>
+        }
     };
 
     return <>
