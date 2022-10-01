@@ -246,7 +246,7 @@ def place(data):
         emit("place", create_error("Target does not exist"))
         return
     character = game_controller.get_character(target)
-    game_controller.place(character, data["pos"])
+    game_controller.place(character, data["pos"], data["real_pixels"])
     emit('place', create_response())
     emit("characterUpdate", json_serialize(character), broadcast=True)
 
