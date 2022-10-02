@@ -115,7 +115,8 @@ export default function BattleMap(props) {
         let img = mapRef.current;
         if (img) {
             console.log(e);
-            let pos = {x: e.clientX, y: e.clientY};
+            let rect = e.target.getBoundingClientRect();
+            let pos = {x: e.clientX - rect.x, y: e.clientY - rect.y};
             let relWidth = img.naturalWidth / img.clientWidth;
             let relHeight =img.naturalHeight / img.clientHeight;
             let trueX = Math.floor(relWidth * pos.x);
