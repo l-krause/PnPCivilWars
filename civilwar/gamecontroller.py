@@ -300,8 +300,8 @@ class GameController:
     def place(self, target: Character, pos, real_pixels):
         x = max(0, pos[0])
         x = min(self._og_x, x)
-        y = min(0, pos[1])
-        y = max(self._og_y, y)
+        y = max(0, pos[1])
+        y = min(self._og_y, y)
         new_pos = [x, y]
         target.place(new_pos)
 
