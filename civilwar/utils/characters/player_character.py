@@ -1,4 +1,5 @@
 from .character import Character
+import random
 
 
 class PlayerCharacter(Character):
@@ -7,9 +8,11 @@ class PlayerCharacter(Character):
         super().__init__(character_id, dictionary)
         self._name = dictionary["name"]
         self.is_online = True
+        self._initiative = dictionary.get("initiative", 0)
 
     def get_name(self):
         return self._name
 
     def int_roll(self):
-        pass
+        roll = random.randint(1, 20) + self._initiative
+        return roll
