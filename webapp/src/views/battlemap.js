@@ -57,14 +57,25 @@ export default function BattleMap(props) {
 
     const onCharacterUpdate = useCallback((char) => {
         let newState = {...characters};
+        if (JSON.stringify(char.pos) !== JSON.stringify(characters[char.id].pos)) {
+            let img = mapRef.current;
+            if (img) {
+                let relY = img.clientHeight / img.naturalHeight;
+                let relX = img.clientWidth / img.naturalWidth;
+                let trueY = Math.floor(relY * char.pos[1]);
+                let trueX = Math.floor(relX * char.pos[0]);
+                char.pos = [trueX, trueY];
+            }
+        }
         newState[char.id] = char;
         setCharacters(newState);
     }, [characters]);
 
     const onStartGame = useCallback((response) => {
-        setActiveChar(response.data["first"]);
-
-    }, [setActiveChar]);
+        console.log(activeChar, character);
+        setActiveChar(response.data["first"].id);
+        console.log(activeChar, character);
+    }, [activeChar, setActiveChar]);
 
     const onReset = useCallback((response) => {
         setCharacter(null);
@@ -105,12 +116,11 @@ export default function BattleMap(props) {
         let img = mapRef.current;
         if (img) {
             console.log(e);
-            let rect = e.target.getBoundingClientRect();
-            let pos = {x: e.clientX - rect.left, y: e.clientY - rect.top};
-            let relWidth = Math.floor(img.clientWidth / img.naturalWidth);
-            let relHeight = Math.floor(img.clientHeight / img.naturalHeight);
-            let trueX = relWidth * pos.x;
-            let trueY = relHeight * pos.y;
+            let pos = {x: e.clientX, y: e.clientY};
+            let relWidth = img.naturalWidth / img.clientWidth;
+            let relHeight =img.naturalHeight / img.clientHeight;
+            let trueX = Math.floor(relWidth * pos.x);
+            let trueY = Math.floor(relHeight * pos.y);
 
             let params = {
                 "pos": [trueX, trueY],
