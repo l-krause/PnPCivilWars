@@ -51,7 +51,7 @@ class GameController:
         self._queue = self._full_queue.copy()
         self._round = 1
         self._active_char = self._queue.pop()
-        return {"success": True, "msg": "", "data": {"first": self._active_char}}
+        return create_response({"first": self._active_char.get_id()})
 
     def create_npc(self, amount=20, allies=True):
         villager_config = self._character_configs["villager"]
