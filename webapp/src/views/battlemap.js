@@ -142,19 +142,21 @@ export default function BattleMap(props) {
                 "pos": [trueX, trueY],
             }
 
-            if (role === "dm") {
-                params["target"] = char.id;
-                api.sendRequest("place", params, (response) => {
-                    if (!response.success) {
-                        alert("Error placing: " + response.msg);
-                    }
-                })
-            } else {
+            if (character === activeChar){
                 api.sendRequest("move", params, (response) => {
                     if (!response.success) {
                         alert("Error moving character: " + response.msg);
                     }
                 });
+            } else {
+                if (role === "dm") {
+                    params["target"] = char.id;
+                    api.sendRequest("place", params, (response) => {
+                        if (!response.success) {
+                            alert("Error placing: " + response.msg);
+                        }
+                    })
+                }
             }
         }
 
@@ -196,7 +198,7 @@ export default function BattleMap(props) {
             </div>
         </MapContainer>
         <div><h2>How do you want to spend your action point?</h2></div>
-        {role !== "dm" ? <div>
+        {role !== "dm" || (activeChar === character) ? <div>
                 <Button variant="contained" onClick={() => onAction("attack")}
                         disabled={activeChar !== character}>Attack</Button>
                 <Button variant="contained" onClick={() => onAction("spell")}
