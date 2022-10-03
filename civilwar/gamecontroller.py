@@ -16,7 +16,6 @@ from utils.vec2 import Vector2D
 
 
 class GameController:
-
     _instance = None
 
     CHARACTER_ID = 1
@@ -66,6 +65,10 @@ class GameController:
     def create_npc(self, amount=20, allies=True):
         villager_config = self._character_configs["villager"]
         veteran_config = self._character_configs["veteran"]
+
+        npcs = {"veterans": [],
+                "villagers": []}
+
         for i in range(amount):
             character_config = (veteran_config if i % 5 == 0 else villager_config).copy()
             position = Position.random([0, 0], self._map_size - [1, 1])
@@ -79,7 +82,12 @@ class GameController:
             character_id = self.next_char_id()
             npc = NPC(character_id, character_config, name, position, allies)
             self._chars[character_id] = npc
-        return True
+            if i % 5 == 0:
+                npcs["veterans"] += npc
+            else:
+                npcs["villagers"] += npc
+        npcs["types"] = npcs.keys()
+        return create_response(npcs)
 
     def create_pc(self, character_name):
         logging.debug("GameController.create_pc")

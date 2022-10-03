@@ -90,10 +90,9 @@ export default function BattleMap(props) {
     const onCreatedNpcs = useCallback((data) => {
         let newChars = {...characters};
         data.types.forEach(t => {
-            let type = data[t];
-            for (let i = 0; i < type.count; i++) {
-                newChars = {...newChars, [type.char.id]: type.char};
-            }
+            data[t].forEach(char => {
+                newChars[char.id] = char;
+            });
         });
         setCharacters(newChars);
     }, [characters, setCharacters]);
