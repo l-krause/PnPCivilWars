@@ -64,9 +64,8 @@ export default function BattleMap(props) {
             if (img) {
                 let relY = img.clientHeight / img.naturalHeight;
                 let relX = img.clientWidth / img.naturalWidth;
-                let trueY = Math.floor(relY * char.pos.y);
-                let trueX = Math.floor(relX * char.pos.x);
-                char.pos = [trueX, trueY];
+                char.pos.x = Math.floor(relY * char.pos.y);
+                char.pos.y = Math.floor(relX * char.pos.x);
             }
         }
         newState[char.id] = char;
@@ -131,6 +130,7 @@ export default function BattleMap(props) {
         let img = mapRef.current;
         if (img) {
             console.log(e);
+            e.preventDefault();
             let rect = img.getBoundingClientRect();
             let pos = {x: e.clientX - rect.x, y: e.clientY - rect.y};
             let relWidth = img.naturalWidth / img.clientWidth;
@@ -142,27 +142,20 @@ export default function BattleMap(props) {
                 "pos": [trueX, trueY],
             }
 
-            if (!character || character.id !== char.id) {
-                if (role === "dm") {
-                    params["target"] = char.id;
-                    api.sendRequest("place", params, (response) => {
-                        if (!response.success) {
-                            alert("Error placing: " + response.msg);
-                        }
-                    })
-                    return;
-                } else {
-                    e.preventDefault();
-                    return;
-                }
+            if (role === "dm") {
+                params["target"] = char.id;
+                api.sendRequest("place", params, (response) => {
+                    if (!response.success) {
+                        alert("Error placing: " + response.msg);
+                    }
+                })
+            } else {
+                api.sendRequest("move", params, (response) => {
+                    if (!response.success) {
+                        alert("Error moving character: " + response.msg);
+                    }
+                });
             }
-
-
-            api.sendRequest("move", params, (response) => {
-                if (!response.success) {
-                    alert("Error moving character: " + response.msg);
-                }
-            });
         }
 
 
