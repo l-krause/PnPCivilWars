@@ -62,10 +62,11 @@ export default function BattleMap(props) {
         if (JSON.stringify(char.pos) !== JSON.stringify(characters[char.id].pos)) {
             let img = mapRef.current;
             if (img) {
+                let rect = img.getBoundingClientRect();
                 let relY = img.clientHeight / img.naturalHeight;
                 let relX = img.clientWidth / img.naturalWidth;
-                char.pos.x = Math.floor(relY * char.pos.y);
-                char.pos.y = Math.floor(relX * char.pos.x);
+                char.pos.x = Math.floor(relY * char.pos.y) - rect.x;
+                char.pos.y = Math.floor(relX * char.pos.x) - rect.y;
             }
         }
         newState[char.id] = char;
