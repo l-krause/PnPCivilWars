@@ -13,3 +13,7 @@ class NPC(Character):
 
     def is_ally(self):
         return self._is_ally
+
+    def make_turn(self):
+        # TODO: NPC.make_turn()
+        pass

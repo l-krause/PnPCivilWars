@@ -3,7 +3,9 @@ import logging
 import math
 import os.path
 
-from utils.api import create_response, create_error
+from flask_socketio import emit
+
+from utils.api import create_response, create_error, json_serialize
 from utils.characters.character import Character
 from utils.characters.npc import NPC
 from utils.characters.player_character import PlayerCharacter
@@ -243,10 +245,16 @@ class GameController:
         active_char.turn_over()
 
         if active_char.is_dead():
+            emit("gameEvent", json_serialize({"type": "characterDied", "characterId": active_char.get_id()}))
             self._turn_order.remove(active_char)
 
         # start next turn
-        self._turn_order.get_next()
+        next_char = self._turn_order.get_next()
+
+        while self.get_game_state() == "ongoing" and isinstance(next_char, NPC):
+            next_char.make_turn()
+            next_char = self._turn_order.get_next()
+
         return create_response(data={"status": self.get_status(), "character": active_char})
 
     def place(self, target: Character, pos: Position):
