@@ -87,6 +87,17 @@ export default function BattleMap(props) {
         setActiveChar(data.active_char.id)
     }, [setActiveChar]);
 
+    const onCreatedNpcs = useCallback((data) => {
+        let newChars = {...characters};
+        data.types.forEach(t => {
+            let type = data[t];
+            for (let i = 0; i < type.count; i++) {
+                newChars = {...newChars, [type.char.id]: type.char};
+            }
+        });
+        setCharacters(newChars);
+    }, [characters, setCharacters]);
+
 
     useEffect(() => {
         onFetchCharacters();
@@ -99,6 +110,7 @@ export default function BattleMap(props) {
         api.registerEvent("start", onStartGame);
         api.registerEvent("reset", onReset);
         api.registerEvent("pass", onPassTurn);
+        api.registerEvent("createNPCs", onCreatedNpcs);
 
         return () => {
             // dismount
@@ -107,6 +119,7 @@ export default function BattleMap(props) {
             api.unregisterEvent("start");
             api.unregisterEvent("reset");
             api.unregisterEvent("pass");
+            api.unregisterEvent("createNPCs");
         }
     }, [api, onCharacterJoin, onCharacterUpdate, onStartGame, onReset, onPassTurn]);
 
@@ -117,7 +130,7 @@ export default function BattleMap(props) {
             let rect = img.getBoundingClientRect();
             let pos = {x: e.clientX - rect.x, y: e.clientY - rect.y};
             let relWidth = img.naturalWidth / img.clientWidth;
-            let relHeight =img.naturalHeight / img.clientHeight;
+            let relHeight = img.naturalHeight / img.clientHeight;
             let trueX = Math.floor(relWidth * pos.x);
             let trueY = Math.floor(relHeight * pos.y);
 
@@ -153,11 +166,22 @@ export default function BattleMap(props) {
     }, [api, character, role]);
 
     const renderCharacter = (character) => {
+        let style = {};
+        if (character.id === selectedCharacter) {
+            style.border = "1px solid red";
+        }
+        if (character.type === "npc") {
+            if (character.is_ally) {
+                style.background = "linear-gradient(blue)";
+            } else {
+                style.background = "linear-gradient(red)";
+            }
+        }
         return <Token key={"character-" + character.id} style={{left: character.pos.x, top: character.pos.y}}>
             <img alt={"token of " + character.id} src={character.token}
                  onDragEnd={(e) => onTokenDrag(e, character)}
                  onClick={() => setSelectedCharacter(character.id)}
-                 style={character.id === selectedCharacter ? { border: "1px solid red"} : {}}/>
+                 style={style}/>
         </Token>
     };
 

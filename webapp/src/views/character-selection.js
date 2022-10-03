@@ -134,7 +134,13 @@ export default function CharacterSelection(props) {
                                            api.sendRequest("login", {password: password}, (resp) => {
                                                if (resp.success) {
                                                    onSelectRole("dm")
-                                                   onSelectCharacter("crab")
+                                                   api.onChooseCharacter(selectedCharacter, (response) => {
+                                                       if (response.success) {
+                                                           onSelectCharacter(response.data);
+                                                       } else {
+                                                           setError(response.msg);
+                                                       }
+                                                   })
                                                } else {
                                                    alert(resp.msg)
                                                }
