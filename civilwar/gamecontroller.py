@@ -66,8 +66,7 @@ class GameController:
         villager_config = self._character_configs["villager"]
         veteran_config = self._character_configs["veteran"]
 
-        npcs = {"veterans": [],
-                "villagers": []}
+        npcs = {"veterans": [], "villagers": []}
 
         for i in range(amount):
             character_config = (veteran_config if i % 5 == 0 else villager_config).copy()
@@ -82,11 +81,8 @@ class GameController:
             character_id = self.next_char_id()
             npc = NPC(character_id, character_config, name, position, allies)
             self._chars[character_id] = npc
-            if i % 5 == 0:
-                npcs["veterans"] += npc
-            else:
-                npcs["villagers"] += npc
-        npcs["types"] = npcs.keys()
+            npc_type = "veterans" if i % 5 == 0 else "villagers"
+            npcs[npc_type].append(npc)
         return create_response(npcs)
 
     def create_pc(self, character_name):

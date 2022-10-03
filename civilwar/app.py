@@ -259,7 +259,7 @@ def dm_stun(data):
 @param("amount", required_type=int)
 def dm_create_npcs(data):
     response = GameController.instance().create_npc(data["amount"], data["allies"])
-    emit("createNPCs", response, broadcast=True)
+    broadcast_response(response)
 
 
 if __name__ == "__main__":
