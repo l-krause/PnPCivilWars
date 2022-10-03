@@ -5,6 +5,7 @@
   "movement": 9,
   "passivePerception": 10,
   "token": "/img/villager.png",
+  "tokenShadow": "/img/villager_shadow.png",
   "type": "npc",
   "weapons": [
     {

@@ -101,8 +101,12 @@ class GameController:
     def get_all_characters(self):
         return self._chars
 
-    def get_characters_by(self, f):
-        return filter(f, self._chars.values())
+    def get_characters_by(self, *filters):
+        filtered_chars = self._chars.values()
+        for f in filters:
+            filtered_chars = filter(f, filtered_chars)
+
+        return filtered_chars
 
     def get_characters_by_type(self, t):
         return filter(lambda c: isinstance(c, t), self._chars.values())
@@ -130,6 +134,9 @@ class GameController:
             return None
         return self._chars.get(character_id, None)
 
+    def get_turn(self):
+        return self._turn_order
+
     # TODO: rewrite
     def get_characters_aoe(self, start_pos, r):
         pixel_dist = r // self._og_meter
@@ -148,7 +155,7 @@ class GameController:
         max_dist = r // self._og_meter
         dist = start_pos.distance(dest_pos)
         if dist > max_dist:
-            dest_pos = start_pos.normalize_distance(dest_pos, max_dist, self._map_size - [1, 1])
+            dest_pos = start_pos.normalize_distance(dest_pos, max_dist, self.get_map_bounds())
         response = []
         first_c = None
         first_dist = 0
@@ -182,8 +189,11 @@ class GameController:
         weapon = actor.get_active_weapon()
         distance = actor.get_pos().distance(target.get_pos(), factor=self._og_meter)
         resp = weapon.attack(distance, self._chars[target])
+
         if resp["success"]:
             actor.use_action()
+            self.on_game_event("characterAttack", {"attacker": actor.get_id(), "victim": target.get_id(),
+                                                   "hit": resp["hit"], "damage": resp["damage"]})
 
         return resp
 
@@ -193,10 +203,9 @@ class GameController:
             return create_error("It's not your characters turn yet")
         max_dist = target.get_movement_left()
 
-        new_pos = pos.normalize_distance(target.get_pos, max_dist, self._map_size - Vector2D(1, 1))
+        new_pos = pos.normalize_distance(target.get_pos, max_dist, self.get_map_bounds())
         print("new pos:", new_pos)
-        dist = math.ceil(target.get_pos().distance(new_pos, factor=self._og_meter))
-        target.move(new_pos, dist)
+        target.move(new_pos)
         return create_response()
 
     def _load_character_configs(self):
@@ -209,18 +218,6 @@ class GameController:
                     data = json.loads(reader.read())
                     self._character_configs[config_name] = data
                     print("Loaded character config:", config_name)
-
-    def switch_weapon(self, name: str, target: str):
-        character = self._chars.get(target, None)
-        if character is None:
-            return create_error("Character does not exist")
-        if not character.has_action():
-            return create_error("No Action Points available")
-        weapon = character.switch_weapon(name)
-        if weapon is None:
-            return create_error("No suitable weapon found")
-        character.use_action()
-        return create_response(weapon)
 
     def change_health(self, target: str, life: int):
         c = self._chars.get(target, None)
@@ -254,23 +251,34 @@ class GameController:
 
         # end turn of last char
         active_char = self._turn_order.get_active()
-        active_char.turn_over()
 
-        if active_char.is_dead():
-            emit("gameEvent", json_serialize({"type": "characterDied", "characterId": active_char.get_id()}))
-            self._turn_order.remove(active_char)
-
-        # start next turn
-        next_char = self._turn_order.get_next()
-
-        while self.get_game_state() == "ongoing" and isinstance(next_char, NPC):
-            next_char.make_turn()
+        if isinstance(active_char, NPC):
+            is_ally = active_char.is_ally()
+            next_char = active_char
+            while isinstance(next_char, NPC) and is_ally == next_char.is_ally():
+                next_char.make_turn()
+                next_char.turn_over()
+                next_char = self._turn_order.get_next()
+        else:
+            active_char.turn_over()
             next_char = self._turn_order.get_next()
 
-        return create_response(data={"status": self.get_status(), "character": active_char})
+        return create_response(data={"status": self.get_status(), "character": next_char})
+
+    @staticmethod
+    def on_game_event(event, data=None):
+        if data is None:
+            data = {}
+        data["type"] = event
+        emit("gameEvent", json_serialize(data))
+        print("Game Event:", data)
+
+    def on_character_died(self, character: Character, reason=None):
+        self._turn_order.remove(character)
+        self.on_game_event("characterDied", {"characterId": character.get_id(), "reason": reason})
 
     def place(self, target: Character, pos: Position):
-        pos.to_bounds([0, 0], self._map_size - Vector2D(1, 1))
+        pos.to_bounds(self.get_map_bounds())
         target.place(pos)
         return create_response()
 
@@ -298,3 +306,6 @@ class GameController:
             "active_char": self._turn_order.get_active().get_id(),
             "state": self.get_game_state()
         }
+
+    def get_map_bounds(self):
+        return [0, 0, self._map_size._x - 1, self._map_size._y - 1]

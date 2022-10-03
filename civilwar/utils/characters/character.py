@@ -1,12 +1,13 @@
 import random
-from abc import abstractmethod
+from abc import abstractmethod, ABC
 
-from utils.api import create_error, ApiParameter
+from utils.api import create_error, ApiParameter, create_response
+from utils.constants import MEELE_RANGE
 from utils.json_serializable import JsonSerializable
 from utils.position import Position
 
 
-class Character(JsonSerializable, ApiParameter):
+class Character(JsonSerializable, ApiParameter, ABC):
 
     def __init__(self, character_id, dictionary, pos=Position(0, 0)):
         self._id = character_id
@@ -71,13 +72,26 @@ class Character(JsonSerializable, ApiParameter):
 
     def stun(self, rounds):
         self._stunned += rounds
+        from gamecontroller import GameController
+        GameController.instance().on_game_event("characterStunned", {"rounds": rounds})
 
-    def switch_weapon(self, name: str):
-        for weapon in self._weapons:
-            if name == weapon.get_name():
-                self._active_weapon = weapon
-                return weapon
-        return None
+    def get_weapon(self, name: str):
+        try:
+            return next(filter(lambda w: w.get_name() == name, self._weapons))
+        except StopIteration:
+            return None
+
+    def switch_weapon(self, weapon):
+        from gamecontroller import GameController
+        if weapon not in self._weapons:
+            return create_error("You do not own such weapon")
+        elif not self.has_action():
+            return create_error("No Action Points available")
+
+        self._active_weapon = weapon
+        self.use_action()
+        GameController.instance().on_game_event("characterSwitchWeapon", {"weapon": weapon})
+        return create_response()
 
     def change_health(self, health):
         tmp_health = self._curr_life + health
@@ -88,10 +102,12 @@ class Character(JsonSerializable, ApiParameter):
             return
         self._curr_life = tmp_health
 
-    def move(self, new_pos, dist):
+    def move(self, new_pos):
+        from gamecontroller import GameController
+        dist = self._pos.distance(new_pos)
         self._pos = new_pos
         self._movement_left = max(0, self._movement_left - dist)
-        print("character.move(", new_pos, ",", dist, "), movement_left:", self._movement_left)
+        GameController.instance().on_game_event("characterMove", {"to": self._pos})
 
     def place(self, new_pos):
         self._pos = new_pos
@@ -148,10 +164,15 @@ class Character(JsonSerializable, ApiParameter):
             if roll == 1:
                 self._lost_death += 1
             if self._lost_death == 3:
-                self._dead = True
+                self.kill(reason="Death Roll")
 
     def is_dead(self):
         return self._dead
+
+    def kill(self, reason=None):
+        self._dead = True
+        from gamecontroller import GameController
+        GameController.instance().on_character_died(self, reason=reason)
 
     @staticmethod
     def api_validate(game_controller, value):
@@ -163,3 +184,54 @@ class Character(JsonSerializable, ApiParameter):
             return create_error(f"No such character id={value}")
 
         return character
+
+    def get_enemies_with_distance(self, distance=MEELE_RANGE):
+        from gamecontroller import GameController
+        game_controller = GameController.instance()
+        filters = [
+            lambda c: not c.is_dead(),               # character is alive
+            lambda c: self.distance(c) <= distance,  # in range
+            lambda c: not self.is_allied_to(c),      # is not allied to
+        ]
+
+        return game_controller.get_characters_by(*filters)
+
+    def get_closest_enemy(self):
+        from gamecontroller import GameController
+        game_controller = GameController.instance()
+        enemies = list(game_controller.get_characters_by(lambda c: not c.is_dead() and not self.is_allied_to(c)))
+        if len(enemies) == 0:
+            return None
+
+        closest_enemy = enemies[0]
+        closest_dist = self.distance(closest_enemy)
+        for enemy in enemies:
+            dist = self.distance(enemy)
+            if dist < closest_dist:
+                closest_enemy = enemy
+                closest_dist = dist
+
+        return closest_enemy
+
+    @abstractmethod
+    def is_allied_to(self, other):
+        pass
+
+    def distance(self, other):
+        return self.get_pos().distance(other.get_pos())
+
+    def move_towards(self, other, requested_distance):
+        from gamecontroller import GameController
+        game_controller = GameController.instance()
+        current_distance = self.distance(other)
+        move_distance = min(current_distance - requested_distance, self._movement_left)
+        if move_distance > 0:
+            target_pos = self.get_pos().normalize_distance(other.get_pos(), move_distance, game_controller.get_map_bounds())
+            self.move(target_pos)
+
+    def get_ranged_weapon(self):
+        try:
+            return next(filter(lambda w: w.is_ranged(), self._weapons))
+        except StopIteration:
+            return None
+

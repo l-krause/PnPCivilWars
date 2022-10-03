@@ -2,6 +2,7 @@ from characters.character import Character
 import random
 
 from utils.api import create_response, create_error
+from utils.constants import MEELE_RANGE
 
 
 class Weapon:
@@ -16,6 +17,12 @@ class Weapon:
         self._min_range = 0 if "min_range" not in dictionary.keys() else dictionary["min_range"]
         self._max_range = 1.5 if "max_range" not in dictionary.keys() else dictionary["max_range"]
         self._usages = -1 if "usages" not in dictionary.keys() else dictionary["usages"]
+
+    def get_max_range(self):
+        return self._max_range
+
+    def is_ranged(self):
+        return self._max_range > MEELE_RANGE
 
     def get_name(self):
         return self._name
@@ -38,4 +45,4 @@ class Weapon:
             damage = damage // 2
         damage *= -1
         target.change_health(damage)
-        return create_response({"hit": f"Hit for {hit}", "damage": f"{damage} damage", "target": target.get_id()})
+        return create_response({"hit": hit, "damage": damage, "target": target.get_id()})

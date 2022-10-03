@@ -168,20 +168,29 @@ def api_move(data):
 
 
 @socketio.on('pass')
+@has_character()
 def api_pass_turn(data):
-    broadcast_response(GameController.instance().next_turn())
+    game_controller = GameController.instance()
+    character = game_controller.get_character(session["character"])
+    if game_controller.get_turn().get_active_char() != character:
+        response = create_error("It's not your turn")
+    else:
+        response = game_controller.next_turn()
+    broadcast_response(response)
 
 
 @socketio.on('switchWeapon')
+@param("name", required_type=str)
 @has_character()
 def api_switch_weapon(data):
-    resp = None
-    character = session["character"]
-    weapon_name = data.get("name", None)
-    if weapon_name is None:
-        resp = create_error("No weapon selected")
-    if resp is None:
-        resp = GameController.instance().switch_weapon(weapon_name, character)
+    game_controller = GameController.instance()
+    character = game_controller.get_character(session["character"])
+    weapon = character.get_weapon(data["name"])
+    if not weapon:
+        resp = create_response("You do not own such weapon")
+    else:
+        resp = character.switch_weapon(weapon)
+
     emit("switchWeapon", resp)
 
 

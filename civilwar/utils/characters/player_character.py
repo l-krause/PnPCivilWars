@@ -21,3 +21,7 @@ class PlayerCharacter(Character):
         data = super().to_json()
         data["type"] = "player"
         return data
+
+    def is_allied_to(self, other):
+        from .npc import NPC
+        return isinstance(other, PlayerCharacter) or (isinstance(other, NPC) and other.is_ally())

@@ -46,16 +46,16 @@ class Position(Vector2D, ApiParameter):
     def distance(self, other_pos, factor=1.0):
         return len(other_pos - self) * factor
 
-    def normalize_distance(self, other_pos, max_distance, max_bounds: Vector2D):
+    def normalize_distance(self, other_pos, max_distance, bounds: Vector2D):
         direction = other_pos - self
         length = len(direction)
-        print("dir:", dir, "length:", length)
         destination = ((direction / length) * max_distance).to_pos()
-        return destination.to_bounds([0, 0], max_bounds)
+        return destination.to_bounds(bounds)
 
-    def to_bounds(self, min_bounds, max_bounds):
-        self._x = clamp(self._x, min_bounds[0], max_bounds[0])
-        self._y = clamp(self._y, min_bounds[1], max_bounds[1])
+    def to_bounds(self, bounds):
+        # bounds: [min_x, min_y, max_x, max_y]
+        self._x = clamp(self._x, bounds[0], bounds[2])
+        self._y = clamp(self._y, bounds[1], bounds[3])
 
     def __repr__(self):
         return f"pos({self._x}, {self._y})"
