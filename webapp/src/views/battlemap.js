@@ -65,8 +65,8 @@ export default function BattleMap(props) {
                 let rect = img.getBoundingClientRect();
                 let relY = img.clientHeight / img.naturalHeight;
                 let relX = img.clientWidth / img.naturalWidth;
-                char.pos.x = Math.floor(relY * char.pos.y) - rect.x;
-                char.pos.y = Math.floor(relX * char.pos.x) - rect.y;
+                char.pos.x = Math.floor(relY * char.pos.y) + rect.x;
+                char.pos.y = Math.floor(relX * char.pos.x) + rect.y;
             }
         }
         newState[char.id] = char;
