@@ -8,6 +8,7 @@ from utils.characters.character import Character
 from utils.characters.npc import NPC
 from utils.characters.player_character import PlayerCharacter
 from utils.position import Position
+from utils.turn_order import GameTurnOrder
 from utils.vec2 import Vector2D
 
 
@@ -18,23 +19,18 @@ class GameController:
     CHARACTER_ID = 1
 
     def __init__(self):
+
+        # map attributes
         self._map_size = Vector2D(1000, 683)
         self._og_meter = 152.5 / 434
-        self._pcs = {}
-        self._dead_pcs = {}
-        self._allies = {}
-        self._ko_allies = {}
-        self._dead_allies = {}
-        self._enemies = {}
-        self._ko_enemies = {}
-        self._dead_enemies = {}
+
+        # game turn order + round counter + characters
+        self._turn_order = GameTurnOrder()
         self._chars = {}
-        self._round = 0
-        self._queue = []
-        self._full_queue = []
+
+        # character configs
         self._character_configs = {}
         self._load_character_configs()
-        self._active_char = None
 
     def next_char_id(self):
         next_id = self.CHARACTER_ID
@@ -42,16 +38,20 @@ class GameController:
         return next_id
 
     def start(self):
-        int_rolls = []
-        for pc in self._pcs:
-            int_rolls.append(pc.int_roll())
-            self._full_queue.append(pc)
-        int_rolls, self._full_queue = zip(*sorted(zip(int_rolls, self._full_queue)))
-        self._full_queue.append(self._allies)
-        self._queue = self._full_queue.copy()
-        self._round = 1
-        self._active_char = self._queue.pop()
-        return create_response({"first": self._active_char.get_id()})
+        self._turn_order.reset()
+
+        # list of (roll, character)-tuples
+        initial_order = []
+        for player_character in self.get_player_characters():
+            initial_order.append((player_character.int_roll(), player_character))
+
+        # sort the tuples by descending roll value
+        initial_order = sorted(initial_order, reverse=True)
+
+        # add all to queue
+        initial_order = list(zip(*initial_order))[1]
+        self._turn_order.add_all(initial_order)
+        return create_response({"first": self._turn_order.get_next().get_id()})
 
     def create_npc(self, amount=20, allies=True):
         villager_config = self._character_configs["villager"]
@@ -62,15 +62,12 @@ class GameController:
 
             if allies:
                 suffix = "ally"
-                target_dict = self._allies
             else:
                 suffix = "enemy"
-                target_dict = self._enemies
 
-            name = f"{character_config['name']}-{len(target_dict)}_{suffix}"
+            name = f"{character_config['name']}-{len(self._chars)}_{suffix}"
             character_id = self.next_char_id()
-            npc = NPC(character_id, character_config, name, position)
-            target_dict[character_id] = npc
+            npc = NPC(character_id, character_config, name, position, allies)
             self._chars[character_id] = npc
         return True
 
@@ -84,27 +81,42 @@ class GameController:
 
         character_id = self.next_char_id()
         character = PlayerCharacter(character_id, character_config)
-        self._pcs[character_id] = character
         self._chars[character_id] = character
         return character
 
     def get_all_characters(self):
         return self._chars
 
-    def get_pcs(self):
-        return self._pcs
+    def get_characters_by(self, f):
+        return filter(f, self._chars.values())
 
-    def get_allies(self):
-        return self._allies
+    def get_characters_by_type(self, t):
+        return filter(lambda c: isinstance(c, t), self._chars.values())
 
-    def get_enemies(self):
-        return self._enemies
+    def get_player_characters(self, only_alive=False):
+        players = self.get_characters_by_type(PlayerCharacter)
+        if only_alive:
+            players = filter(lambda p: not p.is_dead(), players)
+        return players
+
+    def get_allies(self, only_alive=False):
+        allies = self.get_characters_by(lambda c: isinstance(c, NPC) and c.is_ally())
+        if only_alive:
+            allies = filter(lambda a: not a.is_dead(), allies)
+        return allies
+
+    def get_enemies(self, only_alive=False):
+        enemies = self.get_characters_by(lambda c: isinstance(c, NPC) and not c.is_ally())
+        if only_alive:
+            enemies = filter(lambda e: not e.is_dead(), enemies)
+        return enemies
 
     def get_character(self, character_id):
         if character_id is None:
             return None
         return self._chars.get(character_id, None)
 
+    # TODO: rewrite
     def get_characters_aoe(self, start_pos, r):
         pixel_dist = r // self._og_meter
         response = []
@@ -117,6 +129,7 @@ class GameController:
                 response += [c]
         return response
 
+    # TODO: rewrite
     def get_characters_line(self, start_pos, dest_pos, r, pierce=True):
         max_dist = r // self._og_meter
         dist = start_pos.distance(dest_pos)
@@ -149,22 +162,20 @@ class GameController:
             response += [first_c]
         return response
 
-    def attack(self, actor: str, target: str):
-        pc = self._pcs[actor]
-        tar = self._chars[target]
-        if not pc.has_action():
+    def attack(self, actor: PlayerCharacter, target: Character):
+        if not actor.has_action():
             return create_error("No Action Points available")
-        weapon = self._pcs[actor].get_active_weapon()
-        distance = pc.get_pos().distance(tar.get_pos(), factor=self._og_meter)
+        weapon = actor.get_active_weapon()
+        distance = actor.get_pos().distance(target.get_pos(), factor=self._og_meter)
         resp = weapon.attack(distance, self._chars[target])
         if resp["success"]:
-            pc.use_action()
+            actor.use_action()
 
         return resp
 
     def move(self, target, pos, real_pixels):
         print("GameController.move, target:", target, "pos:", pos, "real_pixels:", real_pixels)
-        if target != self._active_char:
+        if target != self._turn_order.get_active():
             return create_error("It's not your characters turn yet")
         max_dist = target.get_movement_left()
 
@@ -218,57 +229,25 @@ class GameController:
         return character_configs
 
     def remove_character(self, character_id):
-        dicts = [self._chars, self._pcs, self._enemies, self._allies]
-        for d in dicts:
-            if character_id in d:
-                del d[character_id]
+        if character_id in self._chars:
+            del self._chars[character_id]
 
-    def add_turn(self, name):
-        c = self._chars.get(name, None)
-        if c is None:
-            return create_error("Character does not exist")
-        self._queue.append(c)
+    def add_turn(self, character: Character):
+        self._turn_order.add(character)
         return create_response()
 
     def next_turn(self):
-        if len(self._queue) == 0:
-            self._round += 1
-            self._queue = self._full_queue.copy()
-        self._active_char.turn_over()
-        name = self._active_char.get_name()
-        resp = {"state": "ongoing"}
-        if self._active_char.is_dead():
-            self._full_queue = list(filter(lambda a: a.get_name() != self._active_char.get_name(), self._full_queue))
-            self._queue = list(filter(lambda a: a.get_name() != self._active_char.get_name(), self._queue))
-            if name in self._enemies.keys():
-                self._dead_enemies[name] = self._active_char
-                del self._enemies[name]
-                del self._ko_enemies[name]
-            elif name in self._enemies.keys():
-                self._dead_allies[name] = self._active_char
-                del self._allies[name]
-                del self._ko_allies[name]
-            else:
-                self._dead_pcs["name"] = self._active_char
-            resp["died"] = name
-        if self._active_char.get_hp() == 0:
-            if name in self._enemies.keys():
-                self._ko_enemies[name] = self._active_char
-                del self._enemies[name]
-                resp["ko"] = name
-            if name in self._enemies.keys():
-                self._ko_allies[name] = self._active_char
-                del self._allies[name]
-                resp["ko"] = name
-        next_char = self._queue.pop()
-        self._active_char = next_char
-        resp["acitve_char"] = self._active_char._id
-        if len(self._enemies.keys()) == 0:
-            resp["state"] = "won"
-        elif len(self._allies) == 0 and len(self._dead_pcs) == len(self._pcs):
-            resp["state"] = "lost"
 
-        return resp
+        # end turn of last char
+        active_char = self._turn_order.get_active()
+        active_char.turn_over()
+
+        if active_char.is_dead():
+            self._turn_order.remove(active_char)
+
+        # start next turn
+        self._turn_order.get_next()
+        return create_response(data={"status": self.get_status(), "character": active_char})
 
     def place(self, target: Character, pos: Position):
         pos.to_bounds([0, 0], self._map_size - Vector2D(1, 1))
@@ -284,3 +263,18 @@ class GameController:
     @classmethod
     def reset(cls):
         cls._instance = None
+
+    def get_game_state(self):
+        if not any(self.get_enemies(only_alive=True)):
+            return "won"
+        elif not any(self.get_allies(only_alive=True)) and not any(self.get_player_characters(only_alive=True)):
+            return "lost"
+        else:
+            return "ongoing"
+
+    def get_status(self):
+        return {
+            "round": self._turn_order.get_round(),
+            "active_char": self._turn_order.get_active().get_id(),
+            "state": self.get_game_state()
+        }

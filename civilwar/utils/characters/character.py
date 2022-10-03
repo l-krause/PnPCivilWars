@@ -97,12 +97,21 @@ class Character(JsonSerializable, ApiParameter):
         self._pos = new_pos
         print("character.move(", new_pos, ")")
 
+    def get_status(self):
+        if self.is_dead():
+            return "dead"
+        elif self.get_hp() == 0:
+            return "ko"
+        else:
+            return "alive"
+
     def to_json(self):
         return {
             "id": self._id,
             "name": self.get_name(),
             "token": self._token,
-            "pos": self._pos
+            "pos": self._pos,
+            "status": self.get_status()
         }
 
     def get_id(self):

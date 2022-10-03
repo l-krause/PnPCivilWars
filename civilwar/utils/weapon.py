@@ -1,7 +1,7 @@
 from characters.character import Character
 import random
 
-from utils.api import create_response
+from utils.api import create_response, create_error
 
 
 class Weapon:
@@ -22,15 +22,15 @@ class Weapon:
 
     def attack(self, distance, target: Character):
         if distance > self._max_range or distance < self._min_range:
-            return {"success": False, "msg": "Can't reach target", "data": {}}
+            return create_error("Can't reach target")
         if self._usages == 0:
-            return {"success": False, "msg": "No ammo", "data": {}}
+            return create_error("No ammo")
         if self._usages > 0:
             self._usages -= 1
         hit = random.randint(1, 20) + self._hit
         print(hit)
         if hit < target.get_armor():
-            return {"success": False, "msg": "Missed target: " + str(hit), "data": {}}
+            return create_error(f"Missed target: {hit}")
         damage = self._additional
         for i in range(self._dices):
             damage += random.randint(1, self._dice_type)
@@ -38,4 +38,4 @@ class Weapon:
             damage = damage // 2
         damage *= -1
         target.change_health(damage)
-        return create_response({"hit": "Hit for " + str(hit), "damage": str(damage) + " damage", "target": target.get_id()})
+        return create_response({"hit": f"Hit for {hit}", "damage": f"{damage} damage", "target": target.get_id()})

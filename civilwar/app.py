@@ -100,7 +100,7 @@ def get_characters(data):
 
 @socketio.on("getPCs")
 def get_playable_characters(data):
-    emit("getPCs", create_response(data=GameController.instance().get_pcs()))
+    emit("getPCs", create_response(data=GameController.instance().get_player_characters()))
 
 
 @socketio.on("getAllies")
