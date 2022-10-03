@@ -1,4 +1,4 @@
-import {Box, styled} from "@mui/material";
+import {Box, Checkbox, styled, TextField} from "@mui/material";
 import {useCallback, useEffect, useRef, useState} from "react";
 import Button from '@mui/material/Button';
 
@@ -34,6 +34,8 @@ export default function BattleMap(props) {
     const [characters, setCharacters] = useState({});
     const [selectedCharacter, setSelectedCharacter] = useState(null);
     const [activeChar, setActiveChar] = useState(null);
+    const [npcAmount, setNPCAmount] = useState(20);
+    const [npcAlly, setNPCAlly] = useState(true);
     const mapRef = useRef(null);
 
     const onFetchCharacters = useCallback(() => {
@@ -88,13 +90,17 @@ export default function BattleMap(props) {
     }, [setActiveChar]);
 
     const onCreatedNpcs = useCallback((data) => {
-        let newChars = {...characters};
-        data.types.forEach(t => {
-            data[t].forEach(char => {
-                newChars[char.id] = char;
+        if (data.success) {
+            let newChars = {...characters};
+            data.types.forEach(t => {
+                data[t].forEach(char => {
+                    newChars[char.id] = char;
+                });
             });
-        });
-        setCharacters(newChars);
+            setCharacters(newChars);
+        } else {
+            alert(data.msg);
+        }
     }, [characters, setCharacters]);
 
 
@@ -183,8 +189,12 @@ export default function BattleMap(props) {
         </Token>
     };
 
-    const tokens = Object.values(characters).map(c => renderCharacter(c));
+    const addNpcs = () => {
+        let data = {"allies": npcAlly, "amount": npcAmount}
+        api.sendRequest("createNPCs", data)
+    };
 
+    const tokens = Object.values(characters).map(c => renderCharacter(c));
 
     console.log(activeChar, character);
 
@@ -214,7 +224,9 @@ export default function BattleMap(props) {
                 <Button variant="contained" onClick={() => onAction("changeHealth")}>Change HP</Button>
                 <Button variant="contained" onClick={() => onAction("kill")}>Kill</Button>
                 <Button variant="contained" onClick={() => onAction("stun")}>Stun</Button>
-                <Button variant="contained" onClick={() => onAction("createNPCs")}>Create NPCs</Button>
+                <Button variant="contained" onClick={() => addNpcs()}>Create NPCs</Button>
+                <TextField label="Amount" value={npcAmount} onChange={e => setNPCAmount(e.target.value)}/>
+                <Checkbox checked={npcAlly} onChange={() => setNPCAlly(!npcAlly)}/>
             </div>}
     </div>
 
