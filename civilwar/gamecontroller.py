@@ -53,6 +53,13 @@ class GameController:
         # add all to queue
         initial_order = list(zip(*initial_order))[1]
         self._turn_order.add_all(initial_order)
+
+        # next: add all allies
+        self._turn_order.add_all(self.get_allies())
+
+        # last: add all enemies
+        self._turn_order.add_all(self.get_enemies())
+
         return create_response({"first": self._turn_order.get_next().get_id()})
 
     def create_npc(self, amount=20, allies=True):
