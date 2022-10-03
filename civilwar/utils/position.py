@@ -14,6 +14,14 @@ class Position(Vector2D, ApiParameter):
     def api_validate(game_controller, value):
         if isinstance(value, Position):
             return value
+        elif isinstance(value, dict):
+            if set(value.keys()) != {"x", "y"}:
+                return create_error(f"Expected dict to have keys: x, y, got: {list(value.keys())}")
+            for key in ["x", "y"]:
+                prop = value[key]
+                if not isinstance(prop, (float, int)):
+                    return create_error(f"Expected dict to have property '{key}' to be int or float, got: {type(prop)}")
+            return Position(value["x"], value["y"])
 
         if isinstance(value, list):
             value = tuple(value)
