@@ -226,7 +226,7 @@ export default function BattleMap(props) {
                 <Button variant="contained" onClick={() => onAction("stun")}>Stun</Button>
                 <Button variant="contained" onClick={() => addNpcs()}>Create NPCs</Button>
                 <TextField label="Amount" value={npcAmount} onChange={e => setNPCAmount(e.target.value)}/>
-                <Checkbox checked={npcAlly} onChange={() => setNPCAlly(!npcAlly)}/>
+                <Checkbox label={"Ally?"} checked={npcAlly} onChange={() => setNPCAlly(!npcAlly)}/>
             </div>}
     </div>
 
