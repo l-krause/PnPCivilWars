@@ -126,7 +126,7 @@ export default function BattleMap(props) {
             api.unregisterEvent("pass");
             api.unregisterEvent("createNPCs");
         }
-    }, [api, onCharacterJoin, onCharacterUpdate, onStartGame, onReset, onPassTurn]);
+    }, [api, onCharacterJoin, onCharacterUpdate, onStartGame, onReset, onPassTurn, onCreatedNpcs]);
 
     const onTokenDrag = useCallback((e, char) => {
         let img = mapRef.current;
