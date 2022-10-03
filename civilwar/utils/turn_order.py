@@ -41,6 +41,8 @@ class GameTurnOrder:
 
     def remove(self, char):
         self.mutex.acquire()
-        self._original_queue.remove(char)
-        self._round_queue.remove(char)
+        if char in self._original_queue:
+            self._original_queue.remove(char)
+            if char in self._round_queue:
+                self._round_queue.remove(char)
         self.mutex.release()
