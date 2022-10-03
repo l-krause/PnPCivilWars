@@ -167,13 +167,8 @@ export default function BattleMap(props) {
             style.border = "1px solid red";
         }
         if (character.type === "npc") {
-            style.filter = "grayscale(1)";
             if (character.is_ally) {
-                style.filter = "grayscale(0)";
-                style.filter = "hue-rotate(0deg)";
-            } else {
-                style.filter = "grayscale(0)";
-                style.background = "hue-rotate(215deg);";
+                style.filter = " hue-rotate(180deg)";
             }
         }
         return <Token key={"character-" + character.id} style={{left: character.pos.x, top: character.pos.y}}>
@@ -185,7 +180,7 @@ export default function BattleMap(props) {
     };
 
     const addNpcs = () => {
-        let data = {"allies": npcAlly, "amount": npcAmount}
+        let data = {"allies": npcAlly, "amount": parseInt(npcAmount + "")}
         api.sendRequest("createNPCs", data)
     };
 
