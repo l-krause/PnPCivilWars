@@ -9,7 +9,8 @@ from flask_session import Session
 from flask_socketio import SocketIO, emit
 
 from gamecontroller import GameController
-from utils.api import create_response, create_error, json_serialize, param, has_role, has_character, broadcast_response
+from utils.api import create_response, create_error, json_serialize, param, has_role, has_character, broadcast_response, \
+    emit_character_update
 from utils.characters.character import Character
 from utils.position import Position
 
@@ -61,8 +62,6 @@ def on_connect(*args):
     character = GameController.instance().get_character(character_id)
     if character:
         character.is_online = True
-
-
 #        emit("characterJoin", json_serialize(character), broadcast=True)
 
 
@@ -165,10 +164,7 @@ def api_move(data):
         return
 
     response = game_controller.move(target, data["pos"])
-    emit('move', response)
-
-    if response["success"]:
-        emit("characterUpdate", json_serialize(target), broadcast=True)
+    emit_character_update(response, data["target"])
 
 
 @socketio.on('pass')
@@ -208,13 +204,13 @@ def dm_start(data):
 
 @socketio.on('changeHealth')
 @has_role("dm")
-@param("character", required_type=Character)
+@param("target", required_type=Character)
 @param("life", required_type=int, default=0, optional=True)
 def dm_change_health(data):
     game_controller = GameController.instance()
     life_points = data["life"]
-    resp = game_controller.change_health(data["character"], life_points)
-    broadcast_response(resp)
+    response = game_controller.change_health(data["target"], life_points)
+    emit_character_update(response, data["target"])
 
 
 @socketio.on('reset')
@@ -238,9 +234,7 @@ def dm_continue(data):
 def place(data):
     game_controller = GameController.instance()
     response = game_controller.place(data["target"], data["pos"])
-    emit('place', response)
-    if response["success"]:
-        emit("characterUpdate", json_serialize(data["target"]), broadcast=True)
+    emit_character_update(response, data["target"])
 
 
 @socketio.on('addTurn')
@@ -253,14 +247,10 @@ def dm_add_turn(data):
 
 @socketio.on('stun')
 @has_role("dm")
+@param("target", required_type=Character)
 def dm_stun(data):
-    resp = None
-    character = data.get("character", None)
-    if character is None:
-        resp = create_error("No character selected")
-    if resp is None:
-        resp = GameController.instance().stun(character)
-    emit("stun", resp, broadcast=True)
+    resp = GameController.instance().stun(data["target"])
+    emit_character_update(resp, data["target"])
 
 
 @socketio.on('createNPCs')
@@ -268,8 +258,8 @@ def dm_stun(data):
 @param("allies", required_type=bool)
 @param("amount", required_type=int)
 def dm_create_npcs(data):
-    resp = GameController.instance().create_npc(data["amount"], data["allies"])
-    emit("createNPCs", resp, broadcast=True)
+    response = GameController.instance().create_npc(data["amount"], data["allies"])
+    emit("createNPCs", response, broadcast=True)
 
 
 if __name__ == "__main__":
