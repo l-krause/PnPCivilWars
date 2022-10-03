@@ -33,6 +33,7 @@ function App() {
   const onConnect = useCallback(() => {
     console.log('SocketIO Client Connected');
     setWsConnected(true);
+    setLoaded(false);
   }, []);
 
   const onDisconnect = useCallback(() => {

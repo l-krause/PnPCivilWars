@@ -11,6 +11,7 @@ from utils.characters.npc import NPC
 from utils.characters.player_character import PlayerCharacter
 from utils.position import Position
 from utils.turn_order import GameTurnOrder
+from utils.util import CaseInsensitiveDict
 from utils.vec2 import Vector2D
 
 
@@ -31,7 +32,7 @@ class GameController:
         self._chars = {}
 
         # character configs
-        self._character_configs = {}
+        self._character_configs = CaseInsensitiveDict()
         self._load_character_configs()
 
     def next_char_id(self):
@@ -182,8 +183,8 @@ class GameController:
 
         return resp
 
-    def move(self, target, pos, real_pixels):
-        print("GameController.move, target:", target, "pos:", pos, "real_pixels:", real_pixels)
+    def move(self, target, pos):
+        print("GameController.move, target:", target, "pos:", pos)
         if target != self._turn_order.get_active():
             return create_error("It's not your characters turn yet")
         max_dist = target.get_movement_left()

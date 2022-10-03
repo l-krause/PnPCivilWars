@@ -17,3 +17,9 @@ class NPC(Character):
     def make_turn(self):
         # TODO: NPC.make_turn()
         pass
+
+    def to_json(self):
+        data = super().to_json()
+        data["is_ally"] = self._is_ally
+        data["type"] = "npc"
+        return data

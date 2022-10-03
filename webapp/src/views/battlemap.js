@@ -136,7 +136,6 @@ export default function BattleMap(props) {
 
             let params = {
                 "pos": [trueX, trueY],
-                "real_pixels": [img.clientHeight, img.clientWidth]
             }
 
             if (!character || character.id !== char.id) {

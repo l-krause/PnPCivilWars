@@ -16,3 +16,8 @@ class PlayerCharacter(Character):
     def int_roll(self):
         roll = random.randint(1, 20) + self._initiative
         return roll
+
+    def to_json(self):
+        data = super().to_json()
+        data["type"] = "player"
+        return data
