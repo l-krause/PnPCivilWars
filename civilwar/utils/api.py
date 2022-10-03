@@ -1,4 +1,3 @@
-
 from abc import ABC, abstractmethod
 from functools import update_wrapper
 
@@ -18,7 +17,7 @@ def json_serialize(data):
         for i, value in enumerate(data):
             data[i] = json_serialize(value)
     elif isinstance(data, JsonSerializable):
-        return data.to_json()
+        return json_serialize(data.to_json())
 
     return data
 
@@ -47,7 +46,9 @@ def has_character():
                 return emit(request.event['message'], create_error("No character chosen yet"))
 
             return fn(*args, **kwargs)
+
         return update_wrapper(wrapped_function, fn)
+
     return decorator
 
 
@@ -64,7 +65,9 @@ def has_role(*required_roles):
                 return
 
             return fn(*args, **kwargs)
+
         return update_wrapper(wrapped_function, fn)
+
     return decorator
 
 
@@ -84,10 +87,12 @@ def param(param_name, required_type=None, optional=False, default=None):
                 if issubclass(required_type, ApiParameter):
                     from gamecontroller import GameController
                     res = required_type.api_validate(GameController.instance(), value)
-                    if res is not None:
+                    if isinstance(res, dict) and res.get("success", None) is False:
                         res["msg"] = f"Error validating parameter '{param_name}': " + res["msg"]
                         emit(event, res)
                         return
+                    else:
+                        data[param_name] = res
                 elif not isinstance(value, required_type):
                     if (required_type == tuple and isinstance(value, list)) or \
                             (required_type == list and isinstance(value, tuple)):
@@ -99,7 +104,9 @@ def param(param_name, required_type=None, optional=False, default=None):
                         return
 
             return fn(*args, **kwargs)
+
         return update_wrapper(wrapped_function, fn)
+
     return decorator
 
 

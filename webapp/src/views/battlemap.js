@@ -62,8 +62,8 @@ export default function BattleMap(props) {
             if (img) {
                 let relY = img.clientHeight / img.naturalHeight;
                 let relX = img.clientWidth / img.naturalWidth;
-                let trueY = Math.floor(relY * char.pos[1]);
-                let trueX = Math.floor(relX * char.pos[0]);
+                let trueY = Math.floor(relY * char.pos.y);
+                let trueX = Math.floor(relX * char.pos.x);
                 char.pos = [trueX, trueY];
             }
         }
@@ -73,8 +73,7 @@ export default function BattleMap(props) {
 
     const onStartGame = useCallback((response) => {
         setActiveChar(response.data["first"]);
-        console.log(activeChar, character);
-    }, [activeChar, setActiveChar]);
+    }, [setActiveChar]);
 
     const onReset = useCallback((response) => {
         setCharacter(null);
@@ -109,7 +108,7 @@ export default function BattleMap(props) {
             api.unregisterEvent("reset");
             api.unregisterEvent("pass");
         }
-    }, [api, onCharacterJoin, onCharacterUpdate, onStartGame, onReset]);
+    }, [api, onCharacterJoin, onCharacterUpdate, onStartGame, onReset, onPassTurn]);
 
     const onTokenDrag = useCallback((e, char) => {
         let img = mapRef.current;
@@ -154,7 +153,7 @@ export default function BattleMap(props) {
     }, [api, character, role]);
 
     const renderCharacter = (character) => {
-        return <Token key={"character-" + character.id} style={{left: character.pos[0], top: character.pos[1]}}>
+        return <Token key={"character-" + character.id} style={{left: character.pos.x, top: character.pos.y}}>
             <img alt={"token of " + character.id} src={character.token}
                  onDragEnd={(e) => onTokenDrag(e, character)}
                  onClick={() => setSelectedCharacter(character.id)}
@@ -164,6 +163,8 @@ export default function BattleMap(props) {
 
     const tokens = Object.values(characters).map(c => renderCharacter(c));
 
+
+    console.log(activeChar, character);
 
     return <div>
         <MapContainer>

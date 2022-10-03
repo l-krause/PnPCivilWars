@@ -2,12 +2,13 @@ import json
 import logging
 import math
 import os.path
-import random
 
 from utils.api import create_response, create_error
 from utils.characters.character import Character
 from utils.characters.npc import NPC
 from utils.characters.player_character import PlayerCharacter
+from utils.position import Position
+from utils.vec2 import Vector2D
 
 
 class GameController:
@@ -17,8 +18,7 @@ class GameController:
     CHARACTER_ID = 1
 
     def __init__(self):
-        self._og_x = 1000
-        self._og_y = 683
+        self._map_size = Vector2D(1000, 683)
         self._og_meter = 152.5 / 434
         self._pcs = {}
         self._dead_pcs = {}
@@ -58,15 +58,19 @@ class GameController:
         veteran_config = self._character_configs["veteran"]
         for i in range(amount):
             character_config = (veteran_config if i % 5 == 0 else villager_config).copy()
-            x = random.randint(0, self._og_x - 1)
-            y = random.randint(0, self._og_y - 100)
-            name = character_config["name"] + str(len(self._allies)) + ("_ally" if allies else "_enemy")
-            character_id = self.next_char_id()
-            npc = NPC(character_id, character_config, name, (x, y))
+            position = Position.random([0, 0], self._map_size - [1, 1])
+
             if allies:
-                self._allies[character_id] = npc
+                suffix = "ally"
+                target_dict = self._allies
             else:
-                self._enemies[character_id] = npc
+                suffix = "enemy"
+                target_dict = self._enemies
+
+            name = f"{character_config['name']}-{len(target_dict)}_{suffix}"
+            character_id = self.next_char_id()
+            npc = NPC(character_id, character_config, name, position)
+            target_dict[character_id] = npc
             self._chars[character_id] = npc
         return True
 
@@ -101,45 +105,34 @@ class GameController:
             return None
         return self._chars.get(character_id, None)
 
-    def get_characters_aoe(self, start_pos, r, real_pixels):
-        x = self._og_x / real_pixels[0]
-        y = self._og_y / real_pixels[1]
-        start_x = round(start_pos[0] * x)
-        start_y = round(start_pos[1] * y)
+    def get_characters_aoe(self, start_pos, r):
         pixel_dist = r // self._og_meter
         response = []
         for c in self._chars:
-            char_x, char_y = c.get_pos()
-            x_dist = char_x - start_x
-            y_dist = char_y - start_y
-            if 0 < x_dist < 2 and 0 < y_dist < 2:
+            character_pos = c.get_pos()
+            dist = character_pos - start_pos
+            if 0 < dist[0] < 2 and 0 < dist[1] < 2:
                 continue
-            if x_dist ** 2 + y_dist ** 2 <= pixel_dist:
+            if dist[0] ** 2 + dist[1] ** 2 <= pixel_dist:
                 response += [c]
         return response
 
-    def get_characters_line(self, start_pos, dest_pos, r, real_pixels, pierce=True):
-        x = self._og_x / real_pixels[0]
-        y = self._og_y / real_pixels[1]
-        start_x = round(start_pos[0] * x)
-        start_y = round(start_pos[1] * y)
-        dest_x = round(dest_pos[0] * x)
-        dest_y = round(dest_pos[1] * y)
+    def get_characters_line(self, start_pos, dest_pos, r, pierce=True):
         max_dist = r // self._og_meter
-        dist = self._calc_distance((start_x, start_y), (dest_x, dest_y))
+        dist = start_pos.distance(dest_pos)
         if dist > max_dist:
-            dest_x, dest_y = self._normalize_distance((start_x, start_y), (dest_x, dest_y), max_dist)
+            dest_pos = start_pos.normalize_distance(dest_pos, max_dist, self._map_size - [1, 1])
         response = []
         first_c = None
         first_dist = 0
         for c in self._chars:
-            char_x, char_y = c.get_pos()
-            x_dist = char_x - start_x
-            y_dist = char_y - start_y
-            if 0 < x_dist < 2 and 0 < y_dist < 2:
+            character_pos = c.get_pos()
+            dist = character_pos - start_pos
+            if 0 < dist[0] < 2 and 0 < dist[1] < 2:
                 continue
-            cross = x_dist * dest_y - y_dist * dest_x
-            char_dist = math.hypot(x_dist ** 2, y_dist ** 2)
+
+            cross = Vector2D.cross_multiply(dist, dest_pos)
+            char_dist = len(dist)
             if cross > 3 or char_dist > dist:
                 continue
             if pierce:
@@ -156,33 +149,17 @@ class GameController:
             response += [first_c]
         return response
 
-    def _calc_distance(self, pos1, pos2):
-        x_dist = pos1[0] - pos2[0]
-        y_dist = pos1[0] - pos2[0]
-        return math.hypot(x_dist ** 2, y_dist ** 2) * self._og_meter
-
-    def _normalize_distance(self, pos1, pos2, max_dist):
-        print("_normalize_distance pos1=", pos1, "pos2=", pos2, "max_dist=", max_dist)
-        if max_dist <= 0:
-            return pos1[0], pos1[1]
-        x_dir = pos2[0] - pos1[1]
-        y_dir = pos2[1] - pos1[1]
-        print("x_dir:", x_dir, "y_dir:", y_dir)
-        length = math.sqrt(x_dir ** 2 + y_dir ** 2)
-        print("length:", length)
-        dest_x = int(max(min((x_dir / length) * max_dist, self._og_x), 0))
-        dest_y = int(max(min((y_dir / length) * max_dist, self._og_y), 0))
-        return dest_x, dest_y
-
     def attack(self, actor: str, target: str):
         pc = self._pcs[actor]
         tar = self._chars[target]
         if not pc.has_action():
             return create_error("No Action Points available")
         weapon = self._pcs[actor].get_active_weapon()
-        resp = weapon.attack(self._calc_distance(pc.get_pos(), tar.get_pos()), self._chars[target])
+        distance = pc.get_pos().distance(tar.get_pos(), factor=self._og_meter)
+        resp = weapon.attack(distance, self._chars[target])
         if resp["success"]:
             pc.use_action()
+
         return resp
 
     def move(self, target, pos, real_pixels):
@@ -190,16 +167,12 @@ class GameController:
         if target != self._active_char:
             return create_error("It's not your characters turn yet")
         max_dist = target.get_movement_left()
-        new_pos = self._normalize_distance(target.get_pos(), pos, max_dist)
+
+        new_pos = pos.normalize_distance(target.get_pos, max_dist, self._map_size - Vector2D(1, 1))
         print("new pos:", new_pos)
-        dist = math.ceil(self._calc_distance(target.get_pos(), new_pos))
+        dist = math.ceil(target.get_pos().distance(new_pos, factor=self._og_meter))
         target.move(new_pos, dist)
-        x = self._og_x / real_pixels[0]
-        y = self._og_y / real_pixels[1]
-        x = round(x * new_pos[0])
-        y = round(y * new_pos[1])
         return create_response()
-        # return create_response({"char": target, "x": x, "y": y, "og_x": self._og_x, "og_y": self._og_y})
 
     def _load_character_configs(self):
         config_dir = "./configs"
@@ -297,13 +270,10 @@ class GameController:
 
         return resp
 
-    def place(self, target: Character, pos, real_pixels):
-        x = max(0, pos[0])
-        x = min(self._og_x, x)
-        y = max(0, pos[1])
-        y = min(self._og_y, y)
-        new_pos = [x, y]
-        target.place(new_pos)
+    def place(self, target: Character, pos: Position):
+        pos.to_bounds([0, 0], self._map_size - Vector2D(1, 1))
+        target.place(pos)
+        return create_response()
 
     @classmethod
     def instance(cls):

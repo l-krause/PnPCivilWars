@@ -137,8 +137,7 @@ def api_info(data):
 def api_attack(data):
     game_controller = GameController.instance()
     character = game_controller.get_character(session["character"])
-    target = game_controller.get_character(data["target"])
-    response = game_controller.attack(character, target)
+    response = game_controller.attack(character, data["target"])
     broadcast_response(response)
 
 
@@ -150,7 +149,6 @@ def api_cast(data):
 @socketio.on('move')
 @param("target", required_type=Character, optional=True)
 @param("pos", required_type=Position)
-@param("real_pixels", required_type=Position)
 def api_move(data):
     game_controller = GameController.instance()
     target = data.get("target", None)
@@ -166,12 +164,11 @@ def api_move(data):
         emit("move", create_error("Insufficient permissions to move other characters"))
         return
 
-    character = game_controller.get_character(target)
-    response = game_controller.move(character, data["pos"], data["real_pixels"])
+    response = game_controller.move(target, data["pos"])
     emit('move', response)
 
     if response["success"]:
-        emit("characterUpdate", json_serialize(character), broadcast=True)
+        emit("characterUpdate", json_serialize(target), broadcast=True)
 
 
 @socketio.on('pass')
@@ -195,7 +192,7 @@ def api_switch_weapon(data):
 @socketio.on("login")
 @param("password", required_type=str)
 def login(data):
-    if data["password"] == "lukasstinktmegahart":
+    if data["password"] == "123":
         session["role"] = "dm"
         emit("login", create_response())
     else:
@@ -215,9 +212,8 @@ def dm_start(data):
 @param("life", required_type=int, default=0, optional=True)
 def dm_change_health(data):
     game_controller = GameController.instance()
-    character = game_controller.get_character(data["character"])
     life_points = data["life"]
-    resp = game_controller.change_health(character, life_points)
+    resp = game_controller.change_health(data["character"], life_points)
     broadcast_response(resp)
 
 
@@ -237,25 +233,21 @@ def dm_continue(data):
 
 @socketio.on("place")
 @has_role("dm")
-@param("target")
-@param("pos")
+@param("target", required_type=Character)
+@param("pos", required_type=Position)
 def place(data):
     game_controller = GameController.instance()
-    target = data.get("target", None)
-    if target is None:
-        emit("place", create_error("Target does not exist"))
-        return
-    character = game_controller.get_character(target)
-    game_controller.place(character, data["pos"], data["real_pixels"])
-    emit('place', create_response())
-    emit("characterUpdate", json_serialize(character), broadcast=True)
+    response = game_controller.place(data["target"], data["pos"])
+    emit('place', response)
+    if response["success"]:
+        emit("characterUpdate", json_serialize(data["target"]), broadcast=True)
 
 
 @socketio.on('addTurn')
 @has_role("dm")
-@param("name")
+@param("target", required_type=Character)
 def dm_add_turn(data):
-    resp = GameController.instance().add_turn(data["name"])
+    resp = GameController.instance().add_turn(data["target"])
     emit("addTurn", resp)
 
 

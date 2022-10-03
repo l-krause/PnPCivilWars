@@ -3,11 +3,12 @@ from abc import abstractmethod
 
 from utils.api import create_error, ApiParameter
 from utils.json_serializable import JsonSerializable
+from utils.position import Position
 
 
 class Character(JsonSerializable, ApiParameter):
 
-    def __init__(self, character_id, dictionary, pos=(0, 0)):
+    def __init__(self, character_id, dictionary, pos=Position(0, 0)):
         self._id = character_id
         self._max_life = dictionary["lifePoints"]
         self._curr_life = dictionary["lifePoints"]
@@ -147,5 +148,9 @@ class Character(JsonSerializable, ApiParameter):
     def api_validate(game_controller, value):
         if not isinstance(value, int):
             return create_error(f"Invalid type, required: int, got: {type(value)}")
-        elif game_controller.get_character(value) is None:
+
+        character = game_controller.get_character(value)
+        if character is None:
             return create_error(f"No such character id={value}")
+
+        return character
