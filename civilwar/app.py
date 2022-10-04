@@ -162,7 +162,7 @@ def api_cast(data):
 def api_move(data):
     game_controller = GameController.instance()
     target = data.get("target", None)
-    own_character = session.get("character", None)
+    own_character = game_controller.get_character(session.get("character", None))
 
     if target is None:
         if own_character is None:
