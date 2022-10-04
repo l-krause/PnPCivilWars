@@ -213,12 +213,14 @@ export default function BattleMap(props) {
                 style.filter = " hue-rotate(180deg)";
             }
         }
-        return <Token key={"character-" + character.id} style={{left: character.pos.x, top: character.pos.y}}>
-            <img alt={"token of " + character.id} src={character.token}
-                 onDragEnd={(e) => onTokenDrag(e, character)}
-                 onClick={() => setSelectedCharacter(character.id)}
-                 style={style}/>
-        </Token>
+        if (character.status !== "dead") {
+            return <Token key={"character-" + character.id} style={{left: character.pos.x, top: character.pos.y}}>
+                <img alt={"token of " + character.id} src={character.token}
+                     onDragEnd={(e) => onTokenDrag(e, character)}
+                     onClick={() => setSelectedCharacter(character.id)}
+                     style={style}/>
+            </Token>
+        }
     };
 
     const addNpcs = () => {
