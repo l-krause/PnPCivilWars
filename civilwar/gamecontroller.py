@@ -212,6 +212,11 @@ class GameController:
         target.move(new_pos)
         return create_response()
 
+    def dash(self, target: Character):
+        target._movement_left += target._movement
+        target.use_action()
+        return create_response()
+
     def _load_character_configs(self):
         config_dir = "./configs"
         for file in os.listdir(config_dir):
