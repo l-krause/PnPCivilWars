@@ -141,7 +141,7 @@ export default function BattleMap(props) {
                 "pos": [trueX, trueY],
             }
 
-            if (character === activeChar){
+            if (character.id === activeChar){
                 api.sendRequest("move", params, (response) => {
                     if (!response.success) {
                         alert("Error moving character: " + response.msg);
