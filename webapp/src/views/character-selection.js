@@ -86,7 +86,7 @@ export default function CharacterSelection(props) {
             onFetchCharacters();
         }
         setShowPasswordPrompt(selectedCharacter === "Crab");
-    }, [fetchCharacters, characters, onFetchCharacters]);
+    }, [fetchCharacters, characters, onFetchCharacters, setShowPasswordPrompt, selectedCharacter]);
 
     const renderCharacter = (name, character) => {
         if (character.name.toLowerCase() !== "crab") {
