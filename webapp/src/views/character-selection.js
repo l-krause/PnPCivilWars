@@ -78,7 +78,7 @@ export default function CharacterSelection(props) {
             } else {
                 setError(response.msg);
             }
-        })
+        }, password)
     }, [api, onSelectCharacter, selectedCharacter, setShowPasswordPrompt]);
 
     useEffect(() => {
