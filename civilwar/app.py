@@ -176,7 +176,7 @@ def api_pass_turn(data):
         response = create_error("It's not your turn")
     else:
         response = game_controller.next_turn()
-    broadcast_response(response)
+    emit("pass", response)
 
 
 @socketio.on('switchWeapon')
@@ -208,7 +208,8 @@ def login(data):
 @socketio.on('start')
 @has_role("dm")
 def dm_start(data):
-    broadcast_response(GameController.instance().start())
+    GameController.instance().start()
+    return create_response()
 
 
 @socketio.on('changeHealth')

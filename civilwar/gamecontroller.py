@@ -48,7 +48,7 @@ class GameController:
             initial_order.append((player_character.int_roll(), player_character))
 
         # sort the tuples by descending roll value
-        initial_order = sorted(initial_order, reverse=True)
+        initial_order = sorted(initial_order, reverse=True, key=lambda tuple: tuple[0])
 
         # add all to queue
         initial_order = list(zip(*initial_order))[1]
@@ -59,8 +59,7 @@ class GameController:
 
         # last: add all enemies
         self._turn_order.add_all(self.get_enemies())
-
-        return create_response({"first": self._turn_order.get_next().get_id()})
+        self.send_game_status()
 
     def create_npc(self, amount=20, allies=True):
         villager_config = self._character_configs["villager"]
@@ -194,7 +193,7 @@ class GameController:
 
         if resp["success"]:
             actor.use_action()
-            self.on_game_event("characterAttack", {"attacker": actor.get_id(), "victim": target.get_id(),
+            self.send_game_event("characterAttack", {"attacker": actor.get_id(), "victim": target.get_id(),
                                                    "hit": resp["hit"], "damage": resp["damage"]})
 
         return resp
@@ -263,21 +262,25 @@ class GameController:
                 next_char = self._turn_order.get_next()
         else:
             active_char.turn_over()
-            next_char = self._turn_order.get_next()
+            self._turn_order.get_next()
 
-        return create_response(data={"status": self.get_status(), "character": next_char})
+        self.send_game_status()
+        return create_response()
 
     @staticmethod
-    def on_game_event(event, data=None):
+    def send_game_event(event, data=None):
         if data is None:
             data = {}
         data["type"] = event
         emit("gameEvent", json_serialize(data))
         print("Game Event:", data)
 
+    def send_game_status(self):
+        emit("gameStatus", self.get_status(), broadcast=True)
+
     def on_character_died(self, character: Character, reason=None):
         self._turn_order.remove(character)
-        self.on_game_event("characterDied", {"characterId": character.get_id(), "reason": reason})
+        self.send_game_event("characterDied", {"characterId": character.get_id(), "reason": reason})
 
     def place(self, target: Character, pos: Position):
         pos.to_bounds(self.get_map_bounds())
@@ -306,7 +309,10 @@ class GameController:
         return {
             "round": self._turn_order.get_round(),
             "active_char": self._turn_order.get_active().get_id(),
-            "state": self.get_game_state()
+            "state": self.get_game_state(),
+            "map": {
+                "bounds": self.get_map_bounds(),
+            }
         }
 
     def get_map_bounds(self):

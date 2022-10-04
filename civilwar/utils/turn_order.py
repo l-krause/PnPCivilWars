@@ -29,7 +29,7 @@ class GameTurnOrder:
             self._round_queue = self._original_queue.copy()
             self._round += 1
 
-        self._active_char = self._round_queue.pop()
+        self._active_char = self._round_queue.pop(0)
         self.mutex.release()
         return self._active_char
 

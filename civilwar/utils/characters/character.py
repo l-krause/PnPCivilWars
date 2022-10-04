@@ -73,7 +73,7 @@ class Character(JsonSerializable, ApiParameter, ABC):
     def stun(self, rounds):
         self._stunned += rounds
         from gamecontroller import GameController
-        GameController.instance().on_game_event("characterStunned", {"rounds": rounds})
+        GameController.instance().send_game_event("characterStunned", {"rounds": rounds})
 
     def get_weapon(self, name: str):
         try:
@@ -90,7 +90,7 @@ class Character(JsonSerializable, ApiParameter, ABC):
 
         self._active_weapon = weapon
         self.use_action()
-        GameController.instance().on_game_event("characterSwitchWeapon", {"weapon": weapon})
+        GameController.instance().send_game_event("characterSwitchWeapon", {"weapon": weapon})
         return create_response()
 
     def change_health(self, health):
@@ -107,7 +107,7 @@ class Character(JsonSerializable, ApiParameter, ABC):
         dist = self._pos.distance(new_pos)
         self._pos = new_pos
         self._movement_left = max(0, self._movement_left - dist)
-        GameController.instance().on_game_event("characterMove", {"to": self._pos})
+        GameController.instance().send_game_event("characterMove", {"to": self._pos})
 
     def place(self, new_pos):
         self._pos = new_pos
