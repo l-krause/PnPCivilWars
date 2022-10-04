@@ -79,7 +79,7 @@ export default function CharacterSelection(props) {
                 setError(response.msg);
             }
         }, password)
-    }, [api, onSelectCharacter, selectedCharacter, setShowPasswordPrompt]);
+    }, [api, onSelectCharacter, selectedCharacter, password]);
 
     useEffect(() => {
         if (characters === null || fetchCharacters) {
