@@ -30,6 +30,7 @@ const reducer = (characters, action) => {
         case "setCharacter":
             newCharacters[action.character.id] = action.character;
             break;
+        case "characterPlace":
         case "characterMove":
             newCharacters[action.characterId] = { ...newCharacters[action.characterId], pos: action.to };
             break;

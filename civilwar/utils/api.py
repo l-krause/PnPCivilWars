@@ -38,13 +38,6 @@ def broadcast_response(response):
         emit(event, response["data"], broadcast=True, include_self=False)
 
 
-def emit_character_update(response, character):
-    event = request.event["message"]
-    emit(event, response)
-    if response["success"]:
-        emit("characterUpdate", json_serialize(character), broadcast=True)
-
-
 def has_character():
     def decorator(fn):
         def wrapped_function(*args, **kwargs):

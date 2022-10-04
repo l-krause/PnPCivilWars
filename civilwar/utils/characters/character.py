@@ -74,6 +74,7 @@ class Character(JsonSerializable, ApiParameter, ABC):
     def stun(self, rounds):
         self._stunned += rounds
         self.send_character_event("characterStunned", {"rounds": rounds})
+        return create_response()
 
     def get_weapon(self, name: str):
         try:
@@ -106,10 +107,12 @@ class Character(JsonSerializable, ApiParameter, ABC):
         self._pos = new_pos
         self._movement_left = max(0, self._movement_left - dist)
         self.send_character_event("characterMove", {"to": self._pos})
+        return create_response()
 
     def place(self, new_pos):
         self._pos = new_pos
-        print("character.move(", new_pos, ")")
+        self.send_character_event("characterPlace", {"to": self._pos})
+        return create_response()
 
     def get_status(self):
         if self.is_dead():

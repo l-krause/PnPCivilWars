@@ -9,8 +9,7 @@ from flask_session import Session
 from flask_socketio import SocketIO, emit
 
 from gamecontroller import GameController
-from utils.api import create_response, create_error, json_serialize, param, has_role, has_character, broadcast_response, \
-    emit_character_update
+from utils.api import create_response, create_error, json_serialize, param, has_role, has_character, broadcast_response
 from utils.characters.character import Character
 from utils.position import Position
 
@@ -176,7 +175,7 @@ def api_move(data):
         return
 
     response = game_controller.move(target, data["pos"])
-    emit_character_update(response, data["target"])
+    emit("move", response)
 
 
 @socketio.on('pass')
@@ -219,10 +218,8 @@ def dm_start(data):
 @param("target", required_type=Character)
 @param("life", required_type=int, default=0, optional=True)
 def dm_change_health(data):
-    game_controller = GameController.instance()
-    life_points = data["life"]
-    response = game_controller.change_health(data["target"], life_points)
-    emit_character_update(response, data["target"])
+    response = data["target"].change_health(data["life"])
+    emit('changeHealth', response)
 
 
 @socketio.on('reset')
@@ -243,9 +240,8 @@ def dm_continue(data):
 @param("target", required_type=Character)
 @param("pos", required_type=Position)
 def place(data):
-    game_controller = GameController.instance()
-    response = game_controller.place(data["target"], data["pos"])
-    emit_character_update(response, data["target"])
+    response = data["target"].place(data["pos"])
+    emit("place", response)
 
 
 @socketio.on('addTurn')
@@ -260,8 +256,8 @@ def dm_add_turn(data):
 @has_role("dm")
 @param("target", required_type=Character)
 def dm_stun(data):
-    resp = GameController.instance().stun(data["target"])
-    emit_character_update(resp, data["target"])
+    response = data["target"].stun()
+    emit("stun", response)
 
 
 @socketio.on('createNPCs')

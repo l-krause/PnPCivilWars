@@ -197,7 +197,7 @@ class GameController:
         if resp["success"]:
             actor.use_action()
             self.send_game_event("characterAttack", {"attacker": actor.get_id(), "victim": target.get_id(),
-                                                   "hit": resp["hit"], "damage": resp["damage"]})
+                                                   "hit": resp["data"]["hit"], "damage": resp["data"]["damage"]})
 
         return resp
 
@@ -222,20 +222,6 @@ class GameController:
                     data = json.loads(reader.read())
                     self._character_configs[config_name] = data
                     print("Loaded character config:", config_name)
-
-    def change_health(self, target: str, life: int):
-        c = self._chars.get(target, None)
-        if c is None:
-            return create_error("Character does not exist")
-        c.change_health(life)
-        return create_response(c)
-
-    def stun(self, target: str):
-        c = self._chars.get(target, None)
-        if c is None:
-            return create_error("Character does not exist")
-        c.stun()
-        return create_response(c)
 
     def get_character_configs(self, fn_filter=None):
         character_configs = self._character_configs
