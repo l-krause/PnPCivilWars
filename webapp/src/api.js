@@ -60,8 +60,8 @@ export default class API {
         this.sendRequest("getSelectableCharacters", {}, callback);
     }
 
-    onChooseCharacter(characterName, callback) {
-        this.sendRequest("chooseCharacter", {name: characterName}, callback);
+    onChooseCharacter(characterName, callback, pw="") {
+        this.sendRequest("chooseCharacter", {name: characterName, password: pw}, callback);
     }
 
     fetchAllCharacters(callback) {

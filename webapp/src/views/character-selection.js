@@ -71,13 +71,10 @@ export default function CharacterSelection(props) {
 
     const onChooseCharacter = useCallback(() => {
         setError(null);
-        if (selectedCharacter === "Crab") {
-            setShowPasswordPrompt(true);
-            return;
-        }
         api.onChooseCharacter(selectedCharacter, (response) => {
             if (response.success) {
-                onSelectCharacter(response.data);
+                onSelectCharacter(response.data.character);
+                onSelectRole(response.data.role);
             } else {
                 setError(response.msg);
             }
@@ -88,6 +85,7 @@ export default function CharacterSelection(props) {
         if (characters === null || fetchCharacters) {
             onFetchCharacters();
         }
+        setShowPasswordPrompt(selectedCharacter === "Crab");
     }, [fetchCharacters, characters, onFetchCharacters]);
 
     const renderCharacter = (name, character) => {
@@ -128,28 +126,7 @@ export default function CharacterSelection(props) {
                     <img src={"/img/crab.png"} alt="Crab"/>
                 </CharacterToken>
                 {showPasswordPrompt ? <>
-                        <TextField type={"password"} value={password} onChange={e => setPassword(e.target.value)}
-                                   onKeyPress={(ev) => {
-                                       if (ev.key === "Enter") {
-                                           api.sendRequest("login", {password: password}, (resp) => {
-                                               if (resp.success) {
-                                                   onSelectRole("dm")
-                                                   api.onChooseCharacter(selectedCharacter, (response) => {
-                                                       if (response.success) {
-                                                           onSelectCharacter(response.data);
-                                                       } else {
-                                                           setError(response.msg);
-                                                       }
-                                                   })
-                                               } else {
-                                                   alert(resp.msg)
-                                               }
-                                           })
-                                           ev.preventDefault()
-                                       }
-                                   }
-                                   }/>
-                        <CloseIcon onClick={() => setShowPasswordPrompt(false)}/>
+                        <TextField type={"password"} value={password} onChange={e => setPassword(e.target.value)}/>
                     </>
                     : null}
             </div>
