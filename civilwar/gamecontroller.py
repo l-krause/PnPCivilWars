@@ -34,8 +34,9 @@ class GameController:
         self._load_character_configs()
 
     def next_char_id(self):
-        next_id = self.CHARACTER_ID
-        self.CHARACTER_ID += 1
+        # important: do not re-use character ids!
+        next_id = GameController.CHARACTER_ID
+        GameController.CHARACTER_ID += 1
         return next_id
 
     def start(self):
@@ -290,7 +291,6 @@ class GameController:
     @classmethod
     def reset(cls):
         cls._instance = None
-        cls.CHARACTER_ID = 1
 
     def get_game_state(self):
         if not any(self.get_enemies(only_alive=True)):

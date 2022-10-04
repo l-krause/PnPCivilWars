@@ -227,8 +227,6 @@ def dm_change_health(data):
 def dm_reset(data):
     GameController.reset()
     emit("reset", {}, broadcast=True)
-    app.secret_key = os.urandom(32)
-
 
 @socketio.on('continue')
 @has_role("dm")
