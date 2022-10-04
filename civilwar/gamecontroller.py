@@ -212,9 +212,10 @@ class GameController:
         target.move(new_pos)
         return create_response()
 
-    def dash(self, target: Character):
-        target._movement_left += target._movement
-        target.use_action()
+    def dash(self, target):
+        c = self._chars[target]
+        c._movement_left += c._movement
+        c.use_action()
         return create_response()
 
     def _load_character_configs(self):
