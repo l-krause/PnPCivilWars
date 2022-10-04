@@ -72,10 +72,6 @@ export default function BattleMap(props) {
         setCharacters(newState);
     }, [characters]);
 
-    const onStartGame = useCallback((response) => {
-        setActiveChar(response.data["first"]);
-    }, [setActiveChar]);
-
     const onReset = useCallback((response) => {
         setCharacter(null);
     }, [setCharacter]);
@@ -83,10 +79,6 @@ export default function BattleMap(props) {
     const onAction = useCallback((action) => {
         api.sendRequest(action, {"target": selectedCharacter})
     }, [api, selectedCharacter]);
-
-    const onPassTurn = useCallback((data) => {
-        setActiveChar(data.active_char.id)
-    }, [setActiveChar]);
 
     const onCreatedNpcs = useCallback((data) => {
         if (data.success) {
@@ -101,6 +93,11 @@ export default function BattleMap(props) {
         }
     }, [characters, setCharacters]);
 
+    const onGameStatus = useCallback((data) => {
+        setActiveChar(data.active_char);
+        // setRound(data.round);
+        // setGameState(data.state);
+    }, []);
 
     useEffect(() => {
         onFetchCharacters();
@@ -110,10 +107,11 @@ export default function BattleMap(props) {
         console.log("useEffect called");
         api.registerEvent("characterJoin", onCharacterJoin);
         api.registerEvent("characterUpdate", onCharacterUpdate);
-        api.registerEvent("start", onStartGame);
+        api.registerEvent("start", (res) => !res.success && alert("Error starting game: " + res.msg));
         api.registerEvent("reset", onReset);
-        api.registerEvent("pass", onPassTurn);
+        api.registerEvent("pass", (res) => !res.success && alert("Error passing turn: " + res.msg));
         api.registerEvent("createNPCs", onCreatedNpcs);
+        api.registerEvent("gameStatus", onGameStatus);
 
         return () => {
             // dismount
@@ -123,8 +121,9 @@ export default function BattleMap(props) {
             api.unregisterEvent("reset");
             api.unregisterEvent("pass");
             api.unregisterEvent("createNPCs");
+            api.unregisterEvent("gameStatus");
         }
-    }, [api, onCharacterJoin, onCharacterUpdate, onStartGame, onReset, onPassTurn, onCreatedNpcs]);
+    }, [api, onCharacterJoin, onCharacterUpdate, onReset, onCreatedNpcs, onGameStatus]);
 
     const onTokenDrag = useCallback((e, char) => {
         let img = mapRef.current;
@@ -161,7 +160,7 @@ export default function BattleMap(props) {
         }
 
 
-    }, [api, character, role]);
+    }, [api, character, role, activeChar]);
 
     const renderCharacter = (character) => {
         let style = {};
