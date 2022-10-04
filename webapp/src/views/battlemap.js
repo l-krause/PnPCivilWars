@@ -43,7 +43,7 @@ const reducer = (characters, action) => {
             }
             break;
         case "characterDied":
-            newCharacters[action.character.id] = action.character;
+            newCharacters[action.characterId].status = "dead";
             break;
         default:
             break;
