@@ -70,11 +70,13 @@ class GameController:
 
         for i in range(amount):
             character_config = (veteran_config if i % 5 == 0 else villager_config).copy()
-            position = Position.random([0, 0], self._map_size - [1, 1])
 
+            position = Position(0, 0)
             if allies:
+                position = Position.random([0, self._map_size[1] - 150], self._map_size - [1, 1])
                 suffix = "ally"
             else:
+                position = Position.random([0, 0], self._map_size - [1, 150])
                 suffix = "enemy"
 
             name = f"{character_config['name']}-{len(self._chars)}_{suffix}"
