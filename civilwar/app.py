@@ -3,7 +3,7 @@ import logging
 import os
 
 from dotenv import load_dotenv
-from flask import Flask, session, send_from_directory
+from flask import Flask, session, send_from_directory, request
 from flask_cors import CORS
 from flask_session import Session
 from flask_socketio import SocketIO, emit
@@ -53,7 +53,7 @@ def on_disconnect(*args):
     character = GameController.instance().get_character(character_id)
     if character:
         # GAME_CONTROLLER.remove_character(character_id)
-        character.is_online = False
+        character.remove_client_sid(request.sid)
 
 
 @socketio.on("connect")
@@ -61,7 +61,7 @@ def on_connect(*args):
     character_id = session.get("character", None)
     character = GameController.instance().get_character(character_id)
     if character:
-        character.is_online = True
+        character.add_client_sid(request.sid)
 #        emit("characterJoin", json_serialize(character), broadcast=True)
 
 
@@ -79,6 +79,7 @@ def choose_character(data):
         if isinstance(character, dict):  # error
             response = character
         else:
+            character.add_client_sid(request.sid)
             session["character"] = character.get_id()
             response = create_response(character)
             emit("characterJoin", json_serialize(character), broadcast=True)

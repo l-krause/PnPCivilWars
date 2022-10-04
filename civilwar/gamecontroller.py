@@ -59,6 +59,8 @@ class GameController:
 
         # last: add all enemies
         self._turn_order.add_all(self.get_enemies())
+
+        self._turn_order.get_next()
         self.send_game_status()
 
     def create_npc(self, amount=20, allies=True):
@@ -253,16 +255,17 @@ class GameController:
         # end turn of last char
         active_char = self._turn_order.get_active()
 
-        if isinstance(active_char, NPC):
-            is_ally = active_char.is_ally()
-            next_char = active_char
-            while isinstance(next_char, NPC) and is_ally == next_char.is_ally():
-                next_char.make_turn()
-                next_char.turn_over()
-                next_char = self._turn_order.get_next()
-        else:
-            active_char.turn_over()
-            self._turn_order.get_next()
+        if active_char is not None:
+            if isinstance(active_char, NPC):
+                is_ally = active_char.is_ally()
+                next_char = active_char
+                while isinstance(next_char, NPC) and is_ally == next_char.is_ally():
+                    next_char.make_turn()
+                    next_char.turn_over()
+                    next_char = self._turn_order.get_next()
+            else:
+                active_char.turn_over()
+                self._turn_order.get_next()
 
         self.send_game_status()
         return create_response()
@@ -308,7 +311,7 @@ class GameController:
     def get_status(self):
         return {
             "round": self._turn_order.get_round(),
-            "active_char": self._turn_order.get_active().get_id(),
+            "active_char": None if not self._turn_order.get_active() else self._turn_order.get_active().get_id(),
             "state": self.get_game_state(),
             "map": {
                 "bounds": self.get_map_bounds(),
