@@ -1,4 +1,3 @@
-from characters.character import Character
 import random
 
 from utils.api import create_response, create_error
@@ -27,7 +26,7 @@ class Weapon:
     def get_name(self):
         return self._name
 
-    def attack(self, distance, target: Character):
+    def attack(self, distance, target):
         if distance > self._max_range or distance < self._min_range:
             return create_error("Can't reach target")
         if self._usages == 0:

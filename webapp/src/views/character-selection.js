@@ -1,6 +1,5 @@
 import {useCallback, useEffect, useState} from "react";
 import {Alert, Box, Button, CircularProgress, styled, TextField} from "@mui/material";
-import CloseIcon from '@mui/icons-material/Close';
 
 const CharacterToken = styled(Box)(({theme}) => ({
     "& img": {
@@ -79,7 +78,7 @@ export default function CharacterSelection(props) {
                 setError(response.msg);
             }
         }, password)
-    }, [api, onSelectCharacter, selectedCharacter, password]);
+    }, [api, onSelectCharacter, selectedCharacter, password, onSelectRole]);
 
     useEffect(() => {
         if (characters === null || fetchCharacters) {

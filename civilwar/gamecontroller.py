@@ -33,7 +33,8 @@ class GameController:
         self._character_configs = CaseInsensitiveDict()
         self._load_character_configs()
 
-    def next_char_id(self):
+    @staticmethod
+    def next_char_id():
         # important: do not re-use character ids!
         next_id = GameController.CHARACTER_ID
         GameController.CHARACTER_ID += 1
@@ -191,7 +192,7 @@ class GameController:
             return create_error("No Action Points available")
         weapon = actor.get_active_weapon()
         distance = actor.get_pos().distance(target.get_pos(), factor=self._og_meter)
-        resp = weapon.attack(distance, self._chars[target])
+        resp = weapon.attack(distance, target)
 
         if resp["success"]:
             actor.use_action()
@@ -201,7 +202,7 @@ class GameController:
         return resp
 
     def move(self, target, pos):
-        print("GameController.move, target:", target, "pos:", pos)
+        print("GameControlwler.move, target:", target, "pos:", pos)
         if target != self._turn_order.get_active():
             return create_error("It's not your characters turn yet")
         max_dist = target.get_movement_left()
@@ -286,7 +287,7 @@ class GameController:
         self.send_game_event("characterDied", {"characterId": character.get_id(), "reason": reason})
 
     def place(self, target: Character, pos: Position):
-        pos.to_bounds(self.get_map_bounds())
+        pos = pos.to_bounds(self.get_map_bounds())
         target.place(pos)
         return create_response()
 

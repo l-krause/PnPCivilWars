@@ -1,5 +1,5 @@
 import {Box, Checkbox, styled, TextField} from "@mui/material";
-import {useCallback, useEffect, useRef, useState} from "react";
+import {useCallback, useEffect, useReducer, useRef, useState} from "react";
 import Button from '@mui/material/Button';
 
 const TOKEN_SIZE = 48;
@@ -23,6 +23,32 @@ const Token = styled(Box)(({theme}) => ({
     }
 }));
 
+const reducer = (characters, action) => {
+    console.log("BEFORE", characters);
+    let newCharacters = {...characters};
+    switch (action.type) {
+        case "setCharacter":
+            newCharacters[action.character.id] = action.character;
+            break;
+        case "characterMove":
+            newCharacters[action.characterId] = { ...newCharacters[action.characterId], pos: action.to };
+            break;
+        case "setAllCharacters":
+            newCharacters = action.characters;
+            break;
+        case "addCharacters":
+            for(const char of action.characters) {
+                newCharacters[char.id] = char;
+            }
+            break;
+        default:
+            break;
+    }
+
+    console.log("AFTER", newCharacters);
+    return newCharacters;
+}
+
 export default function BattleMap(props) {
 
     const api = props.api;
@@ -31,7 +57,7 @@ export default function BattleMap(props) {
     const setCharacter = props.setCharacter;
 
     const [fetchCharacters, setFetchCharacters] = useState(true);
-    const [characters, setCharacters] = useState({});
+    const [characters, dispatch] = useReducer(reducer, null, () => ({}));
     const [selectedCharacter, setSelectedCharacter] = useState(null);
     const [activeChar, setActiveChar] = useState(null);
     const [npcAmount, setNPCAmount] = useState(20);
@@ -43,7 +69,7 @@ export default function BattleMap(props) {
             setFetchCharacters(false);
             api.fetchAllCharacters((response) => {
                 if (response.success) {
-                    setCharacters(response.data);
+                    dispatch({ type: "setAllCharacters", characters: response.data });
                 } else {
                     alert("Error fetching characters: " + response.msg);
                 }
@@ -53,24 +79,27 @@ export default function BattleMap(props) {
 
     const onCharacterJoin = useCallback((character) => {
         if (!characters.hasOwnProperty(character.id)) {
-            setCharacters({...characters, [character.id]: character})
+            dispatch({ type: "setCharacter", character: character });
         }
     }, [characters]);
 
-    const onCharacterUpdate = useCallback((char) => {
-        let newState = {...characters};
-        if (JSON.stringify(char.pos) !== JSON.stringify(characters[char.id].pos)) {
-            let img = mapRef.current;
-            if (img) {
-                let relY = img.clientHeight / img.naturalHeight;
-                let relX = img.clientWidth / img.naturalWidth;
-                char.pos.x = Math.floor(relX * char.pos.x);
-                char.pos.y = Math.floor(relY * char.pos.y);
-            }
+    const translatePosition = (pos) => {
+        let img = mapRef.current;
+        if (img) {
+            let relY = img.clientHeight / img.naturalHeight;
+            let relX = img.clientWidth / img.naturalWidth;
+            let x = Math.floor(relX * pos.x);
+            let y = Math.floor(relY * pos.y);
+            return {x: x, y: y};
         }
-        newState[char.id] = char;
-        setCharacters(newState);
-    }, [characters]);
+
+        return null;
+    }
+
+    const onCharacterUpdate = useCallback((char) => {
+        char.pos = translatePosition(char.pos);
+        dispatch({type: "setCharacter", character: char});
+    }, []);
 
     const onReset = useCallback((response) => {
         setCharacter(null);
@@ -82,21 +111,28 @@ export default function BattleMap(props) {
 
     const onCreatedNpcs = useCallback((data) => {
         if (data.success) {
-            let newChars = {...characters};
+            let newChars = [];
             // villagers/veterans/... => list of chars
             for (const chars of Object.values(data.data)) {
-                newChars = {...newChars, ...chars};
+                newChars = newChars.concat(newChars, chars);
             }
-            setCharacters(newChars);
+            dispatch({ type: "addCharacters", characters: newChars });
         } else {
             alert(data.msg);
         }
-    }, [characters, setCharacters]);
+    }, []);
 
     const onGameStatus = useCallback((data) => {
         setActiveChar(data.active_char);
         // setRound(data.round);
         // setGameState(data.state);
+    }, []);
+
+    const onGameEvent = useCallback((data) => {
+        if (data.type === "characterMove") {
+            data.to = translatePosition(data.to);
+            dispatch(data);
+        }
     }, []);
 
     useEffect(() => {
@@ -112,6 +148,7 @@ export default function BattleMap(props) {
         api.registerEvent("pass", (res) => !res.success && alert("Error passing turn: " + res.msg));
         api.registerEvent("createNPCs", onCreatedNpcs);
         api.registerEvent("gameStatus", onGameStatus);
+        api.registerEvent("gameEvent", onGameEvent);
 
         return () => {
             // dismount
@@ -122,8 +159,9 @@ export default function BattleMap(props) {
             api.unregisterEvent("pass");
             api.unregisterEvent("createNPCs");
             api.unregisterEvent("gameStatus");
+            api.unregisterEvent("gameEvent");
         }
-    }, [api, onCharacterJoin, onCharacterUpdate, onReset, onCreatedNpcs, onGameStatus]);
+    }, [api, onCharacterJoin, onCharacterUpdate, onReset, onCreatedNpcs, onGameStatus, onGameEvent]);
 
     const onTokenDrag = useCallback((e, char) => {
         let img = mapRef.current;
@@ -186,8 +224,6 @@ export default function BattleMap(props) {
     };
 
     const tokens = Object.values(characters).map(c => renderCharacter(c));
-
-    console.log(activeChar, character);
 
     return <div>
         <MapContainer>

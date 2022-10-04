@@ -5,6 +5,7 @@ from utils.api import create_error, ApiParameter, create_response
 from utils.constants import MEELE_RANGE
 from utils.json_serializable import JsonSerializable
 from utils.position import Position
+from utils.weapon import Weapon
 
 
 class Character(JsonSerializable, ApiParameter, ABC):
@@ -17,8 +18,8 @@ class Character(JsonSerializable, ApiParameter, ABC):
         self._movement = dictionary["movement"]
         self._movement_left = dictionary["movement"] * 10
         self._passivePerception = dictionary["passivePerception"]
-        self._active_weapon = dictionary["activeWeapon"]
-        self._weapons = dictionary["weapons"]
+        self._weapons = [Weapon(weapon_data) for weapon_data in dictionary["weapons"]]
+        self._active_weapon = self.get_weapon(dictionary["activeWeapon"])
         self._resistances = dictionary.get("resistance", [])
         self._std_resistances = dictionary.get("resistance", [])
         self._res_buff = 0
@@ -72,8 +73,7 @@ class Character(JsonSerializable, ApiParameter, ABC):
 
     def stun(self, rounds):
         self._stunned += rounds
-        from gamecontroller import GameController
-        GameController.instance().send_game_event("characterStunned", {"rounds": rounds})
+        self.send_character_event("characterStunned", {"rounds": rounds})
 
     def get_weapon(self, name: str):
         try:
@@ -82,7 +82,6 @@ class Character(JsonSerializable, ApiParameter, ABC):
             return None
 
     def switch_weapon(self, weapon):
-        from gamecontroller import GameController
         if weapon not in self._weapons:
             return create_error("You do not own such weapon")
         elif not self.has_action():
@@ -90,7 +89,7 @@ class Character(JsonSerializable, ApiParameter, ABC):
 
         self._active_weapon = weapon
         self.use_action()
-        GameController.instance().send_game_event("characterSwitchWeapon", {"weapon": weapon})
+        self.send_character_event("characterSwitchWeapon", {"weapon": weapon})
         return create_response()
 
     def change_health(self, health):
@@ -103,11 +102,10 @@ class Character(JsonSerializable, ApiParameter, ABC):
         self._curr_life = tmp_health
 
     def move(self, new_pos):
-        from gamecontroller import GameController
         dist = self._pos.distance(new_pos)
         self._pos = new_pos
         self._movement_left = max(0, self._movement_left - dist)
-        GameController.instance().send_game_event("characterMove", {"to": self._pos})
+        self.send_character_event("characterMove", {"to": self._pos})
 
     def place(self, new_pos):
         self._pos = new_pos
@@ -237,3 +235,8 @@ class Character(JsonSerializable, ApiParameter, ABC):
         except StopIteration:
             return None
 
+    def send_character_event(self, event, data=None):
+        data = {} if data is None else data
+        data["characterId"] = self._id
+        from gamecontroller import GameController
+        GameController.instance().send_game_event(event, data)

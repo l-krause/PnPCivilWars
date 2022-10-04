@@ -1,5 +1,6 @@
 from .character import Character
 from .player_character import PlayerCharacter
+from ..constants import MEELE_RANGE
 
 
 class NPC(Character):
@@ -22,7 +23,7 @@ class NPC(Character):
         target_enemy = None
         enemies = self.get_enemies_with_distance(distance=self.get_movement_left())
         for enemy in enemies:
-            in_meele_range = list(enemy.get_enemies_with_distance(distance=Character.MEELE_RANGE))
+            in_meele_range = list(enemy.get_enemies_with_distance(distance=MEELE_RANGE))
             if len(in_meele_range) <= 2:
                 target_enemy = enemy
                 break

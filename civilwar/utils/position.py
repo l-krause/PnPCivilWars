@@ -54,8 +54,9 @@ class Position(Vector2D, ApiParameter):
 
     def to_bounds(self, bounds):
         # bounds: [min_x, min_y, max_x, max_y]
-        self._x = clamp(self._x, bounds[0], bounds[2])
-        self._y = clamp(self._y, bounds[1], bounds[3])
+        x = clamp(self._x, bounds[0], bounds[2])
+        y = clamp(self._y, bounds[1], bounds[3])
+        return Position(x, y)
 
     def __repr__(self):
         return f"pos({self._x}, {self._y})"
