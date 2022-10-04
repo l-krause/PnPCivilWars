@@ -169,7 +169,7 @@ class GameController:
                 continue
 
             cross = Vector2D.cross_multiply(dist, dest_pos)
-            char_dist = len(dist)
+            char_dist = dist.length()
             if cross > 3 or char_dist > dist:
                 continue
             if pierce:

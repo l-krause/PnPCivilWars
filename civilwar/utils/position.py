@@ -44,11 +44,11 @@ class Position(Vector2D, ApiParameter):
         return Position(x, y)
 
     def distance(self, other_pos, factor=1.0):
-        return len(other_pos - self) * factor
+        return (other_pos - self).length() * factor
 
     def normalize_distance(self, other_pos, max_distance, bounds: Vector2D):
         direction = other_pos - self
-        length = len(direction)
+        length = direction.length()
         destination = ((direction / length) * max_distance).to_pos()
         return destination.to_bounds(bounds)
 

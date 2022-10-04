@@ -67,6 +67,7 @@ def on_connect(*args):
 
 @socketio.on('chooseCharacter')
 @param("name", required_type=str)
+@param("password", required_type=str, optional=True)
 def choose_character(data):
     logging.debug("socketIO chooseCharacter")
     character_id = session.get("character", None)
@@ -75,13 +76,23 @@ def choose_character(data):
     if game_controller.get_character(character_id) is not None:
         response = create_error("You already chose a character")
     else:
+        if data["name"].lower() == "crab":
+            password = data.get("password", None)
+            if password != os.getenv("DM_PASSWORD"):
+                emit("login", create_error("Wrong Password"))
+                return
+            role = "dm"
+        else:
+            role = "player"
+
         character = game_controller.create_pc(data["name"])
         if isinstance(character, dict):  # error
             response = character
         else:
             character.add_client_sid(request.sid)
             session["character"] = character.get_id()
-            response = create_response(character)
+            session["role"] = role
+            response = create_response({"character":character, "role": role})
             emit("characterJoin", json_serialize(character), broadcast=True)
 
     emit("chooseCharacter", response)
@@ -173,7 +184,7 @@ def api_move(data):
 def api_pass_turn(data):
     game_controller = GameController.instance()
     character = game_controller.get_character(session["character"])
-    if game_controller.get_turn().get_active_char() != character:
+    if game_controller.get_turn().get_active() != character:
         response = create_error("It's not your turn")
     else:
         response = game_controller.next_turn()
@@ -193,16 +204,6 @@ def api_switch_weapon(data):
         resp = character.switch_weapon(weapon)
 
     emit("switchWeapon", resp)
-
-
-@socketio.on("login")
-@param("password", required_type=str)
-def login(data):
-    if data["password"] == os.getenv("DM_PASSWORD"):
-        session["role"] = "dm"
-        emit("login", create_response())
-    else:
-        emit("login", create_error("Wrong Password"))
 
 
 ### DM methods

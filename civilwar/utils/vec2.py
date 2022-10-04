@@ -20,7 +20,7 @@ class Vector2D(JsonSerializable):
     def __truediv__(self, a):
         return Vector2D(self._x / a, self._y / a)
 
-    def __len__(self):
+    def length(self):
         return math.sqrt(self._x ** 2 + self._y ** 2)
 
     def __getitem__(self, item):
