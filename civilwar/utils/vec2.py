@@ -23,6 +23,12 @@ class Vector2D(JsonSerializable):
     def length(self):
         return math.sqrt(self._x ** 2 + self._y ** 2)
 
+    def normalize(self):
+        length = self.length()
+        if length > 0:
+            return self / length
+        return Vector2D(0, 0)
+
     def __getitem__(self, item):
         if item == 0:
             return self._x

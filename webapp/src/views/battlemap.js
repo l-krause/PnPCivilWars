@@ -130,8 +130,10 @@ export default function BattleMap(props) {
     }, []);
 
     const onGameEvent = useCallback((data) => {
-        if (data.type === "characterMove") {
-            data.to = translatePosition(data.to);
+        if (data.type.startsWith("character")) {
+            if (data.type === "characterMove" || data.type === "characterPlace") {
+                data.to = translatePosition(data.to);
+            }
             dispatch(data);
         }
     }, []);
