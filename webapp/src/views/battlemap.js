@@ -73,7 +73,6 @@ export default function BattleMap(props) {
     }, [characters]);
 
     const onStartGame = useCallback((response) => {
-        if ()
         setActiveChar(response.data["first"]);
     }, [setActiveChar]);
 
