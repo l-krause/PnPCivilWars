@@ -1,6 +1,5 @@
 import json
 import logging
-import math
 import os.path
 
 from flask_socketio import emit
@@ -291,6 +290,7 @@ class GameController:
     @classmethod
     def reset(cls):
         cls._instance = None
+        cls.CHARACTER_ID = 1
 
     def get_game_state(self):
         if not any(self.get_enemies(only_alive=True)):

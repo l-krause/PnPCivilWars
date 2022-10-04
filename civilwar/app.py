@@ -24,7 +24,7 @@ app.config['SESSION_PERMANENT'] = True
 app.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(days=365)
 app.config['SESSION_COOKIE_NAME'] = 'session'
 app.config['SESSION_TYPE'] = 'filesystem'
-app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")
+app.config['SECRET_KEY'] = os.urandom(32)
 Session(app)
 socketio = SocketIO(app, cors_allowed_origins=ORIGINS, cookie='session', manage_session=False)
 cors = CORS(app, origins=ORIGINS)
@@ -197,7 +197,7 @@ def api_switch_weapon(data):
 @socketio.on("login")
 @param("password", required_type=str)
 def login(data):
-    if data["password"] == "123":
+    if data["password"] == os.getenv("DM_PASSWORD"):
         session["role"] = "dm"
         emit("login", create_response())
     else:
@@ -227,6 +227,7 @@ def dm_change_health(data):
 def dm_reset(data):
     GameController.reset()
     emit("reset", {}, broadcast=True)
+    app.secret_key = os.urandom(32)
 
 
 @socketio.on('continue')
