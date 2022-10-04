@@ -127,7 +127,9 @@ class Character(JsonSerializable, ApiParameter, ABC):
             "name": self.get_name(),
             "token": self._token,
             "pos": self._pos,
-            "status": self.get_status()
+            "status": self.get_status(),
+            "hp": self.get_hp(),
+            "max_hp": self._max_life
         }
 
     def get_id(self):
