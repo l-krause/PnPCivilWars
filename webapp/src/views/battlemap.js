@@ -42,6 +42,9 @@ const reducer = (characters, action) => {
                 newCharacters[char.id] = char;
             }
             break;
+        case "characterDied":
+            newCharacters[action.character.id] = action.character;
+            break;
         default:
             break;
     }
