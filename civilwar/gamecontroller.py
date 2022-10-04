@@ -249,7 +249,10 @@ class GameController:
                 while isinstance(next_char, NPC) and is_ally == next_char.is_ally():
                     next_char.make_turn()
                     next_char.turn_over()
-                    next_char = self._turn_order.get_next()
+                    if self.get_game_state() == "ongoing":
+                        next_char = self._turn_order.get_next()
+                    else:
+                        break
             else:
                 active_char.turn_over()
                 self._turn_order.get_next()

@@ -26,10 +26,15 @@ class GameTurnOrder:
     def get_next(self):
         self.mutex.acquire()
         if len(self._round_queue) == 0:
-            self._round_queue = self._original_queue.copy()
-            self._round += 1
+            if len(self._original_queue) > 0:
+                self._round_queue = self._original_queue.copy()
+                self._round += 1
+                self._active_char = self._round_queue.pop(0)
+            else:
+                self._active_char = None
+        else:
+            self._active_char = self._round_queue.pop(0)
 
-        self._active_char = self._round_queue.pop(0)
         self.mutex.release()
         return self._active_char
 
