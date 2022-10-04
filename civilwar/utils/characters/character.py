@@ -2,7 +2,7 @@ import random
 from abc import abstractmethod, ABC
 
 from utils.api import create_error, ApiParameter, create_response
-from utils.constants import MEELE_RANGE
+from utils.constants import MEELE_RANGE, OG_METER
 from utils.json_serializable import JsonSerializable
 from utils.position import Position
 from utils.weapon import Weapon
@@ -220,16 +220,16 @@ class Character(JsonSerializable, ApiParameter, ABC):
     def is_allied_to(self, other):
         pass
 
-    def distance(self, other):
-        return self.get_pos().distance(other.get_pos())
+    def distance(self, other, factor=1.0):
+        return self.get_pos().distance(other.get_pos(), factor)
 
     def move_towards(self, other, requested_distance):
         from gamecontroller import GameController
         game_controller = GameController.instance()
-        current_distance = self.distance(other)
+        current_distance = self.distance(other.get_pos(), OG_METER)
         move_distance = min(current_distance - requested_distance, self._movement_left)
         if move_distance > 0:
-            target_pos = self.get_pos().normalize_distance(other.get_pos(), move_distance, game_controller.get_map_bounds())
+            target_pos = self.get_pos().normalize_distance(other.get_pos(), move_distance/OG_METER, game_controller.get_map_bounds())
             self.move(target_pos)
 
     def get_ranged_weapon(self):

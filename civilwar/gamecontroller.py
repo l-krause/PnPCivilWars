@@ -12,6 +12,7 @@ from utils.position import Position
 from utils.turn_order import GameTurnOrder
 from utils.util import CaseInsensitiveDict
 from utils.vec2 import Vector2D
+from utils.constants import OG_METER
 
 
 class GameController:
@@ -23,7 +24,6 @@ class GameController:
 
         # map attributes
         self._map_size = Vector2D(1000, 683)
-        self._og_meter = 152.5 / 434
 
         # game turn order + round counter + characters
         self._turn_order = GameTurnOrder()
@@ -143,7 +143,7 @@ class GameController:
 
     # TODO: rewrite
     def get_characters_aoe(self, start_pos, r):
-        pixel_dist = r // self._og_meter
+        pixel_dist = r // OG_METER
         response = []
         for c in self._chars:
             character_pos = c.get_pos()
@@ -156,7 +156,7 @@ class GameController:
 
     # TODO: rewrite
     def get_characters_line(self, start_pos, dest_pos, r, pierce=True):
-        max_dist = r // self._og_meter
+        max_dist = r // OG_METER
         dist = start_pos.distance(dest_pos)
         if dist > max_dist:
             dest_pos = start_pos.normalize_distance(dest_pos, max_dist, self.get_map_bounds())
@@ -191,7 +191,7 @@ class GameController:
         if not actor.has_action():
             return create_error("No Action Points available")
         weapon = actor.get_active_weapon()
-        distance = actor.get_pos().distance(target.get_pos(), factor=self._og_meter)
+        distance = actor.get_pos().distance(target.get_pos(), factor=OG_METER)
         resp = weapon.attack(distance, target)
 
         if resp["success"]:
