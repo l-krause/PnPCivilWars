@@ -197,15 +197,15 @@ export default function BattleMap(props) {
             </div>
         </MapContainer>
         <div><h2>How do you want to spend your action point?</h2></div>
-        {role !== "dm" || (activeChar === character) ? <div>
+        {role !== "dm" || (activeChar === character.id) ? <div>
                 <Button variant="contained" onClick={() => onAction("attack")}
-                        disabled={activeChar !== character}>Attack</Button>
+                        disabled={activeChar !== character.id}>Attack</Button>
                 <Button variant="contained" onClick={() => onAction("spell")}
-                        disabled={activeChar !== character}>Spell</Button>
+                        disabled={activeChar !== character.id}>Spell</Button>
                 <Button variant="contained" onClick={() => api.sendRequest("dash")}
-                        disabled={activeChar !== character}>Dash</Button>
-                <Button variant="contained" disabled={activeChar !== character}>Change Weapon</Button>
-                <Button variant="contained" onClick={() => onAction("pass")} disabled={activeChar !== character}>Pass
+                        disabled={activeChar !== character.id}>Dash</Button>
+                <Button variant="contained" disabled={activeChar !== character.id}>Change Weapon</Button>
+                <Button variant="contained" onClick={() => onAction("pass")} disabled={activeChar !== character.id}>Pass
                     Turn</Button>
             </div> :
             <div>
