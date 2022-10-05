@@ -137,8 +137,10 @@ class Character(JsonSerializable, ApiParameter, ABC):
         return self._id
 
     def turn_over(self):
+        if self._curr_life <= -2 * self._max_life:
+            self.kill("HP is too low")
+            return
         if self._curr_life <= 0:
-            self.stun(1)
             self._death_roll()
             return
         self._movement_left = self._movement
