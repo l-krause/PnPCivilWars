@@ -231,7 +231,12 @@ export default function BattleMap(props) {
         api.sendRequest("createNPCs", data)
     };
 
+    const renderMessages = (text) => {
+
+    };
+
     const tokens = Object.values(characters).map(c => renderCharacter(c));
+    const messages = Object.values().map(t => renderMessages(t));
 
     return <div>
         <MapContainer>
@@ -263,6 +268,9 @@ export default function BattleMap(props) {
                 <TextField label="Amount" value={npcAmount} onChange={e => setNPCAmount(e.target.value)}/>
                 <Checkbox label={"Ally?"} checked={npcAlly} onChange={() => setNPCAlly(!npcAlly)}/>
             </div>}
+        <div>
+            {messages}
+        </div>
     </div>
 
 }
