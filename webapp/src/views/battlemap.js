@@ -1,4 +1,14 @@
-import {Box, Checkbox, styled, TextField} from "@mui/material";
+import {
+    Box,
+    Checkbox,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
+    styled,
+    TextField
+} from "@mui/material";
 import {useCallback, useEffect, useReducer, useRef, useState} from "react";
 import Button from '@mui/material/Button';
 import Token from "../elements/token";
@@ -83,6 +93,7 @@ export default function BattleMap(props) {
     const [activeChar, setActiveChar] = useState(null);
     const [npcAmount, setNPCAmount] = useState(20);
     const [npcAlly, setNPCAlly] = useState(true);
+    const [npcDialog, setNpcDialog] = useState(false);
     const mapRef = useRef(null);
 
     const onFetchCharacters = useCallback(() => {
@@ -258,7 +269,8 @@ export default function BattleMap(props) {
                     <Button variant="contained" onClick={() => api.sendRequest("dash")}
                             disabled={activeChar !== character.id}>Dash</Button>
                     <Button variant="contained" disabled={activeChar !== character.id}>Change Weapon</Button>
-                    <Button className="pass-turn" variant="contained" onClick={() => onAction("pass")} disabled={activeChar !== character.id}>Pass
+                    <Button className="pass-turn" variant="contained" onClick={() => onAction("pass")}
+                            disabled={activeChar !== character.id}>Pass
                         Turn</Button>
                 </div> :
                 <div className="dm-interface">
@@ -268,10 +280,25 @@ export default function BattleMap(props) {
                     <Button variant="contained" onClick={() => onAction("changeHealth")}>Change HP</Button>
                     <Button variant="contained" onClick={() => onAction("kill")}>Kill</Button>
                     <Button variant="contained" onClick={() => onAction("stun")}>Stun</Button>
-                    <Button variant="contained" onClick={() => addNpcs()}>Create NPCs</Button>
+                    <Button variant="contained" onClick={() => setNpcDialog(true)}>Create NPCs</Button>
+                </div>}
+            <Dialog open={npcDialog} onClose={() => setNpcDialog(false)}>
+                <DialogTitle>Create NPCs</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        Choose how many NPCs to create and if they should be created as allies.
+                    </DialogContentText>
                     <TextField label="Amount" value={npcAmount} onChange={e => setNPCAmount(e.target.value)}/>
                     <Checkbox label={"Ally?"} checked={npcAlly} onChange={() => setNPCAlly(!npcAlly)}/>
-                </div>}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => {
+                        addNpcs();
+                        setNpcDialog(false);
+                    }}>Create</Button>
+                    <Button onClick={() => setNpcDialog(false)}>Cancel</Button>
+                </DialogActions>
+            </Dialog>
         </div>
     </div>
 

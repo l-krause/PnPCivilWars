@@ -2,9 +2,14 @@ import "./event-message.css"
 
 export default function EventMessage(props) {
     let message = props.eventMessage;
-    let color = props.color;
+    let textColor = props.color;
+
+    let style = {
+        position: relative,
+        color: textColor
+    }
 
     return <div>
-        <p>{message}</p>
+        <p style={style}>{message}</p>
     </div>;
 }
