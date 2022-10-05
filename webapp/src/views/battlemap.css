@@ -26,10 +26,18 @@
     height: 20vh;
 }
 
+.pass-turn {
+    width: 100% !important;
+    color: red;
+    background-color: red;
+}
+
 .player-interface > button {
     width: 50%;
     height: 50%;
 }
+
+
 
 .dm-interface {
     height: 20vh;

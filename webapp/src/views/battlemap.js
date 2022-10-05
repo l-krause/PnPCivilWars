@@ -258,7 +258,7 @@ export default function BattleMap(props) {
                     <Button variant="contained" onClick={() => api.sendRequest("dash")}
                             disabled={activeChar !== character.id}>Dash</Button>
                     <Button variant="contained" disabled={activeChar !== character.id}>Change Weapon</Button>
-                    <Button variant="contained" onClick={() => onAction("pass")} disabled={activeChar !== character.id}>Pass
+                    <Button className="pass-turn" variant="contained" onClick={() => onAction("pass")} disabled={activeChar !== character.id}>Pass
                         Turn</Button>
                 </div> :
                 <div className="dm-interface">
