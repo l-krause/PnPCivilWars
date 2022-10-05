@@ -1,5 +1,4 @@
 from utils.characters.character import Character
-from threading import Lock
 
 
 class GameTurnOrder:
@@ -9,7 +8,6 @@ class GameTurnOrder:
         self._round_queue = []
         self._active_char = None
         self._round = 0
-        self.mutex = Lock()
 
     def add(self, character: Character):
         self._original_queue.append(character)
@@ -24,7 +22,6 @@ class GameTurnOrder:
         self._active_char = None
 
     def get_next(self):
-        self.mutex.acquire()
         if len(self._round_queue) == 0:
             if len(self._original_queue) > 0:
                 self._round_queue = self._original_queue.copy()
@@ -35,7 +32,6 @@ class GameTurnOrder:
         else:
             self._active_char = self._round_queue.pop(0)
 
-        self.mutex.release()
         return self._active_char
 
     def get_active(self):
@@ -45,9 +41,7 @@ class GameTurnOrder:
         return self._round
 
     def remove(self, char):
-        self.mutex.acquire()
         if char in self._original_queue:
             self._original_queue.remove(char)
             if char in self._round_queue:
                 self._round_queue.remove(char)
-        self.mutex.release()

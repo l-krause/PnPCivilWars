@@ -8,6 +8,7 @@
     height: 99vh;
     width: 78vw;
     border: 1px solid grey;
+    position: relative;
 }
 
 .battlemap {

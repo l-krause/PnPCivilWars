@@ -9,7 +9,6 @@ import ChangeCharDialog from "../elements/change-char-dialog";
 const MAX_LOG_SIZE = 250;
 
 const reducer = (gameData, action) => {
-    console.log("BEFORE", gameData);
     let newGameData = {...gameData};
     switch (action.type) {
         case "setCharacter":
@@ -57,6 +56,7 @@ const reducer = (gameData, action) => {
                 message: `${gameData.characters[action.characterId].name} survived due to ${action.reason}`,
                 color: 'green'
             })
+            break;
         default:
             break;
     }
@@ -65,7 +65,6 @@ const reducer = (gameData, action) => {
         newGameData.log = newGameData.log.slice(newGameData.log.length - MAX_LOG_SIZE);
     }
 
-    console.log("AFTER", newGameData);
     return newGameData;
 }
 
@@ -84,6 +83,8 @@ export default function BattleMap(props) {
     const [changeChar, setChangeChar] = useState(false)
     const [round, setRound] = useState(0);
     const [gameState, setGameState] = useState("ongoing");
+    const [loaded, setLoaded] = useState(false);
+
     const mapRef = useRef(null);
 
     const onFetchCharacters = useCallback(() => {
@@ -113,13 +114,13 @@ export default function BattleMap(props) {
             let x = Math.floor(relX * pos.x);
             let y = Math.floor(relY * pos.y);
             return {x: x, y: y};
+        } else {
+            console.log("WARN: translatePosition called before mapRef was loaded!");
+            return pos;
         }
-
-        return null;
     }
 
     const onCharacterUpdate = useCallback((char) => {
-        char.pos = translatePosition(char.pos);
         dispatch({type: "setCharacter", character: char});
     }, []);
 
@@ -152,9 +153,6 @@ export default function BattleMap(props) {
 
     const onGameEvent = useCallback((data) => {
         if (data.type.startsWith("character")) {
-            if (data.type === "characterMove" || data.type === "characterPlace") {
-                data.to = translatePosition(data.to);
-            }
             dispatch(data);
         }
     }, []);
@@ -164,7 +162,6 @@ export default function BattleMap(props) {
     }, [onFetchCharacters]);
 
     useEffect(() => {
-        console.log("useEffect called");
         api.registerEvent("characterJoin", onCharacterJoin);
         api.registerEvent("characterUpdate", onCharacterUpdate);
         api.registerEvent("start", (res) => !res.success && alert("Error starting game: " + res.msg));
@@ -224,27 +221,27 @@ export default function BattleMap(props) {
 
     }, [api, character, role, activeChar]);
 
-    const tokens = Object.values(gameData.characters).map(c => <Token
+    const tokens = Object.values(mapRef.current && loaded ? gameData.characters : {}).map(c => <Token
         character={c}
         onDrag={(e) => onTokenDrag(e, c)}
         onClick={() => setSelectedCharacter(c.id)}
+        translatePosition={translatePosition}
         isSelected={c.id === selectedCharacter}
     />);
+
     const messages = gameData.log.map(entry => <EventMessage
         eventMessage={entry.message}
         color={entry.color}
     />);
 
-    console.log(activeChar, character.id)
-
     return <div className="battle-view">
         <div className="battlemap-container">
-            <img className="battlemap" src={"/img/battlemap.png"} alt="BattleMap" ref={mapRef}/>
+            <img className="battlemap" src={"/img/battlemap.png"} alt="BattleMap" ref={mapRef} onLoad={() => setLoaded(true)}/>
             {tokens}
         </div>
         <div className="event-container">
             <div className="status">
-                <img className="heart" src="/img/heart.svg.png"/>
+                <img className="heart" src={"/img/heart.png"} alt={"heart icon"} />
                 &nbsp; {character.hp} / {character.max_hp}
                 <div>Round {round}.</div>
             </div>
