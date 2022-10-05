@@ -1,4 +1,51 @@
+.battle-view {
+    width: 100vw;
+    height: 100vh;
+}
+
+.battlemap-container {
+    float: left;
+    height: 99vh;
+    width: 78vw;
+    border: 1px solid grey;
+}
+
+.battlemap {
+    height: 99vh;
+    width: 78vw;
+    border: 1px solid grey;
+}
+
+.event-container {
+    float: right;
+    width: 21vw;
+    height: 100vh;
+}
+
+.player-interface {
+    height: 20vh;
+}
+
+.player-interface > button {
+    width: 50%;
+    height: 50%;
+}
+
+.dm-interface {
+    height: 20vh;
+}
+
+.dm-interface > button{
+    width: 50%;
+    height: 30%;
+}
+
+.question {
+
+}
+
 .event-log {
-    max-height: 400px;
+    height: 63vh;
     overflow-y: scroll;
+    border: 1px solid black;
 }

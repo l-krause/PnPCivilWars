@@ -57,6 +57,7 @@ const reducer = (gameData, action) => {
                     color: "white"
                 }
             )
+            break;
         default:
             break;
     }
@@ -227,10 +228,6 @@ export default function BattleMap(props) {
         api.sendRequest("createNPCs", data)
     };
 
-    const renderMessages = (text) => {
-
-    };
-
     const tokens = Object.values(gameData.characters).map(c => <Token
         character={c}
         onDrag={(e) => onTokenDrag(e, c)}
@@ -243,38 +240,38 @@ export default function BattleMap(props) {
     />);
 
 
-    return <div>
-        <MapContainer>
-            <div>
-                <img src={"/img/battlemap.png"} alt="BattleMap" ref={mapRef}/>
-                {tokens}
+    return <div className="battle-view">
+        <div className="battlemap-container">
+            <img className="battlemap" src={"/img/battlemap.png"} alt="BattleMap" ref={mapRef}/>
+            {tokens}
+        </div>
+        <div className="event-container">
+            <div className="event-log">
+                {messages}
             </div>
-        </MapContainer>
-        <div><h2>How do you want to spend your action point?</h2></div>
-        {role !== "dm" || (activeChar === character.id) ? <div>
-                <Button variant="contained" onClick={() => onAction("attack")}
-                        disabled={activeChar !== character.id}>Attack</Button>
-                <Button variant="contained" onClick={() => onAction("spell")}
-                        disabled={activeChar !== character.id}>Spell</Button>
-                <Button variant="contained" onClick={() => api.sendRequest("dash")}
-                        disabled={activeChar !== character.id}>Dash</Button>
-                <Button variant="contained" disabled={activeChar !== character.id}>Change Weapon</Button>
-                <Button variant="contained" onClick={() => onAction("pass")} disabled={activeChar !== character.id}>Pass
-                    Turn</Button>
-            </div> :
-            <div>
-                <Button variant="contained" onClick={() => onAction("start")}>Start</Button>
-                <Button variant="contained" onClick={() => onAction("continue")}>Continue</Button>
-                <Button variant="contained" onClick={() => onAction("reset")}>Reset</Button>
-                <Button variant="contained" onClick={() => onAction("changeHealth")}>Change HP</Button>
-                <Button variant="contained" onClick={() => onAction("kill")}>Kill</Button>
-                <Button variant="contained" onClick={() => onAction("stun")}>Stun</Button>
-                <Button variant="contained" onClick={() => addNpcs()}>Create NPCs</Button>
-                <TextField label="Amount" value={npcAmount} onChange={e => setNPCAmount(e.target.value)}/>
-                <Checkbox label={"Ally?"} checked={npcAlly} onChange={() => setNPCAlly(!npcAlly)}/>
-            </div>}
-        <div className="event-log">
-            {messages}
+            <div className="question"><h4>How do you want to spend your action point?</h4></div>
+            {role !== "dm" || (activeChar === character.id) ? <div className="player-interface">
+                    <Button variant="contained" onClick={() => onAction("attack")}
+                            disabled={activeChar !== character.id}>Attack</Button>
+                    <Button variant="contained" onClick={() => onAction("spell")}
+                            disabled={activeChar !== character.id}>Spell</Button>
+                    <Button variant="contained" onClick={() => api.sendRequest("dash")}
+                            disabled={activeChar !== character.id}>Dash</Button>
+                    <Button variant="contained" disabled={activeChar !== character.id}>Change Weapon</Button>
+                    <Button variant="contained" onClick={() => onAction("pass")} disabled={activeChar !== character.id}>Pass
+                        Turn</Button>
+                </div> :
+                <div className="dm-interface">
+                    <Button variant="contained" onClick={() => onAction("start")}>Start</Button>
+                    <Button variant="contained" onClick={() => onAction("continue")}>Continue</Button>
+                    <Button variant="contained" onClick={() => onAction("reset")}>Reset</Button>
+                    <Button variant="contained" onClick={() => onAction("changeHealth")}>Change HP</Button>
+                    <Button variant="contained" onClick={() => onAction("kill")}>Kill</Button>
+                    <Button variant="contained" onClick={() => onAction("stun")}>Stun</Button>
+                    <Button variant="contained" onClick={() => addNpcs()}>Create NPCs</Button>
+                    <TextField label="Amount" value={npcAmount} onChange={e => setNPCAmount(e.target.value)}/>
+                    <Checkbox label={"Ally?"} checked={npcAlly} onChange={() => setNPCAlly(!npcAlly)}/>
+                </div>}
         </div>
     </div>
 
