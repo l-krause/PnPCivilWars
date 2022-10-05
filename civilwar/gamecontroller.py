@@ -24,7 +24,7 @@ class GameController:
     def __init__(self):
 
         # map attributes
-        self._map_size = Vector2D(1000, 683)
+        self._map_size = Vector2D(1000, 684)
 
         # game turn order + round counter + characters
         self._turn_order = GameTurnOrder()
