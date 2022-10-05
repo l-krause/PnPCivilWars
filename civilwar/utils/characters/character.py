@@ -182,9 +182,7 @@ class Character(JsonSerializable, ApiParameter, ABC):
         self._won_death = 0
         self._lost_death = 0
         self._curr_life = hp
-        from gamecontroller import GameController
-        GameController.send_game_event("characterSurvived",
-                                       data={"character": self._id, "reason": reason, "hp": self.get_hp()})
+        self.send_character_event("characterSurvived", data={"reason": reason, "hp": self.get_hp()})
 
     @staticmethod
     def api_validate(game_controller, value):
