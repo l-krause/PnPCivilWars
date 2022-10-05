@@ -51,7 +51,7 @@ const reducer = (gameData, action) => {
     }
 
     if (newGameData.log.length > MAX_LOG_SIZE) {
-        newGameData.log = newGameData.slice(newGameData.length - MAX_LOG_SIZE);
+        newGameData.log = newGameData.log.slice(newGameData.log.length - MAX_LOG_SIZE);
     }
 
     console.log("AFTER", newGameData);
