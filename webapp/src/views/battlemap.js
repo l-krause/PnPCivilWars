@@ -41,7 +41,7 @@ const reducer = (gameData, action) => {
             });
             break;
         case "characterAttack":
-            newGameData.characters[action.victim].hp = newGameData.characters[action.victim].hp - action.damage;
+            newGameData.characters[action.victim].hp = newGameData.characters[action.victim].hp + action.damage;
             newGameData.log.push({
                     timestamp: action.timestamp,
                     message: `${gameData.characters[action.attacker].name} hit ${gameData.characters[action.victim].name} with a ${action.hit} for ${action.damage} damage!`,

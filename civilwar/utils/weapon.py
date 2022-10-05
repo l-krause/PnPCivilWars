@@ -14,7 +14,7 @@ class Weapon:
         self._type = dictionary["type"]
         self._additional = 0 if "additional" not in dictionary.keys() else dictionary["additional"]
         self._min_range = 0 if "min_range" not in dictionary.keys() else dictionary["min_range"]
-        self._max_range = 1.5 if "max_range" not in dictionary.keys() else dictionary["max_range"]
+        self._max_range = MEELE_RANGE if "max_range" not in dictionary.keys() else dictionary["max_range"]
         self._usages = -1 if "usages" not in dictionary.keys() else dictionary["usages"]
 
     def get_max_range(self):
