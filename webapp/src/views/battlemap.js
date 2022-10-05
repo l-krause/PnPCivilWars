@@ -100,6 +100,7 @@ export default function BattleMap(props) {
     const [changeDamage, setChangeDamage] = useState(0);
     const [changeAdd, setChangeAdd] = useState(0);
     const [changeArmor, setChangeArmor] = useState(0);
+    const [changeDice, setChangeDice] = useState(0);
     const mapRef = useRef(null);
 
     const onFetchCharacters = useCallback(() => {
@@ -250,6 +251,7 @@ export default function BattleMap(props) {
             "character": selectedCharacter,
             "curr_hp": changeHp,
             "max_hp": changeMaxHp,
+            "dice": changeDice,
             "damage": changeDamage,
             "modifier": changeAdd,
             "armor": changeArmor
@@ -328,7 +330,8 @@ export default function BattleMap(props) {
                 </DialogContentText>
                 <TextField label="Max HP" value={changeMaxHp} onChange={e => setChangeMaxHp(e.target.value)}/>
                 <TextField label="Curr_HP" value={changeHp} onChange={e => setChangeHp(e.target.value)}/>
-                <TextField label="Damage Dice" value={changeDamage} onChange={e => setChangeDamage(e.target.value)}/>
+                <TextField label="Damage Dice" value={changeDice} onChange={e => setChangeDice(e.target.value)}/>
+                <TextField label="Dice Type" value={changeDamage} onChange={e => setChangeDamage(e.target.value)}/>
                 <TextField label="Damage Additional" value={changeAdd} onChange={e => setChangeAdd(e.target.value)}/>
                 <TextField label="Armor" value={changeArmor} onChange={e => setChangeArmor(e.target.value)}/>
             </DialogContent>
