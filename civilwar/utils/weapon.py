@@ -34,7 +34,6 @@ class Weapon:
         if self._usages > 0:
             self._usages -= 1
         hit = random.randint(1, 20) + self._hit
-        print(hit)
         if hit < target.get_armor():
             return create_error(f"Missed target: {hit}")
         damage = self._additional

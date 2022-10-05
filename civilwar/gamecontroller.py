@@ -1,6 +1,7 @@
 import json
 import logging
 import os.path
+import time
 
 from flask_socketio import emit
 
@@ -207,7 +208,7 @@ class GameController:
             return create_error("It's not your characters turn yet")
         max_dist = target.get_movement_left()
 
-        new_pos = pos.normalize_distance(target.get_pos, max_dist, self.get_map_bounds())
+        new_pos = pos.normalize_distance(target.get_pos(), max_dist, self.get_map_bounds())
         print("new pos:", new_pos)
         target.move(new_pos)
         return create_response()
@@ -268,9 +269,9 @@ class GameController:
 
     @staticmethod
     def send_game_event(event, data=None):
-        if data is None:
-            data = {}
+        data = {} if data is None else data
         data["type"] = event
+        data["timestamp"] = int(time.time())
         emit("gameEvent", json_serialize(data))
         print("Game Event:", data)
 
