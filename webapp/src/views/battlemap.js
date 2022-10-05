@@ -48,6 +48,13 @@ const reducer = (gameData, action) => {
                 }
             )
             break;
+        case "characterSurvived":
+            newGameData.characters[action.characterId].hp = action.hp
+            newGameData.log.push({
+                timestamp: action.timestamp,
+                message: `${gameData.characters[action.characterId].name} survived due to ${action.reason}`,
+                color: 'green'
+            })
         default:
             break;
     }
