@@ -5,7 +5,7 @@ export default function EventMessage(props) {
     let textColor = props.color;
 
     let style = {
-        position: relative,
+        position: "relative",
         color: textColor
     }
 
