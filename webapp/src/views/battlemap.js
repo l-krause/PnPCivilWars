@@ -38,10 +38,10 @@ const reducer = (gameData, action) => {
         case "characterPlace":
         case "characterMove":
             newGameData.characters[action.characterId].pos = action.to;
-            newGameData.log.push({
-                timestamp: action.timestamp,
-                message: `Character id=${action.characterId} moved to pos=(${action.to.x}, ${action.to.y})`
-            });
+            // newGameData.log.push({
+            //     timestamp: action.timestamp,
+            //     message: `Character id=${action.characterId} moved to pos=(${action.to.x}, ${action.to.y})`
+            // });
             break;
         case "setAllCharacters":
             newGameData.characters = action.characters;
@@ -55,7 +55,7 @@ const reducer = (gameData, action) => {
             newGameData.characters[action.characterId].status = "dead";
             newGameData.log.push({
                 timestamp: action.timestamp,
-                message: `${gameData.characters[action.characterId]} died, reason=${action.reason}`,
+                message: `${gameData.characters[action.characterId].name} died, reason=${action.reason}`,
                 color: "red"
             });
             break;
@@ -63,7 +63,7 @@ const reducer = (gameData, action) => {
             newGameData.characters[action.victim].hp = newGameData.characters[action.victim].hp - action.damage;
             newGameData.log.push({
                     timestamp: action.timestamp,
-                    message: `Hit ${gameData.characters[action.victim]} with a ${action.hit} for ${action.damage} damage!`,
+                    message: `${gameData.characters[action.attacker].name} hit ${gameData.characters[action.victim].name} with a ${action.hit} for ${action.damage} damage!`,
                     color: "white"
                 }
             )
