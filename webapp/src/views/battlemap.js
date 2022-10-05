@@ -16,6 +16,8 @@ const reducer = (gameData, action) => {
             newGameData.characters[action.character.id] = action.character;
             break;
         case "characterPlace":
+            newGameData.characters[action.characterId].pos = action.to;
+            break;
         case "characterMove":
             newGameData.characters[action.characterId].pos = action.to;
             // newGameData.log.push({
@@ -81,6 +83,7 @@ export default function BattleMap(props) {
     const [npcDialog, setNpcDialog] = useState(false);
     const [changeChar, setChangeChar] = useState(false)
     const [round, setRound] = useState(0);
+    const [gameState, setGameState] = useState("ongoing");
     const mapRef = useRef(null);
 
     const onFetchCharacters = useCallback(() => {
@@ -144,7 +147,7 @@ export default function BattleMap(props) {
     const onGameStatus = useCallback((data) => {
         setActiveChar(data.active_char);
         setRound(data.round);
-        // setGameState(data.state);
+        setGameState(data.state);
     }, []);
 
     const onGameEvent = useCallback((data) => {
