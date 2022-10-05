@@ -94,6 +94,12 @@ export default function BattleMap(props) {
     const [npcAmount, setNPCAmount] = useState(20);
     const [npcAlly, setNPCAlly] = useState(true);
     const [npcDialog, setNpcDialog] = useState(false);
+    const [changeChar, setChangeChar] = useState(false)
+    const [changeHp, setChangeHp] = useState(0);
+    const [changeMaxHp, setChangeMaxHp] = useState(0);
+    const [changeDamage, setChangeDamage] = useState(0);
+    const [changeAdd, setChangeAdd] = useState(0);
+    const [changeArmor, setChangeArmor] = useState(0);
     const mapRef = useRef(null);
 
     const onFetchCharacters = useCallback(() => {
@@ -239,67 +245,101 @@ export default function BattleMap(props) {
         api.sendRequest("createNPCs", data)
     };
 
-    const tokens = Object.values(gameData.characters).map(c => <Token
-        character={c}
-        onDrag={(e) => onTokenDrag(e, c)}
-        onClick={() => setSelectedCharacter(c.id)}
-        isSelected={c.id === selectedCharacter}
-    />);
-    const messages = gameData.log.map(entry => <EventMessage
-        eventMessage={entry.message}
-        color={entry.color}
-    />);
+    const changeSelCharacter = () => {
+        let data = {
+            "character": selectedCharacter,
+            "curr_hp": changeHp,
+            "max_hp": changeMaxHp,
+            "damage": changeDamage,
+            "modifier": changeAdd,
+            "armor": changeArmor
+        }
+        api.sendRequest("changeSelChar", data)
+    }
+}
+
+const tokens = Object.values(gameData.characters).map(c => <Token
+    character={c}
+    onDrag={(e) => onTokenDrag(e, c)}
+    onClick={() => setSelectedCharacter(c.id)}
+    isSelected={c.id === selectedCharacter}
+/>);
+const messages = gameData.log.map(entry => <EventMessage
+    eventMessage={entry.message}
+    color={entry.color}
+/>);
 
 
-    return <div className="battle-view">
-        <div className="battlemap-container">
-            <img className="battlemap" src={"/img/battlemap.png"} alt="BattleMap" ref={mapRef}/>
-            {tokens}
-        </div>
-        <div className="event-container">
-            <div className="event-log">
-                {messages}
-            </div>
-            <div className="question"><h4>How do you want to spend your action point?</h4></div>
-            {role !== "dm" || (activeChar === character.id) ? <div className="player-interface">
-                    <Button variant="contained" onClick={() => onAction("attack")}
-                            disabled={activeChar !== character.id}>Attack</Button>
-                    <Button variant="contained" onClick={() => onAction("spell")}
-                            disabled={activeChar !== character.id}>Spell</Button>
-                    <Button variant="contained" onClick={() => api.sendRequest("dash")}
-                            disabled={activeChar !== character.id}>Dash</Button>
-                    <Button variant="contained" disabled={activeChar !== character.id}>Change Weapon</Button>
-                    <Button className="pass-turn" variant="contained" onClick={() => onAction("pass")}
-                            disabled={activeChar !== character.id}>Pass
-                        Turn</Button>
-                </div> :
-                <div className="dm-interface">
-                    <Button variant="contained" onClick={() => onAction("start")}>Start</Button>
-                    <Button variant="contained" onClick={() => onAction("continue")}>Continue</Button>
-                    <Button variant="contained" onClick={() => onAction("reset")}>Reset</Button>
-                    <Button variant="contained" onClick={() => onAction("changeHealth")}>Change HP</Button>
-                    <Button variant="contained" onClick={() => onAction("kill")}>Kill</Button>
-                    <Button variant="contained" onClick={() => onAction("stun")}>Stun</Button>
-                    <Button variant="contained" onClick={() => setNpcDialog(true)}>Create NPCs</Button>
-                </div>}
-            <Dialog open={npcDialog} onClose={() => setNpcDialog(false)}>
-                <DialogTitle>Create NPCs</DialogTitle>
-                <DialogContent>
-                    <DialogContentText>
-                        Choose how many NPCs to create and if they should be created as allies.
-                    </DialogContentText>
-                    <TextField label="Amount" value={npcAmount} onChange={e => setNPCAmount(e.target.value)}/>
-                    <Checkbox label={"Ally?"} checked={npcAlly} onChange={() => setNPCAlly(!npcAlly)}/>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => {
-                        addNpcs();
-                        setNpcDialog(false);
-                    }}>Create</Button>
-                    <Button onClick={() => setNpcDialog(false)}>Cancel</Button>
-                </DialogActions>
-            </Dialog>
-        </div>
+return <div className="battle-view">
+    <div className="battlemap-container">
+        <img className="battlemap" src={"/img/battlemap.png"} alt="BattleMap" ref={mapRef}/>
+        {tokens}
     </div>
+    <div className="event-container">
+        <div className="event-log">
+            {messages}
+        </div>
+        <div className="question"><h4>How do you want to spend your action point?</h4></div>
+        {role !== "dm" || (activeChar === character.id) ? <div className="player-interface">
+                <Button variant="contained" onClick={() => onAction("attack")}
+                        disabled={activeChar !== character.id}>Attack</Button>
+                <Button variant="contained" onClick={() => onAction("spell")}
+                        disabled={activeChar !== character.id}>Spell</Button>
+                <Button variant="contained" onClick={() => api.sendRequest("dash")}
+                        disabled={activeChar !== character.id}>Dash</Button>
+                <Button variant="contained" disabled={activeChar !== character.id}>Change Weapon</Button>
+                <Button className="pass-turn" variant="contained" onClick={() => onAction("pass")}
+                        disabled={activeChar !== character.id}>Pass
+                    Turn</Button>
+            </div> :
+            <div className="dm-interface">
+                <Button variant="contained" onClick={() => onAction("start")}>Start</Button>
+                <Button variant="contained" onClick={() => onAction("continue")}>Continue</Button>
+                <Button variant="contained" onClick={() => onAction("reset")}>Reset</Button>
+                <Button variant="contained" onClick={() => onAction("changeHealth")}>Change HP</Button>
+                <Button variant="contained" onClick={() => onAction("kill")}>Kill</Button>
+                <Button variant="contained" onClick={() => onAction("stun")}>Stun</Button>
+                <Button variant="contained" onClick={() => setNpcDialog(true)}>Create NPCs</Button>
+                <Button variant="contained" onClick={() => setChangeChar(true)}>Change Character</Button>
+            </div>}
+    </div>
+    <Dialog open={npcDialog} onClose={() => setNpcDialog(false)}>
+        <DialogTitle>Create NPCs</DialogTitle>
+        <DialogContent>
+            <DialogContentText>
+                Choose how many NPCs to create and if they should be created as allies.
+            </DialogContentText>
+            <TextField label="Amount" value={npcAmount} onChange={e => setNPCAmount(e.target.value)}/>
+            <Checkbox label={"Ally?"} checked={npcAlly} onChange={() => setNPCAlly(!npcAlly)}/>
+        </DialogContent>
+        <DialogActions>
+            <Button onClick={() => {
+                addNpcs();
+                setNpcDialog(false);
+            }}>Create</Button>
+            <Button onClick={() => setNpcDialog(false)}>Cancel</Button>
+        </DialogActions>
+    </Dialog>
+    <Dialog open={changeChar} onClose={() => setChangeChar(false)}>
+        <DialogTitle>Create NPCs</DialogTitle>
+        <DialogContent>
+            <DialogContentText>
+                Choose how you want to modify the character
+            </DialogContentText>
+            <TextField label="Max HP" value={changeMaxHp} onChange={e => setChangeMaxHp(e.target.value)}/>
+            <TextField label="Curr_HP" value={changeHp} onChange={e => setChangeHp(e.target.value)}/>
+            <TextField label="Damage Dice" value={changeDamage} onChange={e => setChangeDamage(e.target.value)}/>
+            <TextField label="Damage Additional" value={changeAdd} onChange={e => setChangeAdd(e.target.value)}/>
+            <TextField label="Armor" value={changeArmor} onChange={e => setChangeArmor(e.target.value)}>
+        </DialogContent>
+        <DialogActions>
+            <Button onClick={() => {
+                changeSelCharacter();
+                setChangeChar(false);
+            }}>Change</Button>
+            <Button onClick={() => setChangeChar(false)}>Cancel</Button>
+        </DialogActions>
+    </Dialog>
+</div>
 
 }
