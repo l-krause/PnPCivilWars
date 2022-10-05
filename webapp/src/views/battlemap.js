@@ -1,8 +1,9 @@
 import {Box, Checkbox, styled, TextField} from "@mui/material";
 import {useCallback, useEffect, useReducer, useRef, useState} from "react";
 import Button from '@mui/material/Button';
+import Token from "../elements/token";
 
-const TOKEN_SIZE = 48;
+const MAX_LOG_SIZE = 250;
 
 const MapContainer = styled(Box)(({theme}) => ({
     "& > div": {
@@ -15,42 +16,46 @@ const MapContainer = styled(Box)(({theme}) => ({
     }
 }));
 
-const Token = styled(Box)(({theme}) => ({
-    position: "absolute",
-    "& img": {
-        width: TOKEN_SIZE,
-        height: TOKEN_SIZE
-    }
-}));
-
-const reducer = (characters, action) => {
-    console.log("BEFORE", characters);
-    let newCharacters = {...characters};
+const reducer = (gameData, action) => {
+    console.log("BEFORE", gameData);
+    let newGameData = {...gameData};
     switch (action.type) {
         case "setCharacter":
-            newCharacters[action.character.id] = action.character;
+            newGameData.characters[action.character.id] = action.character;
             break;
         case "characterPlace":
         case "characterMove":
-            newCharacters[action.characterId] = { ...newCharacters[action.characterId], pos: action.to };
+            newGameData.characters[action.characterId].pos = action.to;
+            newGameData.log.push({
+                timestamp: action.timestamp,
+                message: `Character id=${action.characterId} moved to pos=(${action.to.x}, ${action.to.y})`
+            });
             break;
         case "setAllCharacters":
-            newCharacters = action.characters;
+            newGameData.characters = action.characters;
             break;
         case "addCharacters":
             for(const char of action.characters) {
-                newCharacters[char.id] = char;
+                newGameData.characters[char.id] = char;
             }
             break;
         case "characterDied":
-            newCharacters[action.characterId].status = "dead";
+            newGameData.characters[action.characterId].status = "dead";
+            newGameData.log.push({
+                timestamp: action.timestamp,
+                message: `Character id=${action.characterId} died, reason=${action.reason}`
+            });
             break;
         default:
             break;
     }
 
-    console.log("AFTER", newCharacters);
-    return newCharacters;
+    if (newGameData.log.length > MAX_LOG_SIZE) {
+        newGameData.log = newGameData.slice(newGameData.length - MAX_LOG_SIZE);
+    }
+
+    console.log("AFTER", newGameData);
+    return newGameData;
 }
 
 export default function BattleMap(props) {
@@ -61,7 +66,7 @@ export default function BattleMap(props) {
     const setCharacter = props.setCharacter;
 
     const [fetchCharacters, setFetchCharacters] = useState(true);
-    const [characters, dispatch] = useReducer(reducer, null, () => ({}));
+    const [gameData, dispatch] = useReducer(reducer, null, () => ({ characters: {}, log: [] }));
     const [selectedCharacter, setSelectedCharacter] = useState(null);
     const [activeChar, setActiveChar] = useState(null);
     const [npcAmount, setNPCAmount] = useState(20);
@@ -82,10 +87,10 @@ export default function BattleMap(props) {
     }, [api, fetchCharacters]);
 
     const onCharacterJoin = useCallback((character) => {
-        if (!characters.hasOwnProperty(character.id)) {
+        if (!gameData.characters.hasOwnProperty(character.id)) {
             dispatch({ type: "setCharacter", character: character });
         }
-    }, [characters]);
+    }, [gameData]);
 
     const translatePosition = (pos) => {
         let img = mapRef.current;
@@ -206,32 +211,17 @@ export default function BattleMap(props) {
 
     }, [api, character, role, activeChar]);
 
-    const renderCharacter = (character) => {
-        let style = {};
-        if (character.id === selectedCharacter) {
-            style.border = "1px solid red";
-        }
-        if (character.type === "npc") {
-            if (character.is_ally) {
-                style.filter = " hue-rotate(180deg)";
-            }
-        }
-        if (character.status !== "dead") {
-            return <Token key={"character-" + character.id} style={{left: character.pos.x, top: character.pos.y}}>
-                <img alt={"token of " + character.id} src={character.token}
-                     onDragEnd={(e) => onTokenDrag(e, character)}
-                     onClick={() => setSelectedCharacter(character.id)}
-                     style={style}/>
-            </Token>
-        }
-    };
-
     const addNpcs = () => {
         let data = {"allies": npcAlly, "amount": parseInt(npcAmount + "")}
         api.sendRequest("createNPCs", data)
     };
 
-    const tokens = Object.values(characters).map(c => renderCharacter(c));
+    const tokens = Object.values(gameData.characters).map(c => <Token
+        character={c}
+        onDrag={(e) => onTokenDrag(e, c)}
+        onClick={() => setSelectedCharacter(c.id)}
+        isSelected={c.id === selectedCharacter}
+    />);
 
     return <div>
         <MapContainer>
