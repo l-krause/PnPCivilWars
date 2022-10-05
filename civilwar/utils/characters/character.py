@@ -137,7 +137,10 @@ class Character(JsonSerializable, ApiParameter, ABC):
         return self._id
 
     def turn_over(self):
-        self._death_roll()
+        if self._curr_life <= 0:
+            self.stun(1)
+            self._death_roll()
+            return
         self._movement_left = self._movement
         self._action_points = self._action_points_max
         if self._ap_buff > 0:
@@ -155,13 +158,11 @@ class Character(JsonSerializable, ApiParameter, ABC):
             roll = max(roll, random.randint(1, 20))
         if roll > 10:
             if roll == 20:
-                self._curr_life = 1
+                self.revive(reason="Nat 20")
             else:
                 self._won_death += 1
                 if self._won_death == 3:
-                    self._curr_life = random.randint(1, 4)
-                    self._won_death = 0
-                    self._lost_death = 0
+                    self.revive(random.randint(1, 4), "Won 3 Death roles")
         else:
             self._lost_death += 1
             if roll == 1:
@@ -176,6 +177,14 @@ class Character(JsonSerializable, ApiParameter, ABC):
         self._dead = True
         from gamecontroller import GameController
         GameController.instance().on_character_died(self, reason=reason)
+
+    def revive(self, hp=1, reason=None):
+        self._won_death = 0
+        self._lost_death = 0
+        self._curr_life = hp
+        from gamecontroller import GameController
+        GameController.send_game_event("characterSurvived",
+                                       data={"character": self._id, "reason": reason, "hp": self.get_hp()})
 
     @staticmethod
     def api_validate(game_controller, value):
@@ -192,9 +201,9 @@ class Character(JsonSerializable, ApiParameter, ABC):
         from gamecontroller import GameController
         game_controller = GameController.instance()
         filters = [
-            lambda c: not c.is_dead(),               # character is alive
+            lambda c: not c.is_dead(),  # character is alive
             lambda c: self.distance(c) <= distance,  # in range
-            lambda c: not self.is_allied_to(c),      # is not allied to
+            lambda c: not self.is_allied_to(c),  # is not allied to
         ]
 
         return game_controller.get_characters_by(*filters)
@@ -229,7 +238,8 @@ class Character(JsonSerializable, ApiParameter, ABC):
         current_distance = self.distance(other, OG_METER)
         move_distance = min(current_distance - requested_distance, self._movement_left)
         if move_distance > 0:
-            target_pos = self.get_pos().normalize_distance(other.get_pos(), move_distance/OG_METER, game_controller.get_map_bounds())
+            target_pos = self.get_pos().normalize_distance(other.get_pos(), move_distance / OG_METER,
+                                                           game_controller.get_map_bounds())
             self.move(target_pos)
 
     def get_ranged_weapon(self):

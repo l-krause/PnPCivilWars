@@ -51,7 +51,11 @@
 }
 
 .event-log {
-    height: 63vh;
+    height: 60vh;
     overflow-y: scroll;
     border: 1px solid black;
+}
+
+.heart {
+    height: 1vh;
 }

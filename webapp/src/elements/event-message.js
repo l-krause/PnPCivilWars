@@ -9,7 +9,7 @@ export default function EventMessage(props) {
         color: textColor
     }
 
-    return <div>
-        <p style={style}>{message}</p>
+    return <div style={style}>
+        {message}
     </div>;
 }

@@ -73,6 +73,7 @@ export default function BattleMap(props) {
     const [activeChar, setActiveChar] = useState(null);
     const [npcDialog, setNpcDialog] = useState(false);
     const [changeChar, setChangeChar] = useState(false)
+    const [round, setRound] = useState(0);
     const mapRef = useRef(null);
 
     const onFetchCharacters = useCallback(() => {
@@ -135,7 +136,7 @@ export default function BattleMap(props) {
 
     const onGameStatus = useCallback((data) => {
         setActiveChar(data.active_char);
-        // setRound(data.round);
+        setRound(data.round);
         // setGameState(data.state);
     }, []);
 
@@ -232,6 +233,11 @@ export default function BattleMap(props) {
             {tokens}
         </div>
         <div className="event-container">
+            <div className="status">
+                <img className="heart" src="/img/heart.svg.png"/>
+                &nbsp; {character.hp} / {character.max_hp}
+                <div>Round {round}.</div>
+            </div>
             <div className="event-log">
                 {messages}
             </div>
