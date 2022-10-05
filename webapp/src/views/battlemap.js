@@ -2,6 +2,8 @@ import {Box, Checkbox, styled, TextField} from "@mui/material";
 import {useCallback, useEffect, useReducer, useRef, useState} from "react";
 import Button from '@mui/material/Button';
 import Token from "../elements/token";
+import EventMessage from "../elements/event-message";
+import "./battlemap.css";
 
 const MAX_LOG_SIZE = 250;
 
@@ -43,9 +45,18 @@ const reducer = (gameData, action) => {
             newGameData.characters[action.characterId].status = "dead";
             newGameData.log.push({
                 timestamp: action.timestamp,
-                message: `Character id=${action.characterId} died, reason=${action.reason}`
+                message: `${gameData.characters[action.characterId]} died, reason=${action.reason}`,
+                color: "red"
             });
             break;
+        case "characterAttack":
+            newGameData.characters[action.vicitimId].hp = newGameData.characters[action.vicitimId].hp - action.damage;
+            newGameData.log.push({
+                    timestamp: action.timestamp,
+                    message: `Hit ${gameData.characters[action.vicitimId]} with a ${action.hit} for ${action.damage} damage!`,
+                    color: "white"
+                }
+            )
         default:
             break;
     }
@@ -226,7 +237,10 @@ export default function BattleMap(props) {
         onClick={() => setSelectedCharacter(c.id)}
         isSelected={c.id === selectedCharacter}
     />);
-    const messages = Object.values().map(t => renderMessages(t));
+    const messages = gameData.log.map(entry => <EventMessage
+        eventMessage={entry.message}
+        color={entry.color}
+    />);
 
 
     return <div>
@@ -259,7 +273,7 @@ export default function BattleMap(props) {
                 <TextField label="Amount" value={npcAmount} onChange={e => setNPCAmount(e.target.value)}/>
                 <Checkbox label={"Ally?"} checked={npcAlly} onChange={() => setNPCAlly(!npcAlly)}/>
             </div>}
-        <div>
+        <div className="event-log">
             {messages}
         </div>
     </div>
