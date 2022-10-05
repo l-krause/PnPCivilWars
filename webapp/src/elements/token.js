@@ -12,6 +12,10 @@ export default function Token(props) {
     const onDrag = props.onDrag || (() => {});
     const size = props.size || TOKEN_SIZE;
 
+    if (character.status === "dead") {
+        return;
+    }
+
     let style = {
         width: size,
         height: size,

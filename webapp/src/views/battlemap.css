@@ -37,15 +37,13 @@
     height: 50%;
 }
 
-
-
 .dm-interface {
     height: 20vh;
 }
 
 .dm-interface > button{
     width: 50%;
-    height: 30%;
+    height: 35%;
 }
 
 .question {

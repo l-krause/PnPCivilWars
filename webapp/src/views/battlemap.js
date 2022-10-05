@@ -1,32 +1,12 @@
-import {
-    Box,
-    Checkbox,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogContentText,
-    DialogTitle,
-    styled,
-    TextField
-} from "@mui/material";
 import {useCallback, useEffect, useReducer, useRef, useState} from "react";
 import Button from '@mui/material/Button';
 import Token from "../elements/token";
 import EventMessage from "../elements/event-message";
 import "./battlemap.css";
+import NpcDialog from "../elements/npc-dialog";
+import ChangeCharDialog from "../elements/change-char-dialog";
 
 const MAX_LOG_SIZE = 250;
-
-const MapContainer = styled(Box)(({theme}) => ({
-    "& > div": {
-        position: "relative",
-        width: "min-content",
-        marginLeft: "auto",
-        marginRight: "auto",
-        marginTop: theme.spacing(2),
-        border: "1px solid white"
-    }
-}));
 
 const reducer = (gameData, action) => {
     console.log("BEFORE", gameData);
@@ -91,16 +71,8 @@ export default function BattleMap(props) {
     const [gameData, dispatch] = useReducer(reducer, null, () => ({characters: {}, log: []}));
     const [selectedCharacter, setSelectedCharacter] = useState(null);
     const [activeChar, setActiveChar] = useState(null);
-    const [npcAmount, setNPCAmount] = useState(20);
-    const [npcAlly, setNPCAlly] = useState(true);
     const [npcDialog, setNpcDialog] = useState(false);
     const [changeChar, setChangeChar] = useState(false)
-    const [changeHp, setChangeHp] = useState(0);
-    const [changeMaxHp, setChangeMaxHp] = useState(0);
-    const [changeDamage, setChangeDamage] = useState(0);
-    const [changeAdd, setChangeAdd] = useState(0);
-    const [changeArmor, setChangeArmor] = useState(0);
-    const [changeDice, setChangeDice] = useState(0);
     const mapRef = useRef(null);
 
     const onFetchCharacters = useCallback(() => {
@@ -241,25 +213,6 @@ export default function BattleMap(props) {
 
     }, [api, character, role, activeChar]);
 
-    const addNpcs = () => {
-        let data = {"allies": npcAlly, "amount": parseInt(npcAmount + "")}
-        api.sendRequest("createNPCs", data)
-    };
-
-    const changeSelCharacter = () => {
-        let data = {
-            "character": selectedCharacter,
-            "curr_hp": changeHp,
-            "max_hp": changeMaxHp,
-            "dice": changeDice,
-            "damage": changeDamage,
-            "modifier": changeAdd,
-            "armor": changeArmor
-        }
-        api.sendRequest("changeSelChar", data)
-    }
-
-
     const tokens = Object.values(gameData.characters).map(c => <Token
         character={c}
         onDrag={(e) => onTokenDrag(e, c)}
@@ -271,6 +224,7 @@ export default function BattleMap(props) {
         color={entry.color}
     />);
 
+    console.log(activeChar, character.id)
 
     return <div className="battle-view">
         <div className="battlemap-container">
@@ -305,44 +259,8 @@ export default function BattleMap(props) {
                     <Button variant="contained" onClick={() => setChangeChar(true)}>Change Character</Button>
                 </div>}
         </div>
-        <Dialog open={npcDialog} onClose={() => setNpcDialog(false)}>
-            <DialogTitle>Create NPCs</DialogTitle>
-            <DialogContent>
-                <DialogContentText>
-                    Choose how many NPCs to create and if they should be created as allies.
-                </DialogContentText>
-                <TextField label="Amount" value={npcAmount} onChange={e => setNPCAmount(e.target.value)}/>
-                <Checkbox label={"Ally?"} checked={npcAlly} onChange={() => setNPCAlly(!npcAlly)}/>
-            </DialogContent>
-            <DialogActions>
-                <Button onClick={() => {
-                    addNpcs();
-                    setNpcDialog(false);
-                }}>Create</Button>
-                <Button onClick={() => setNpcDialog(false)}>Cancel</Button>
-            </DialogActions>
-        </Dialog>
-        <Dialog open={changeChar} onClose={() => setChangeChar(false)}>
-            <DialogTitle>Create NPCs</DialogTitle>
-            <DialogContent>
-                <DialogContentText>
-                    Choose how you want to modify the character
-                </DialogContentText>
-                <TextField label="Max HP" value={changeMaxHp} onChange={e => setChangeMaxHp(e.target.value)}/>
-                <TextField label="Curr_HP" value={changeHp} onChange={e => setChangeHp(e.target.value)}/>
-                <TextField label="Damage Dice" value={changeDice} onChange={e => setChangeDice(e.target.value)}/>
-                <TextField label="Dice Type" value={changeDamage} onChange={e => setChangeDamage(e.target.value)}/>
-                <TextField label="Damage Additional" value={changeAdd} onChange={e => setChangeAdd(e.target.value)}/>
-                <TextField label="Armor" value={changeArmor} onChange={e => setChangeArmor(e.target.value)}/>
-            </DialogContent>
-            <DialogActions>
-                <Button onClick={() => {
-                    changeSelCharacter();
-                    setChangeChar(false);
-                }}>Change</Button>
-                <Button onClick={() => setChangeChar(false)}>Cancel</Button>
-            </DialogActions>
-        </Dialog>
+        <NpcDialog npcDialog={npcDialog} setNpcDialog={setNpcDialog} api={api}/>
+        <ChangeCharDialog changeChar={changeChar} setChangeChar={setChangeChar} selectedChar={selectedCharacter} api={api}/>
     </div>
 
 }
