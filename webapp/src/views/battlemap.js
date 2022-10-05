@@ -76,7 +76,7 @@ export default function BattleMap(props) {
     const setCharacter = props.setCharacter;
 
     const [fetchCharacters, setFetchCharacters] = useState(true);
-    const [gameData, dispatch] = useReducer(reducer, null, () => ({characters: {}, log: []}));
+    const [gameData, dispatch] = useReducer(reducer, null, () => ({characters: {[character.id]: character}, log: []}));
     const [selectedCharacter, setSelectedCharacter] = useState(null);
     const [activeChar, setActiveChar] = useState(null);
     const [npcDialog, setNpcDialog] = useState(false);
@@ -234,6 +234,8 @@ export default function BattleMap(props) {
         color={entry.color}
     />);
 
+    console.log(gameData)
+
     return <div className="battle-view">
         <div className="battlemap-container">
             <img className="battlemap" src={"/img/battlemap.png"} alt="BattleMap" ref={mapRef} onLoad={() => setLoaded(true)}/>
@@ -242,7 +244,7 @@ export default function BattleMap(props) {
         <div className="event-container">
             <div className="status">
                 <img className="heart" src={"/img/heart.png"} alt={"heart icon"} />
-                &nbsp; {character.hp} / {character.max_hp}
+                &nbsp; {gameData.characters[character.id].hp} / {character.max_hp}
                 <div>Round {round}.</div>
             </div>
             <div className="event-log">
