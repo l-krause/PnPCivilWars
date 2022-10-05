@@ -2,6 +2,7 @@ import json
 import logging
 import os.path
 import time
+from threading import Lock
 
 from flask_socketio import emit
 
@@ -29,6 +30,7 @@ class GameController:
         # game turn order + round counter + characters
         self._turn_order = GameTurnOrder()
         self._chars = {}
+        self.mutex = Lock()
 
         # character configs
         self._character_configs = CaseInsensitiveDict()
@@ -246,6 +248,8 @@ class GameController:
 
     def next_turn(self):
 
+        self.mutex.acquire()
+
         # end turn of last char
         active_char = self._turn_order.get_active()
 
@@ -264,6 +268,7 @@ class GameController:
                 active_char.turn_over()
                 self._turn_order.get_next()
 
+        self.mutex.release()
         self.send_game_status()
         return create_response()
 
