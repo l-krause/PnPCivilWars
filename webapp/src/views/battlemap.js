@@ -57,6 +57,7 @@ const reducer = (gameData, action) => {
                 message: `${gameData.characters[action.characterId].name} survived due to ${action.reason}`,
                 color: 'green'
             })
+            break;
         default:
             break;
     }
@@ -119,7 +120,6 @@ export default function BattleMap(props) {
     }
 
     const onCharacterUpdate = useCallback((char) => {
-        char.pos = translatePosition(char.pos);
         dispatch({type: "setCharacter", character: char});
     }, []);
 
@@ -152,9 +152,6 @@ export default function BattleMap(props) {
 
     const onGameEvent = useCallback((data) => {
         if (data.type.startsWith("character")) {
-            if (data.type === "characterMove" || data.type === "characterPlace") {
-                data.to = translatePosition(data.to);
-            }
             dispatch(data);
         }
     }, []);
@@ -164,7 +161,6 @@ export default function BattleMap(props) {
     }, [onFetchCharacters]);
 
     useEffect(() => {
-        console.log("useEffect called");
         api.registerEvent("characterJoin", onCharacterJoin);
         api.registerEvent("characterUpdate", onCharacterUpdate);
         api.registerEvent("start", (res) => !res.success && alert("Error starting game: " + res.msg));
@@ -228,14 +224,14 @@ export default function BattleMap(props) {
         character={c}
         onDrag={(e) => onTokenDrag(e, c)}
         onClick={() => setSelectedCharacter(c.id)}
+        translatePosition={translatePosition}
         isSelected={c.id === selectedCharacter}
     />);
+
     const messages = gameData.log.map(entry => <EventMessage
         eventMessage={entry.message}
         color={entry.color}
     />);
-
-    console.log(activeChar, character.id)
 
     return <div className="battle-view">
         <div className="battlemap-container">
@@ -244,7 +240,7 @@ export default function BattleMap(props) {
         </div>
         <div className="event-container">
             <div className="status">
-                <img className="heart" src="/img/heart.svg.png"/>
+                <img className="heart" src="/img/heart.png" alt={"heart icon"} />
                 &nbsp; {character.hp} / {character.max_hp}
                 <div>Round {round}.</div>
             </div>

@@ -10,6 +10,7 @@ export default function Token(props) {
     const isSelected = !!props.isSelected;
     const onClick = props.onClick || (() => {});
     const onDrag = props.onDrag || (() => {});
+    const translatePosition = props.translatePosition || (pos => pos);
     const size = props.size || TOKEN_SIZE;
 
     if (character.status === "dead") {
@@ -31,7 +32,9 @@ export default function Token(props) {
         }
     }
 
-    return <Box className={"Token"} key={"character-" + character.id} style={{left: character.pos.x, top: character.pos.y}}>
+    let translatedPos = translatePosition(character.pos);
+
+    return <Box className={"Token"} key={"character-" + character.id} style={{left: translatedPos.x, top: translatedPos.y}}>
         <img alt={"token of " + character.id} src={character.token}
              onDragEnd={onDrag}
              onClick={onClick}
