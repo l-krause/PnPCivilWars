@@ -23,6 +23,7 @@ app.config['SESSION_PERMANENT'] = True
 app.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(days=365)
 app.config['SESSION_COOKIE_NAME'] = 'session'
 app.config['SESSION_TYPE'] = 'filesystem'
+app.config["SESSION_USE_SIGNER"] = True
 app.config['SECRET_KEY'] = os.urandom(32)
 Session(app)
 socketio = SocketIO(app, cors_allowed_origins=ORIGINS, cookie='session', manage_session=False)
