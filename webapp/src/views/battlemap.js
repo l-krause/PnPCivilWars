@@ -57,6 +57,12 @@ const reducer = (gameData, action) => {
                 color: 'green'
             })
             break;
+        case "attack":
+            newGameData.log.push({
+                message: action.msg,
+                color: "orange"
+            })
+            break;
         default:
             break;
     }
@@ -157,6 +163,12 @@ export default function BattleMap(props) {
         }
     }, []);
 
+    const onAttack = useCallback((data) => {
+        if (!data.success) {
+            dispatch(data);
+        }
+    }, []);
+
     useEffect(() => {
         onFetchCharacters();
     }, [onFetchCharacters]);
@@ -170,6 +182,7 @@ export default function BattleMap(props) {
         api.registerEvent("createNPCs", onCreatedNpcs);
         api.registerEvent("gameStatus", onGameStatus);
         api.registerEvent("gameEvent", onGameEvent);
+        api.registerEvent("attack", onAttack);
 
         return () => {
             // dismount
@@ -181,8 +194,9 @@ export default function BattleMap(props) {
             api.unregisterEvent("createNPCs");
             api.unregisterEvent("gameStatus");
             api.unregisterEvent("gameEvent");
+            api.unregisterEvent("attack");
         }
-    }, [api, onCharacterJoin, onCharacterUpdate, onReset, onCreatedNpcs, onGameStatus, onGameEvent]);
+    }, [api, onCharacterJoin, onCharacterUpdate, onReset, onCreatedNpcs, onGameStatus, onGameEvent, onAttack]);
 
     const onTokenDrag = useCallback((e, char) => {
         let img = mapRef.current;

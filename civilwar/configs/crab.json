@@ -1,27 +1,19 @@
 {
   "name": "Crab",
   "armorClass": 15,
-  "lifePoints": 31,
-  "movement": 10,
-  "passivePerception": 13,
+  "lifePoints": 13,
+  "movement": 9,
+  "passivePerception": 9,
   "token": "/img/crab.png",
   "type": "player",
   "weapons": [
     {
-      "name": "Dagger",
-      "hit": 6,
+      "name": "Claw",
+      "hit": 3,
       "dices": 1,
-      "diceType": 4,
-      "additional": 4,
-      "type": "pierce"
-    },
-    {
-      "name": "Rapier",
-      "hit": 6,
-      "dices": 1,
-      "diceType": 8,
-      "additional": 4,
-      "type": "pierce"
+      "diceType": 6,
+      "additional": 1,
+      "type": "bludge"
     }
   ],
   "spellSlots": [
@@ -63,8 +55,8 @@
       "save": 15
     }
   ],
-  "activeWeapon": "Rapier",
-  "initiative": 5,
+  "activeWeapon": "Claw",
+  "initiative": 2,
   "reactions": [
     {
       "name": "opportunity"
