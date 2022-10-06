@@ -41,6 +41,6 @@ class Weapon:
             damage += random.randint(1, self._dice_type)
         if self._type in target.get_resistances():
             damage = damage // 2
-        damage *= -1
-        target.change_health(damage)
+
+        target.change_health(-damage)
         return create_response({"hit": hit, "damage": damage, "target": target.get_id()})
