@@ -151,7 +151,11 @@ export default function BattleMap(props) {
     }, [setCharacter]);
 
     const onAction = useCallback((action) => {
-        api.sendRequest(action, {"target": selectedCharacter})
+        api.sendRequest(action, {"target": selectedCharacter}, (response) => {
+            if (!response.success) {
+                dispatch({type: "logMessage", color: "orange", msg: response.msg});
+            }
+        })
     }, [api, selectedCharacter]);
 
     const onCreatedNpcs = useCallback((data) => {
@@ -179,12 +183,6 @@ export default function BattleMap(props) {
         }
     }, []);
 
-    const onAttack = useCallback((data) => {
-        if (!data.success) {
-            dispatch({type: "logMessage", color: "orange", msg: data.msg});
-        }
-    }, []);
-
     useEffect(() => {
         onFetchCharacters();
     }, [onFetchCharacters]);
@@ -192,27 +190,21 @@ export default function BattleMap(props) {
     useEffect(() => {
         api.registerEvent("characterJoin", onCharacterJoin);
         api.registerEvent("characterUpdate", onCharacterUpdate);
-        api.registerEvent("start", (res) => !res.success && alert("Error starting game: " + res.msg));
         api.registerEvent("reset", onReset);
-        api.registerEvent("pass", (res) => !res.success && alert("Error passing turn: " + res.msg));
         api.registerEvent("createNPCs", onCreatedNpcs);
         api.registerEvent("gameStatus", onGameStatus);
         api.registerEvent("gameEvent", onGameEvent);
-        api.registerEvent("attack", onAttack);
 
         return () => {
             // dismount
             api.unregisterEvent("characterJoin");
             api.unregisterEvent("characterUpdate");
-            api.unregisterEvent("start");
             api.unregisterEvent("reset");
-            api.unregisterEvent("pass");
             api.unregisterEvent("createNPCs");
             api.unregisterEvent("gameStatus");
             api.unregisterEvent("gameEvent");
-            api.unregisterEvent("attack");
         }
-    }, [api, onCharacterJoin, onCharacterUpdate, onReset, onCreatedNpcs, onGameStatus, onGameEvent, onAttack]);
+    }, [api, onCharacterJoin, onCharacterUpdate, onReset, onCreatedNpcs, onGameStatus, onGameEvent]);
 
     const onTokenDrag = useCallback((e, char) => {
         let img = mapRef.current;
