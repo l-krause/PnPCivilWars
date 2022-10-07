@@ -57,10 +57,10 @@ const reducer = (gameData, action) => {
                 color: 'green'
             })
             break;
-        case "attack":
+        case "logMessage":
             newGameData.log.push({
                 message: action.msg,
-                color: "orange"
+                color: action.color
             })
             break;
         default:
@@ -165,7 +165,7 @@ export default function BattleMap(props) {
 
     const onAttack = useCallback((data) => {
         if (!data.success) {
-            dispatch(data);
+            dispatch({type: "logMessage", color: "orange", msg: data.msg});
         }
     }, []);
 
