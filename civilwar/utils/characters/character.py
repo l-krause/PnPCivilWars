@@ -25,6 +25,7 @@ class Character(JsonSerializable, ApiParameter, ABC):
         self._std_resistances = dictionary.get("resistance", [])
         self._res_buff = 0
         self._token = dictionary.get("token", "")
+        self._token_shadow = dictionary.get("tokenShadow", None)
         self._pos = pos
         self._action_points = 1
         self._action_points_max = 1
@@ -122,7 +123,7 @@ class Character(JsonSerializable, ApiParameter, ABC):
             return "alive"
 
     def to_json(self):
-        return {
+        data = {
             "id": self._id,
             "name": self.get_name(),
             "token": self._token,
@@ -131,6 +132,11 @@ class Character(JsonSerializable, ApiParameter, ABC):
             "hp": self.get_hp(),
             "max_hp": self._max_life
         }
+
+        if self._token_shadow:
+            data["tokenShadow"] = self._token_shadow
+
+        return data
 
     def get_id(self):
         return self._id

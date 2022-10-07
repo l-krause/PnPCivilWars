@@ -22,13 +22,18 @@ export function Token(props) {
         height: size,
     };
 
+    let shadowStyle = {...style, top: 0, left: 0, position: "absolute", pointerEvents: "none"};
+
     if (isSelected) {
         style.border = "1px solid red";
     }
 
     if (character.type === "npc") {
         if (character.is_ally) {
-            style.filter = " hue-rotate(180deg)";
+            shadowStyle.filter = " hue-rotate(200deg)";
+            if (isSelected) {
+                style.border = "1px solid blue";
+            }
         }
     }
 
@@ -40,5 +45,9 @@ export function Token(props) {
              onDragEnd={onDrag}
              onClick={onClick}
              style={style} />
+        { character.tokenShadow ?
+            <img alt={"tokenShadow of " + character.id} src={character.tokenShadow} style={shadowStyle} /> :
+            <></>
+        }
     </Box>
 }

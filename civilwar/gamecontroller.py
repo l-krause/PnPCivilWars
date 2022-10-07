@@ -36,11 +36,6 @@ class GameController:
         self._character_configs = CaseInsensitiveDict()
         self._load_character_configs()
 
-        # debug:
-        bounds = self.get_map_bounds()
-        for pos in [[0,0], [bounds[2], 0], [0, bounds[3]  - 1], [bounds[2] - 1, bounds[3] - 1]]:
-            self.create_npc("test-" + json.dumps(pos), Position(*pos), self._character_configs["villager"].copy(), True)
-
     @staticmethod
     def next_char_id():
         # important: do not re-use character ids!
