@@ -1,6 +1,6 @@
-import {useCallback, useEffect, useReducer, useRef, useState} from "react";
+import {useCallback, useEffect, useLayoutEffect, useReducer, useRef, useState} from "react";
 import Button from '@mui/material/Button';
-import Token from "../elements/token";
+import {Token, TOKEN_SIZE} from "../elements/token";
 import EventMessage from "../elements/event-message";
 import "./battlemap.css";
 import NpcDialog from "../elements/npc-dialog";
@@ -83,6 +83,7 @@ export default function BattleMap(props) {
 
     const [fetchCharacters, setFetchCharacters] = useState(true);
     const [gameData, dispatch] = useReducer(reducer, null, () => ({characters: {[character.id]: character}, log: []}));
+    const [mapSize, setMapSize] = useState([0,0]);
     const [selectedCharacter, setSelectedCharacter] = useState(null);
     const [activeChar, setActiveChar] = useState(null);
     const [npcDialog, setNpcDialog] = useState(false);
@@ -112,19 +113,34 @@ export default function BattleMap(props) {
         }
     }, [gameData]);
 
-    const translatePosition = (pos) => {
+    const translatePosition = useCallback((pos) => {
         let img = mapRef.current;
         if (img) {
-            let relY = img.clientHeight / img.naturalHeight;
-            let relX = img.clientWidth / img.naturalWidth;
+            let relX = mapSize[0] / img.naturalWidth;
+            let relY = mapSize[1] / img.naturalHeight;
             let x = Math.floor(relX * pos.x);
             let y = Math.floor(relY * pos.y);
-            return {x: x, y: y};
+            return {x: x - TOKEN_SIZE / 2, y: y - TOKEN_SIZE / 2};
         } else {
             console.log("WARN: translatePosition called before mapRef was loaded!");
             return pos;
         }
-    }
+    }, [mapSize]);
+
+    const onResizeMap = useCallback((e) => {
+        if (mapRef.current) {
+            setMapSize([mapRef.current.clientWidth, mapRef.current.clientHeight]);
+        }
+    }, [mapRef]);
+
+    useLayoutEffect(() => {
+        const map = mapRef.current;
+        if (map) {
+            setMapSize([map.clientWidth, map.clientHeight]);
+            window.addEventListener("resize", onResizeMap, false);
+            return () => window.removeEventListener("resize", onResizeMap);
+        }
+    }, [mapRef, onResizeMap]);
 
     const onCharacterUpdate = useCallback((char) => {
         dispatch({type: "setCharacter", character: char});
@@ -201,7 +217,6 @@ export default function BattleMap(props) {
     const onTokenDrag = useCallback((e, char) => {
         let img = mapRef.current;
         if (img) {
-            console.log(e);
             e.preventDefault();
             let rect = img.getBoundingClientRect();
             let pos = {x: e.clientX - rect.x, y: e.clientY - rect.y};
@@ -236,6 +251,7 @@ export default function BattleMap(props) {
     }, [api, character, role, activeChar]);
 
     const tokens = Object.values(mapRef.current && loaded ? gameData.characters : {}).map(c => <Token
+        key={"character-" + c.id}
         character={c}
         onDrag={(e) => onTokenDrag(e, c)}
         onClick={() => setSelectedCharacter(c.id)}
@@ -252,7 +268,9 @@ export default function BattleMap(props) {
 
     return <div className="battle-view">
         <div className="battlemap-container">
-            <img className="battlemap" src={"/img/battlemap.png"} alt="BattleMap" ref={mapRef} onLoad={() => setLoaded(true)}/>
+            <img className="battlemap" src={"/img/battlemap.png"} alt="BattleMap" ref={mapRef}
+                 onLoad={() => setLoaded(true)}
+                 onresize={(e) => {console.log(e); mapRef.current && setMapSize([e.clientWidth, e.clientHeight])}}/>
             {tokens}
         </div>
         <div className="event-container">

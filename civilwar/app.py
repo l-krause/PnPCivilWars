@@ -149,7 +149,7 @@ def api_attack(data):
     game_controller = GameController.instance()
     character = game_controller.get_character(session["character"])
     response = game_controller.attack(character, data["target"])
-    broadcast_response(response)
+    emit("attack", response)
 
 
 @socketio.on('cast')
@@ -275,7 +275,7 @@ def dm_stun(data):
 @param("allies", required_type=bool)
 @param("amount", required_type=int)
 def dm_create_npcs(data):
-    response = GameController.instance().create_npc(data["amount"], data["allies"])
+    response = GameController.instance().create_npcs(data["amount"], data["allies"])
     broadcast_response(response)
 
 

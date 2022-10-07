@@ -2,9 +2,9 @@ import {Box} from "@mui/material";
 
 import "./token.css";
 
-const TOKEN_SIZE = 48;
+export const TOKEN_SIZE = 48;
 
-export default function Token(props) {
+export function Token(props) {
 
     const character = props.character;
     const isSelected = !!props.isSelected;

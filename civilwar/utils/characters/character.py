@@ -106,8 +106,10 @@ class Character(JsonSerializable, ApiParameter, ABC):
         self.send_character_event("characterMove", {"to": self._pos})
         return create_response()
 
-    def place(self, new_pos):
-        self._pos = new_pos
+    def place(self, new_pos: Position):
+        from gamecontroller import GameController
+        bounded_pos = new_pos.to_bounds(GameController.instance().get_map_bounds())
+        self._pos = bounded_pos
         self.send_character_event("characterPlace", {"to": self._pos})
         return create_response()
 

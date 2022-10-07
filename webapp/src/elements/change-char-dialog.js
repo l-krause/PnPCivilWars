@@ -2,6 +2,8 @@ import {Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Te
 import Button from "@mui/material/Button";
 import {useState} from "react";
 
+import "./dialogs.css"
+
 export default function ChangeCharDialog(props) {
     let changeChar = props.changeChar;
     let setChangeChar = props.setChangeChar;
@@ -24,28 +26,33 @@ export default function ChangeCharDialog(props) {
             "modifier": changeAdd,
             "armor": changeArmor
         }
-        api.sendRequest("changeSelChar", data)
+        api.sendRequest("changeSelChar", data, (response) => {
+            if (response.success) {
+                setChangeChar(false);
+            } else {
+                alert(response.msg);
+            }
+        })
     }
 
     return <Dialog open={changeChar} onClose={() => setChangeChar(false)}>
         <DialogTitle>Create NPCs</DialogTitle>
-        <DialogContent>
+        <DialogContent className={"dialog-content"}>
             <DialogContentText>
                 Choose how you want to modify the character
             </DialogContentText>
-            <TextField label="Max HP" value={changeMaxHp} onChange={e => setChangeMaxHp(e.target.value)}/>
-            <TextField label="Curr_HP" value={changeHp} onChange={e => setChangeHp(e.target.value)}/>
-            <TextField label="Damage Dice" value={changeDice} onChange={e => setChangeDice(e.target.value)}/>
-            <TextField label="Dice Type" value={changeDamage} onChange={e => setChangeDamage(e.target.value)}/>
-            <TextField label="Damage Additional" value={changeAdd} onChange={e => setChangeAdd(e.target.value)}/>
-            <TextField label="Armor" value={changeArmor} onChange={e => setChangeArmor(e.target.value)}/>
+            <TextField size={"small"} label="Max HP" value={changeMaxHp} onChange={e => setChangeMaxHp(e.target.value)}/>
+            <TextField size={"small"} label="Curr_HP" value={changeHp} onChange={e => setChangeHp(e.target.value)}/>
+            <TextField size={"small"} label="Damage Dice" value={changeDice} onChange={e => setChangeDice(e.target.value)}/>
+            <TextField size={"small"} label="Dice Type" value={changeDamage} onChange={e => setChangeDamage(e.target.value)}/>
+            <TextField size={"small"} label="Damage Additional" value={changeAdd} onChange={e => setChangeAdd(e.target.value)}/>
+            <TextField size={"small"} label="Armor" value={changeArmor} onChange={e => setChangeArmor(e.target.value)}/>
         </DialogContent>
         <DialogActions>
-            <Button onClick={() => {
+            <Button variant={"outlined"} onClick={() => {
                 changeSelCharacter();
-                setChangeChar(false);
             }}>Change</Button>
-            <Button onClick={() => setChangeChar(false)}>Cancel</Button>
+            <Button variant={"outlined"} onClick={() => setChangeChar(false)}>Cancel</Button>
         </DialogActions>
     </Dialog>
 }

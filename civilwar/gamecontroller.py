@@ -36,6 +36,11 @@ class GameController:
         self._character_configs = CaseInsensitiveDict()
         self._load_character_configs()
 
+        # debug:
+        bounds = self.get_map_bounds()
+        for pos in [[0,0], [bounds[2], 0], [0, bounds[3]  - 1], [bounds[2] - 1, bounds[3] - 1]]:
+            self.create_npc("test-" + json.dumps(pos), Position(*pos), self._character_configs["villager"].copy(), True)
+
     @staticmethod
     def next_char_id():
         # important: do not re-use character ids!
@@ -67,7 +72,13 @@ class GameController:
         self._turn_order.get_next()
         self.send_game_status()
 
-    def create_npc(self, amount=20, allies=True):
+    def create_npc(self, name, position, character_config, is_ally):
+        character_id = self.next_char_id()
+        npc = NPC(character_id, character_config, name, position, is_ally)
+        self._chars[character_id] = npc
+        return npc
+
+    def create_npcs(self, amount=20, allies=True):
         villager_config = self._character_configs["villager"]
         veteran_config = self._character_configs["veteran"]
 
@@ -75,8 +86,8 @@ class GameController:
 
         for i in range(amount):
             character_config = (veteran_config if i % 5 == 0 else villager_config).copy()
+            npc_type = "veterans" if i % 5 == 0 else "villagers"
 
-            position = Position(0, 0)
             if allies:
                 position = Position.random([0, self._map_size[1] - 150], self._map_size - [1, 1])
                 suffix = "ally"
@@ -85,10 +96,7 @@ class GameController:
                 suffix = "enemy"
 
             name = f"{character_config['name']}-{len(self._chars)}_{suffix}"
-            character_id = self.next_char_id()
-            npc = NPC(character_id, character_config, name, position, allies)
-            self._chars[character_id] = npc
-            npc_type = "veterans" if i % 5 == 0 else "villagers"
+            npc = self.create_npc(name, position, character_config, allies)
             npcs[npc_type].append(npc)
         return create_response(npcs)
 
@@ -193,6 +201,7 @@ class GameController:
     def attack(self, actor: PlayerCharacter, target: Character):
         if not actor.has_action():
             return create_error("No Action Points available")
+
         weapon = actor.get_active_weapon()
         distance = actor.get_pos().distance(target.get_pos(), factor=OG_METER)
         resp = weapon.attack(distance, target)
@@ -286,11 +295,6 @@ class GameController:
     def on_character_died(self, character: Character, reason=None):
         self._turn_order.remove(character)
         self.send_game_event("characterDied", {"characterId": character.get_id(), "reason": reason})
-
-    def place(self, target: Character, pos: Position):
-        pos = pos.to_bounds(self.get_map_bounds())
-        target.place(pos)
-        return create_response()
 
     @classmethod
     def instance(cls):
