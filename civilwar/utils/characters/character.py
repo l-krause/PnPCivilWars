@@ -5,6 +5,7 @@ from utils.api import create_error, ApiParameter, create_response
 from utils.constants import MEELE_RANGE, OG_METER
 from utils.json_serializable import JsonSerializable
 from utils.position import Position
+from utils.util import clamp
 from utils.weapon import Weapon
 
 
@@ -94,13 +95,9 @@ class Character(JsonSerializable, ApiParameter, ABC):
         return create_response()
 
     def change_health(self, health):
-        tmp_health = self._curr_life + health
-        if tmp_health > self._max_life:
-            self._curr_life = self._max_life
-            return
-        if tmp_health <= self._max_life * -2:
-            return
-        self._curr_life = tmp_health
+        self._curr_life = clamp(health, -self._max_life, self._max_life)
+        if self._curr_life == -self._max_life:
+            self._dead = True
 
     def move(self, new_pos):
         dist = self._pos.distance(new_pos)
@@ -117,7 +114,7 @@ class Character(JsonSerializable, ApiParameter, ABC):
     def get_status(self):
         if self.is_dead():
             return "dead"
-        elif self.get_hp() == 0:
+        elif self.get_hp() <= 0:
             return "ko"
         else:
             return "alive"
@@ -137,12 +134,12 @@ class Character(JsonSerializable, ApiParameter, ABC):
         return self._id
 
     def turn_over(self):
-        if self._curr_life <= -2 * self._max_life:
-            self.kill("HP is too low")
+        if self.is_dead():
             return
-        if self._curr_life <= 0:
+        elif self.is_ko():
             self._death_roll()
             return
+
         self._movement_left = self._movement
         self._action_points = self._action_points_max
         if self._ap_buff > 0:
@@ -175,6 +172,9 @@ class Character(JsonSerializable, ApiParameter, ABC):
     def is_dead(self):
         return self._dead
 
+    def is_ko(self):
+        return not self.is_dead() and self._curr_life <= 0
+
     def kill(self, reason=None):
         self._dead = True
         from gamecontroller import GameController
@@ -184,6 +184,7 @@ class Character(JsonSerializable, ApiParameter, ABC):
         self._won_death = 0
         self._lost_death = 0
         self._curr_life = hp
+        self._dead = False
         self.send_character_event("characterSurvived", data={"reason": reason, "hp": self.get_hp()})
 
     @staticmethod
