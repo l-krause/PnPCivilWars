@@ -62,6 +62,8 @@ def on_connect(*args):
     character = GameController.instance().get_character(character_id)
     if character:
         character.add_client_sid(request.sid)
+
+
 #        emit("characterJoin", json_serialize(character), broadcast=True)
 
 
@@ -92,7 +94,7 @@ def choose_character(data):
             character.add_client_sid(request.sid)
             session["character"] = character.get_id()
             session["role"] = role
-            response = create_response({"character":character, "role": role})
+            response = create_response({"character": character, "role": role})
             emit("characterJoin", json_serialize(character), broadcast=True)
 
     emit("chooseCharacter", response)
@@ -238,6 +240,7 @@ def dm_reset(data):
     GameController.reset()
     emit("reset", {}, broadcast=True)
 
+
 @socketio.on('continue')
 @has_role("dm")
 def dm_continue(data):
@@ -277,6 +280,25 @@ def dm_stun(data):
 def dm_create_npcs(data):
     response = GameController.instance().create_npcs(data["amount"], data["allies"])
     broadcast_response(response)
+
+
+@socketio.on('changeSelChar')
+@has_role("dm")
+@param("character", required_type=int)
+@param("curr_hp", required_type=int)
+@param("max_hp", required_type=int)
+@param("dice", required_type=int)
+@param("damage", required_type=int)
+@param("modifier", required_type=int)
+@param("armor", required_type=int)
+def dm_change_char(data):
+    target = GameController.get_character(data["character"])
+    if target is None:
+        emit("changeSelChar", create_error("Character does not exist"))
+        return
+    resp = GameController.instance().change_char(target=target, max_hp=data["max_hp"], curr_hp=data["curr_hp"],
+                                                 dice=data["dice"], damage=data["damage"], modifier=data["modifier"],
+                                                 armor=data["armor"])
 
 
 if __name__ == "__main__":

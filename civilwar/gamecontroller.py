@@ -2,6 +2,7 @@ import json
 import logging
 import os.path
 import time
+import copy
 from threading import Lock
 
 from flask_socketio import emit
@@ -30,6 +31,7 @@ class GameController:
         # game turn order + round counter + characters
         self._turn_order = GameTurnOrder()
         self._chars = {}
+        self._changed_chars = {}
         self.mutex = Lock()
 
         # character configs
@@ -275,6 +277,23 @@ class GameController:
         self.mutex.release()
         self.send_game_status()
         return create_response()
+
+    def change_char(self, target: Character, max_hp, curr_hp, armor, damage, modifier, dice):
+        if target.get_id() in self._changed_chars.keys():
+            self._chars[target.get_id()] = self._changed_chars.pop(target.get_id())
+            data = {"curr_hp": self._chars[target.get_id()]._curr_life, "max_hp": self._chars[target.get_id()]._max_life}
+            target.send_character_event("characterChangged", data)
+            return
+        self._changed_chars = copy.deepcopy(self._chars[target.get_id()])
+        target._max_life = max_hp
+        target._curr_life = curr_hp
+        target._armor = armor
+        weapon = target.get_active_weapon()
+        weapon._dices = dice
+        weapon._dice_type = damage
+        weapon._additional = modifier
+        data = {"curr_hp": self._chars[target.get_id()]._curr_life, "max_hp": self._chars[target.get_id()]._max_life}
+        target.send_character_event("characterChangged", data)
 
     @staticmethod
     def send_game_event(event, data=None):
