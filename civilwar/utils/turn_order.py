@@ -18,7 +18,7 @@ class GameTurnOrder:
     def reset(self):
         self._original_queue = []
         self._round_queue = []
-        self._round = 1
+        self._round = 0
         self._active_char = None
 
     def get_next(self):
