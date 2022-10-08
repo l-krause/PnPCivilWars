@@ -95,7 +95,7 @@ def choose_character(data):
             session["character"] = character.get_id()
             session["role"] = role
             response = create_response({"character": character, "role": role})
-            emit("characterJoin", json_serialize(character), broadcast=True)
+            game_controller.send_game_event("characterJoin", {"character": character})
 
     emit("chooseCharacter", response)
 
@@ -278,8 +278,9 @@ def dm_stun(data):
 @param("allies", required_type=bool)
 @param("amount", required_type=int)
 def dm_create_npcs(data):
-    response = GameController.instance().create_npcs(data["amount"], data["allies"])
-    broadcast_response(response)
+    game_controller = GameController.instance()
+    response = game_controller.create_npcs(data["amount"], data["allies"])
+    emit("createNPCs", response)
 
 
 @socketio.on('changeSelChar')

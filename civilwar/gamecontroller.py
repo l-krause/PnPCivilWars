@@ -76,14 +76,16 @@ class GameController:
         return npc
 
     def create_npcs(self, amount=20, allies=True):
+
+        if amount < 1:
+            return create_error("Invalid amount, you need to create at least 1 NPC")
+
         villager_config = self._character_configs["villager"]
         veteran_config = self._character_configs["veteran"]
-
-        npcs = {"veterans": [], "villagers": []}
+        npcs = {}
 
         for i in range(amount):
             character_config = (veteran_config if i % 5 == 0 else villager_config).copy()
-            npc_type = "veterans" if i % 5 == 0 else "villagers"
 
             if allies:
                 position = Position.random([0, self._map_size[1] - 150], self._map_size - [1, 1])
@@ -94,8 +96,10 @@ class GameController:
 
             name = f"{character_config['name']}-{len(self._chars)}_{suffix}"
             npc = self.create_npc(name, position, character_config, allies)
-            npcs[npc_type].append(npc)
-        return create_response(npcs)
+            npcs[npc.get_id()] = npc
+
+        self.send_game_event("charactersSpawned", {"characters": npcs})
+        return create_response()
 
     def create_pc(self, character_name):
         logging.debug("GameController.create_pc")
@@ -300,7 +304,7 @@ class GameController:
         data = {} if data is None else data
         data["type"] = event
         data["timestamp"] = int(time.time())
-        emit("gameEvent", json_serialize(data))
+        emit("gameEvent", json_serialize(data), broadcast=True)
         print("Game Event:", data)
 
     def send_game_status(self):

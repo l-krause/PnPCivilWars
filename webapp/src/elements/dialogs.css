@@ -1,3 +1,7 @@
 .dialog-content > div {
     margin: 8px;
 }
+
+.checkbox-ally > span:first-child {
+    margin-left: 10px;
+}

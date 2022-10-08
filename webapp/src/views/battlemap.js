@@ -11,8 +11,13 @@ const MAX_LOG_SIZE = 250;
 const reducer = (gameData, action) => {
     let newGameData = {...gameData};
     switch (action.type) {
-        case "setCharacter":
+        case "characterJoin":
             newGameData.characters[action.character.id] = action.character;
+            newGameData.log.push({
+                timestamp: action.timestamp,
+                color: 'green',
+                message: `${action.character.name} joined the game!`
+            });
             break;
         case "characterPlace":
             newGameData.characters[action.characterId].pos = action.to;
@@ -27,10 +32,8 @@ const reducer = (gameData, action) => {
         case "setAllCharacters":
             newGameData.characters = action.characters;
             break;
-        case "addCharacters":
-            for (const char of action.characters) {
-                newGameData.characters[char.id] = char;
-            }
+        case "charactersSpawned":
+            newGameData.characters = {...newGameData.characters, ...action.characters};
             break;
         case "characterDied":
             newGameData.characters[action.characterId].status = "dead";
@@ -107,12 +110,6 @@ export default function BattleMap(props) {
         }
     }, [api, fetchCharacters]);
 
-    const onCharacterJoin = useCallback((character) => {
-        if (!gameData.characters.hasOwnProperty(character.id)) {
-            dispatch({type: "setCharacter", character: character});
-        }
-    }, [gameData]);
-
     const translatePosition = useCallback((pos) => {
         let img = mapRef.current;
         if (img) {
@@ -142,10 +139,6 @@ export default function BattleMap(props) {
         }
     }, [mapRef, onResizeMap]);
 
-    const onCharacterUpdate = useCallback((char) => {
-        dispatch({type: "setCharacter", character: char});
-    }, []);
-
     const onReset = useCallback((response) => {
         setCharacter(null);
     }, [setCharacter]);
@@ -158,19 +151,6 @@ export default function BattleMap(props) {
         })
     }, [api, selectedCharacter]);
 
-    const onCreatedNpcs = useCallback((data) => {
-        if (data.success) {
-            let newChars = [];
-            // villagers/veterans/... => list of chars
-            for (const chars of Object.values(data.data)) {
-                newChars = newChars.concat(newChars, chars);
-            }
-            dispatch({type: "addCharacters", characters: newChars});
-        } else {
-            alert(data.msg);
-        }
-    }, []);
-
     const onGameStatus = useCallback((data) => {
         setActiveChar(data.active_char);
         setRound(data.round);
@@ -178,9 +158,8 @@ export default function BattleMap(props) {
     }, []);
 
     const onGameEvent = useCallback((data) => {
-        if (data.type.startsWith("character")) {
-            dispatch(data);
-        }
+        console.log("onGameEvent", data);
+        dispatch(data);
     }, []);
 
     useEffect(() => {
@@ -188,23 +167,17 @@ export default function BattleMap(props) {
     }, [onFetchCharacters]);
 
     useEffect(() => {
-        api.registerEvent("characterJoin", onCharacterJoin);
-        api.registerEvent("characterUpdate", onCharacterUpdate);
         api.registerEvent("reset", onReset);
-        api.registerEvent("createNPCs", onCreatedNpcs);
         api.registerEvent("gameStatus", onGameStatus);
         api.registerEvent("gameEvent", onGameEvent);
 
         return () => {
             // dismount
-            api.unregisterEvent("characterJoin");
-            api.unregisterEvent("characterUpdate");
             api.unregisterEvent("reset");
-            api.unregisterEvent("createNPCs");
             api.unregisterEvent("gameStatus");
             api.unregisterEvent("gameEvent");
         }
-    }, [api, onCharacterJoin, onCharacterUpdate, onReset, onCreatedNpcs, onGameStatus, onGameEvent]);
+    }, [api, onReset, onGameStatus, onGameEvent]);
 
     const onTokenDrag = useCallback((e, char) => {
         let img = mapRef.current;
@@ -262,7 +235,7 @@ export default function BattleMap(props) {
         <div className="battlemap-container">
             <img className="battlemap" src={"/img/battlemap.png"} alt="BattleMap" ref={mapRef}
                  onLoad={() => setLoaded(true)}
-                 onresize={(e) => {console.log(e); mapRef.current && setMapSize([e.clientWidth, e.clientHeight])}}/>
+                 onResize={(e) => mapRef.current && setMapSize([e.clientWidth, e.clientHeight])}/>
             {tokens}
         </div>
         <div className="event-container">

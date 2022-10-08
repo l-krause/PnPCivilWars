@@ -38,7 +38,6 @@ export function Token(props) {
     }
 
     let translatedPos = translatePosition(character.pos);
-    console.log(character.pos, "->", translatedPos);
 
     return <Box className={"Token"} key={"character-" + character.id} style={{left: translatedPos.x, top: translatedPos.y}}>
         <img alt={"token of " + character.id} src={character.token}
