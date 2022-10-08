@@ -262,3 +262,7 @@ class Character(JsonSerializable, ApiParameter, ABC):
         data["characterId"] = self._id
         from gamecontroller import GameController
         GameController.instance().send_game_event(event, data)
+
+    def __repr__(self):
+        is_dead = ", dead" if self.is_dead() else ""
+        return f"{type(self).__name__}(id={self._id}, name={self.get_name()}, hp={self._curr_life}/{self._max_life}{is_dead})"
