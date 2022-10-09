@@ -199,7 +199,7 @@ class GameController:
             response += [first_c]
         return response
 
-    def attack(self, actor: PlayerCharacter, target: Character):
+    def attack(self, actor: Character, target: Character):
         if not actor.has_action():
             return create_error("No Action Points available")
 

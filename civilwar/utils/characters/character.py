@@ -180,7 +180,7 @@ class Character(JsonSerializable, ApiParameter, ABC):
         return self._dead
 
     def is_ko(self):
-        return not self.is_dead() and self._curr_life <= 0
+        return (not self.is_dead()) and self._curr_life <= 0
 
     def kill(self, reason=None):
         self._dead = True
