@@ -27,7 +27,7 @@ class Weapon:
         return self._name
 
     def attack(self, distance, target):
-        if distance > self._max_range // OG_METER or distance < self._min_range // OG_METER:
+        if distance > self._max_range / OG_METER or distance < self._min_range / OG_METER:
             return create_error("Can't reach target")
         if self._usages == 0:
             return create_error("No ammo")

@@ -230,9 +230,10 @@ class GameController:
         return create_response()
 
     def dash(self, target):
-        c = self._chars[target]
-        c._movement_left += c._movement
-        c.use_action()
+        if not target.has_action():
+            return create_error("No action points left")
+        target._movement_left += target._movement
+        target.use_action()
         return create_response()
 
     def _load_character_configs(self):
