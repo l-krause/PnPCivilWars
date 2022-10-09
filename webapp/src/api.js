@@ -9,8 +9,6 @@ export default class API {
     getSocketIOUrl() {
         if (window.location.hostname === "localhost") {
             return "ws://localhost:8001";
-        } else {
-            return window.location;
         }
     }
 
