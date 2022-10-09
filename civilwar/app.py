@@ -183,9 +183,10 @@ def api_move(data):
 
 @socketio.on('dash')
 def dash(data):
-    target = session.get("character", None)
-    if target is None:
+    id = session.get("character", None)
+    if id is None:
         emit("move", create_error("No character given or chosen yet"))
+    target = GameController.instance().get_character(id)
     response = GameController.instance().dash(target)
     emit("dash", response)
 
