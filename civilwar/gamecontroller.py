@@ -218,9 +218,9 @@ class GameController:
         print("GameControlwler.move, target:", target, "pos:", pos)
         if target != self._turn_order.get_active():
             return create_error("It's not your characters turn yet")
-        max_dist = target.get_movement_left()
+        max_dist = target.get_movement_left() // OG_METER
 
-        new_pos = pos.normalize_distance(target.get_pos(), max_dist, self.get_map_bounds())
+        new_pos = target.get_pos().normalize_distance(pos, max_dist, self.get_map_bounds())
         print("new pos:", new_pos)
         target.move(new_pos)
         return create_response()
