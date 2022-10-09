@@ -63,7 +63,7 @@ const reducer = (gameData, action) => {
         case "characterKO":
             newGameData.log.push({
                 timestamp: action.timestamp,
-                message: `${gameData.characters[action.victim].name} is KO`
+                message: `${gameData.characters[action.victim].name} is KO`,
                 color: "grey"
             })
         case "logMessage":
