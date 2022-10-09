@@ -27,9 +27,9 @@ class NPC(Character):
             return
 
         target_enemy = None
-        enemies = self.get_enemies_with_distance(distance=self.get_movement_left() // OG_METER)
+        enemies = self.get_enemies_with_distance(distance=self.get_movement_left() / OG_METER)
         for enemy in enemies:
-            in_meele_range = list(enemy.get_enemies_with_distance(distance=MEELE_RANGE // OG_METER))
+            in_meele_range = list(enemy.get_enemies_with_distance(distance=MEELE_RANGE / OG_METER))
             if len(in_meele_range) <= 2:
                 target_enemy = enemy
                 break
@@ -37,6 +37,8 @@ class NPC(Character):
         if target_enemy is not None:
             distance = self.distance(target_enemy)
             required_distance = self._active_weapon.get_max_range()
+            print("Distance ", distance)
+            print("Req. distance", required_distance)
             if distance > required_distance:
                 self.move_towards(target_enemy, required_distance)
             game_controller.attack(self, target_enemy)
