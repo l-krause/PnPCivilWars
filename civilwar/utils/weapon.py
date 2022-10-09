@@ -18,7 +18,7 @@ class Weapon:
         self._usages = -1 if "usages" not in dictionary.keys() else dictionary["usages"]
 
     def get_max_range(self):
-        return self._max_range // OG_METER
+        return self._max_range / OG_METER
 
     def is_ranged(self):
         return self._max_range > MEELE_RANGE

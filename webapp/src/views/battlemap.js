@@ -94,6 +94,7 @@ export default function BattleMap(props) {
     const [round, setRound] = useState(0);
     const [gameState, setGameState] = useState("ongoing");
     const [loaded, setLoaded] = useState(false);
+    const [changeWeapon, setChangeWeapon] = useState(false);
 
     const mapRef = useRef(null);
 
@@ -265,7 +266,7 @@ export default function BattleMap(props) {
                         }
                     })}
                             disabled={activeChar !== character.id}>Dash</Button>
-                    <Button variant="contained" disabled={activeChar !== character.id}>Change Weapon</Button>
+                    <Button onClick={()=> setChangeWeapon(true)} variant="contained" disabled={activeChar !== character.id}>Change Weapon</Button>
                     <Button className="pass-turn" variant="contained" onClick={() => onAction("pass")}
                             disabled={activeChar !== character.id}>Pass
                         Turn</Button>
