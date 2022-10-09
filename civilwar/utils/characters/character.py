@@ -17,7 +17,7 @@ class Character(JsonSerializable, ApiParameter, ABC):
         self._curr_life = dictionary["lifePoints"]
         self._armor = dictionary["armorClass"]
         self._movement = dictionary["movement"]
-        self._movement_left = dictionary["movement"] * 10
+        self._movement_left = dictionary["movement"]
         self._passivePerception = dictionary["passivePerception"]
         self._weapons = [Weapon(weapon_data) for weapon_data in dictionary["weapons"]]
         self._active_weapon = self.get_weapon(dictionary["activeWeapon"])
