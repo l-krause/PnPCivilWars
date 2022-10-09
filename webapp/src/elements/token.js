@@ -31,6 +31,8 @@ export function Token(props) {
     if (character.type === "npc") {
         if (character.is_ally) {
             shadowStyle.filter = " hue-rotate(200deg)";
+            style.transform = "rotate(180deg)";
+            shadowStyle.transform = "rotate(180deg)";
             if (isSelected) {
                 style.border = "1px solid blue";
             }
