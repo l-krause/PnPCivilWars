@@ -284,6 +284,18 @@ def dm_create_npcs(data):
     emit("createNPCs", response)
 
 
+@socketio.on("kill")
+@has_role("dm")
+@param("target", required_type="int")
+def dm_kill(data):
+    game_controller = GameController.instance()
+    target = GameController.instance().get_character(data["target"])
+    if target is None:
+        emit("kill", create_error("Target does not exist"))
+        return
+    target.kill(reason="DM kill")
+
+
 @socketio.on('changeSelChar')
 @has_role("dm")
 @param("character", required_type=int)
