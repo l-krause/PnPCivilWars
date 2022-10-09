@@ -270,7 +270,7 @@ def dm_add_turn(data):
 @has_role("dm")
 @param("target", required_type=Character)
 def dm_stun(data):
-    response = data["target"].stun()
+    response = data["target"].stun(1)
     emit("stun", response)
 
 
