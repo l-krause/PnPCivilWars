@@ -42,3 +42,6 @@ class PlayerCharacter(Character):
 
     def is_online(self):
         return len(self._client_sids) > 0
+
+    def on_death_roll(self, roll):
+        self.send_character_event("characterDeathRoll", {"roll": roll})
