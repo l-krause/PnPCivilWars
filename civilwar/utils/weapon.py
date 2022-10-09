@@ -1,7 +1,7 @@
 import random
 
 from utils.api import create_response, create_error
-from utils.constants import MEELE_RANGE
+from utils.constants import MEELE_RANGE, OG_METER
 
 
 class Weapon:
@@ -27,7 +27,7 @@ class Weapon:
         return self._name
 
     def attack(self, distance, target):
-        if distance > self._max_range or distance < self._min_range:
+        if distance > self._max_range // OG_METER or distance < self._min_range // OG_METER:
             return create_error("Can't reach target")
         if self._usages == 0:
             return create_error("No ammo")
