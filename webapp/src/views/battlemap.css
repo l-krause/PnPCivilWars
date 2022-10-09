@@ -52,7 +52,7 @@
 }
 
 .event-log {
-    height: 60vh;
+    height: 57vh;
     overflow-y: scroll;
     border: 1px solid black;
 }
