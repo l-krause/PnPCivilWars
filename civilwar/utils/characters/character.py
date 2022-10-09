@@ -96,7 +96,7 @@ class Character(JsonSerializable, ApiParameter, ABC):
         return create_response()
 
     def change_health(self, health):
-        self._curr_life = clamp(health, -self._max_life, self._max_life)
+        self._curr_life = clamp(self._curr_life + health, -self._max_life, self._max_life)
         if self._curr_life == -self._max_life:
             self._dead = True
 
