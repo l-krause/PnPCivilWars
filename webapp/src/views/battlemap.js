@@ -67,6 +67,13 @@ const reducer = (gameData, action) => {
                 color: "grey"
             });
             break;
+        case "characterDeathRoll":
+            newGameData.log.push({
+                timestamp: action.timestamp,
+                message: `${gameData.characters[action.characterId].name} rolled a ${action.roll} on their death roll`,
+                color: "white"
+            });
+            break;
         case "logMessage":
             newGameData.log.push({
                 message: action.msg,
@@ -93,7 +100,7 @@ export default function BattleMap(props) {
 
     const [fetchCharacters, setFetchCharacters] = useState(true);
     const [gameData, dispatch] = useReducer(reducer, null, () => ({characters: {[character.id]: character}, log: []}));
-    const [mapSize, setMapSize] = useState([0,0]);
+    const [mapSize, setMapSize] = useState([0, 0]);
     const [selectedCharacter, setSelectedCharacter] = useState(null);
     const [activeChar, setActiveChar] = useState(null);
     const [npcDialog, setNpcDialog] = useState(false);
@@ -248,7 +255,7 @@ export default function BattleMap(props) {
         </div>
         <div className="event-container">
             <div className="status">
-                <img className="heart" src={"/img/heart.png"} alt={"heart icon"} />
+                <img className="heart" src={"/img/heart.png"} alt={"heart icon"}/>
                 &nbsp; {gameData.characters[character.id].hp} / {character.max_hp}
                 <div>
                     Round {round} -
@@ -265,7 +272,7 @@ export default function BattleMap(props) {
                             disabled={activeChar !== character.id}>Attack</Button>
                     <Button variant="contained" onClick={() => onAction("spell")}
                             disabled={activeChar !== character.id}>Spell</Button>
-                    <Button variant="contained" onClick={() => api.sendRequest("dash", {},(response) => {
+                    <Button variant="contained" onClick={() => api.sendRequest("dash", {}, (response) => {
                         if (response.success) {
                             dispatch({type: "logMessage", color: "yellow", msg: "Successfully dashed"})
                         } else {
@@ -273,7 +280,8 @@ export default function BattleMap(props) {
                         }
                     })}
                             disabled={activeChar !== character.id}>Dash</Button>
-                    <Button onClick={()=> setChangeWeapon(true)} variant="contained" disabled={activeChar !== character.id}>Change Weapon</Button>
+                    <Button onClick={() => setChangeWeapon(true)} variant="contained"
+                            disabled={activeChar !== character.id}>Change Weapon</Button>
                     <Button className="pass-turn" variant="contained" onClick={() => onAction("pass")}
                             disabled={activeChar !== character.id}>Pass
                         Turn</Button>
@@ -290,7 +298,8 @@ export default function BattleMap(props) {
                 </div>}
         </div>
         <NpcDialog npcDialog={npcDialog} setNpcDialog={setNpcDialog} api={api}/>
-        <ChangeCharDialog changeChar={changeChar} setChangeChar={setChangeChar} selectedChar={selectedCharacter} api={api}/>
+        <ChangeCharDialog changeChar={changeChar} setChangeChar={setChangeChar} selectedChar={selectedCharacter}
+                          api={api}/>
     </div>
 
 }
