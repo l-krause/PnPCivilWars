@@ -257,7 +257,13 @@ export default function BattleMap(props) {
                             disabled={activeChar !== character.id}>Attack</Button>
                     <Button variant="contained" onClick={() => onAction("spell")}
                             disabled={activeChar !== character.id}>Spell</Button>
-                    <Button variant="contained" onClick={() => api.sendRequest("dash")}
+                    <Button variant="contained" onClick={() => api.sendRequest("dash", (response) => {
+                        if (response.success) {
+                            dispatch({type: "logMessage", color: "yellow", msg: "Successfully dashed"})
+                        } else {
+                            dispatch({type: "logMessage", color: "orange", msg: response.msg})
+                        }
+                    })}
                             disabled={activeChar !== character.id}>Dash</Button>
                     <Button variant="contained" disabled={activeChar !== character.id}>Change Weapon</Button>
                     <Button className="pass-turn" variant="contained" onClick={() => onAction("pass")}
