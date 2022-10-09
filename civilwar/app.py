@@ -316,5 +316,11 @@ def dm_change_char(data):
 
 
 if __name__ == "__main__":
-    logging.basicConfig(filename='logs/debug.log', level=logging.DEBUG)
+    log_file = 'logs/debug.log'
+    log_dir = os.path.dirname(log_file)
+
+    if not os.path.isdir(log_dir):
+        os.makedirs(log_dir)
+
+    logging.basicConfig(filename=log_file, level=logging.DEBUG)
     app.run("localhost", 8001)
