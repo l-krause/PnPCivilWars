@@ -206,7 +206,7 @@ class Character(JsonSerializable, ApiParameter, ABC):
 
         return character
 
-    def get_enemies_with_distance(self, distance=MEELE_RANGE):
+    def get_enemies_with_distance(self, distance=MEELE_RANGE/OG_METER):
         from gamecontroller import GameController
         game_controller = GameController.instance()
         filters = [
