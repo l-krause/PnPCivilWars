@@ -1,6 +1,5 @@
 import random
 from abc import abstractmethod, ABC
-from player_character import PlayerCharacter
 
 from utils.api import create_error, ApiParameter, create_response
 from utils.constants import MEELE_RANGE, OG_METER
@@ -159,12 +158,14 @@ class Character(JsonSerializable, ApiParameter, ABC):
         if self._stunned > 0:
             self._stunned -= 1
 
+    def on_death_roll(self, roll):
+        pass
+
     def _death_roll(self):
         roll = random.randint(1, 20)
         if self._death_advantage:
             roll = max(roll, random.randint(1, 20))
-            if isinstance(self, PlayerCharacter):
-                self.send_character_event("characterDeathRoll", {"roll": roll})
+            self.on_death_roll(roll)
         if roll > 10:
             if roll == 20:
                 self.revive(reason="Nat 20")
