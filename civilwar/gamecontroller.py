@@ -211,6 +211,10 @@ class GameController:
             actor.use_action()
             self.send_game_event("characterAttack", {"attacker": actor.get_id(), "victim": target.get_id(),
                                                    "hit": resp["data"]["hit"], "damage": resp["data"]["damage"]})
+            if target.is_ko():
+                self.send_game_event("characterKO", {"victim": target.get_id()})
+            if target.is_dead():
+                self.on_character_died(target, reason="Too low on hp")
 
         return resp
 

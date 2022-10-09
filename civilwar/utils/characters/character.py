@@ -142,10 +142,7 @@ class Character(JsonSerializable, ApiParameter, ABC):
         return self._id
 
     def turn_over(self):
-        if self.is_dead():
-            return
-        elif self.is_ko():
-            self._death_roll()
+        if self.is_dead() or self.is_ko():
             return
 
         self._movement_left = self._movement
@@ -158,6 +155,8 @@ class Character(JsonSerializable, ApiParameter, ABC):
             self._res_buff -= 1
             if self._res_buff == 0:
                 self._resistances = self._std_resistances.copy()
+        if self._stunned > 0:
+            self._stunned -= 1
 
     def _death_roll(self):
         roll = random.randint(1, 20)

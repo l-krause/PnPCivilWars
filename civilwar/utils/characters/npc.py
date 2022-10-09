@@ -20,6 +20,10 @@ class NPC(Character):
         from gamecontroller import GameController
         game_controller = GameController.instance()
 
+        if self.is_ko():
+            self._death_roll()
+            return
+
         target_enemy = None
         enemies = self.get_enemies_with_distance(distance=self.get_movement_left() // OG_METER)
         for enemy in enemies:
