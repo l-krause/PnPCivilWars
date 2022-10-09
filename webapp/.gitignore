@@ -11,6 +11,12 @@
 # production
 /build
 
+#logs
+/logs
+
+#session
+/flask_session
+
 # misc
 .DS_Store
 .env.local
