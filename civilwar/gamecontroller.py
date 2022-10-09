@@ -204,7 +204,7 @@ class GameController:
             return create_error("No Action Points available")
 
         weapon = actor.get_active_weapon()
-        distance = actor.get_pos().distance(target.get_pos(), factor=OG_METER)
+        distance = actor.get_pos().distance(target.get_pos(), factor=1/OG_METER)
         resp = weapon.attack(distance, target)
 
         if resp["success"]:
