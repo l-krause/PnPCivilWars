@@ -219,7 +219,7 @@ class GameController:
         return resp
 
     def move(self, target, pos):
-        print("GameControlwler.move, target:", target, "pos:", pos)
+        print("GameController.move, target:", target, "pos:", pos)
         if target != self._turn_order.get_active():
             return create_error("It's not your characters turn yet")
         max_dist = target.get_movement_left() // OG_METER
