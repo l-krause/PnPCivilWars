@@ -6,12 +6,20 @@ export default class API {
         this.websocketClient = null;
     }
 
+    getSocketIOUrl() {
+        if (window.location.hostname === "localhost") {
+            return "ws://localhost:8001";
+        } else {
+            return window.location;
+        }
+    }
+
     reconnect() {
         if (this.io) {
             this.io.removeAllListeners();
         }
         
-        this.io = io({transports: ["websocket"], withCredentials: true});
+        this.io = io(this.getSocketIOUrl(), {transports: ["websocket"], withCredentials: true});
         return this.io;
     }
 
