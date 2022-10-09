@@ -258,7 +258,7 @@ export default function BattleMap(props) {
                             disabled={activeChar !== character.id}>Attack</Button>
                     <Button variant="contained" onClick={() => onAction("spell")}
                             disabled={activeChar !== character.id}>Spell</Button>
-                    <Button variant="contained" onClick={() => api.sendRequest("dash", (response) => {
+                    <Button variant="contained" onClick={() => api.sendRequest("dash", {},(response) => {
                         if (response.success) {
                             dispatch({type: "logMessage", color: "yellow", msg: "Successfully dashed"})
                         } else {
