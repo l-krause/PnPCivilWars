@@ -16,6 +16,7 @@
 
 #session
 /flask_session
+/flask_session/*
 
 # misc
 .DS_Store
