@@ -202,6 +202,8 @@ class GameController:
     def attack(self, actor: Character, target: Character):
         if not actor.has_action():
             return create_error("No Action Points available")
+        if target._stunned > 0:
+            return create_error("You are stunned")
 
         weapon = actor.get_active_weapon()
         distance = actor.get_pos().distance(target.get_pos(), factor=1)
@@ -218,10 +220,12 @@ class GameController:
 
         return resp
 
-    def move(self, target, pos):
+    def move(self, target : Character, pos):
         print("GameController.move, target:", target, "pos:", pos)
         if target != self._turn_order.get_active():
             return create_error("It's not your characters turn yet")
+        if target._stunned > 0:
+            return create_error("You are stunned")
         max_dist = target.get_movement_left() / OG_METER
 
         new_pos = target.get_pos().normalize_distance(pos, max_dist, self.get_map_bounds())
@@ -232,6 +236,8 @@ class GameController:
     def dash(self, target):
         if not target.has_action():
             return create_error("No action points left")
+        if target._stunned > 0:
+            return create_error("You are stunned")
         target._movement_left += target._movement
         target.use_action()
         return create_response()

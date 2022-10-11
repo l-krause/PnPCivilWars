@@ -74,6 +74,13 @@ const reducer = (gameData, action) => {
                 color: "white"
             });
             break;
+        case "characterStunned":
+            newGameData.log.push({
+                timestamp: action.timestamp,
+                message: `${gameData.characters[action.characterId].name} is stunned for ${action.rounds} more round(s)`,
+                color: "yellow"
+            });
+            break;
         case "logMessage":
             newGameData.log.push({
                 message: action.msg,
