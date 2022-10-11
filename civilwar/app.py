@@ -292,19 +292,14 @@ def dm_create_npcs(data):
 
 @socketio.on("kill")
 @has_role("dm")
-@param("target", required_type="int")
+@param("target", required_type=Character)
 def dm_kill(data):
-    game_controller = GameController.instance()
-    target = GameController.instance().get_character(data["target"])
-    if target is None:
-        emit("kill", create_error("Target does not exist"))
-        return
-    target.kill(reason="DM kill")
+    data["target"].kill(reason="DM kill")
 
 
 @socketio.on('changeSelChar')
 @has_role("dm")
-@param("character", required_type=int)
+@param("character", required_type=Character)
 @param("curr_hp", required_type=int)
 @param("max_hp", required_type=int)
 @param("dice", required_type=int)
@@ -312,13 +307,10 @@ def dm_kill(data):
 @param("modifier", required_type=int)
 @param("armor", required_type=int)
 def dm_change_char(data):
-    target = GameController.get_character(data["character"])
-    if target is None:
-        emit("changeSelChar", create_error("Character does not exist"))
-        return
-    resp = GameController.instance().change_char(target=target, max_hp=data["max_hp"], curr_hp=data["curr_hp"],
+    resp = GameController.instance().change_char(target=data["character"], max_hp=data["max_hp"], curr_hp=data["curr_hp"],
                                                  dice=data["dice"], damage=data["damage"], modifier=data["modifier"],
                                                  armor=data["armor"])
+    emit("changeSelChar", resp)
 
 
 if __name__ == "__main__":
