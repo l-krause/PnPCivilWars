@@ -248,7 +248,7 @@ class Character(JsonSerializable, ApiParameter, ABC):
         from gamecontroller import GameController
         game_controller = GameController.instance()
         current_distance = self.distance(other)
-        move_distance = min(current_distance - requested_distance, self._movement_left)
+        move_distance = min(current_distance - requested_distance, self._movement_left / OG_METER)
         if move_distance > 0:
             target_pos = self.get_pos().normalize_distance(other.get_pos(), move_distance / OG_METER,
                                                            game_controller.get_map_bounds())
