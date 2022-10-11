@@ -309,7 +309,7 @@ export default function BattleMap(props) {
                     <Button variant="contained" onClick={() => onAction("start")}>Start</Button>
                     <Button variant="contained" onClick={() => onAction("continue")}>Continue</Button>
                     <Button variant="contained" onClick={() => onAction("reset")}>Reset</Button>
-                    <Button variant="contained" onClick={() => onAction("changeHealth")}>Change HP</Button>
+                    <Button variant="contained" onClick={() => setChangeHp(true)}>Change HP</Button>
                     <Button variant="contained" onClick={() => onAction("kill")}>Kill</Button>
                     <Button variant="contained" onClick={() => onAction("stun")}>Stun</Button>
                     <Button variant="contained" onClick={() => setNpcDialog(true)}>Create NPCs</Button>

@@ -13,11 +13,11 @@ import Button from "@mui/material/Button";
 export default function ChangeHealthDialog(props) {
     let api = props.api;
     let character = props.character;
-    let changeHpDialog = props.changeHpDialog;
-    let setChangeHpDialog = props.setChangeHpDialog;
+    let changeHp = props.changeHp;
+    let setChangeHp = props.setChangeHp;
     const [hp, setHp] = useState(0)
 
-    return <Dialog open={changeHpDialog} onClose={() => setChangeHpDialog(false)}>
+    return <Dialog open={changeHp} onClose={() => setChangeHp(false)}>
         <DialogTitle>Change HPs</DialogTitle>
         <DialogContent>
             <DialogContentText>
@@ -33,9 +33,9 @@ export default function ChangeHealthDialog(props) {
             <Button variant={"outlined"} onClick={() => {
                 let data = {"target": character, "life": hp}
                 api.sendRequest("changeHealth", data)
-                setChangeHpDialog(false)
+                setChangeHp(false)
             }}>Change</Button>
-            <Button variant={"outlined"} onClick={() => setChangeHpDialog(false)}>Cancel</Button>
+            <Button variant={"outlined"} onClick={() => setChangeHp(false)}>Cancel</Button>
         </DialogActions>
     </Dialog>
 
