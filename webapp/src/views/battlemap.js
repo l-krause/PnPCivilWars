@@ -5,6 +5,7 @@ import EventMessage from "../elements/event-message";
 import "./battlemap.css";
 import NpcDialog from "../elements/npc-dialog";
 import ChangeCharDialog from "../elements/change-char-dialog";
+import ChangeHealthDialog from "../elements/change-health-dialog";
 
 const MAX_LOG_SIZE = 250;
 
@@ -81,6 +82,16 @@ const reducer = (gameData, action) => {
                 color: "yellow"
             });
             break;
+        case "characterChangedHp":
+            newGameData.characters[action.characterId].hp = newGameData.characters[action.characterId].hp + action.hp;
+            let eMessage = action.hp > 0 ? `${newGameData.characters[action.characterId].name} was healed by ${action.hp}` :
+                `${newGameData.characters[action.characterId].name} was damaged by ${-action.hp}`;
+            let eColor = action.hp > 0 ? "green" : "white";
+            newGameData.log.push({
+                message: eMessage,
+                color: eColor
+            })
+            break;
         case "logMessage":
             newGameData.log.push({
                 message: action.msg,
@@ -116,6 +127,7 @@ export default function BattleMap(props) {
     const [gameState, setGameState] = useState("ongoing");
     const [loaded, setLoaded] = useState(false);
     const [changeWeapon, setChangeWeapon] = useState(false);
+    const [changeHp, setChangeHp] = useState(false);
 
     const mapRef = useRef(null);
 
@@ -307,6 +319,7 @@ export default function BattleMap(props) {
         <NpcDialog npcDialog={npcDialog} setNpcDialog={setNpcDialog} api={api}/>
         <ChangeCharDialog changeChar={changeChar} setChangeChar={setChangeChar} selectedChar={selectedCharacter}
                           api={api}/>
+        <ChangeHealthDialog changeHp={changeHp} setChangeHp={setChangeHp} character={selectedCharacter} api={api}/>
     </div>
 
 }

@@ -228,11 +228,17 @@ def dm_start(data):
 
 @socketio.on('changeHealth')
 @has_role("dm")
-@param("target", required_type=Character)
+@param("target", required_type=int)
 @param("life", required_type=int, default=0, optional=True)
 def dm_change_health(data):
-    response = data["target"].change_health(data["life"])
-    emit('changeHealth', response)
+    game_controller = GameController.instance()
+    character = game_controller.get_character(data["target"])
+    if character is None:
+        emit("changeHealth", create_error("Character does"))
+        return
+    character.change_health(data["life"])
+    character.send_character_event("characterChangedHp", {"hp": data["life"]})
+    emit('changeHealth', create_response())
 
 
 @socketio.on('reset')
