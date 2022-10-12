@@ -93,7 +93,7 @@ const reducer = (gameData, action) => {
                 color: eColor
             })
             break;
-        case "characterSwitchWeapon:
+        case "characterSwitchWeapon":
             newGameData.characters[action.characterId].active_weapon = action.weapon;
             newGameData.log.push({
                 message: `${newGameData.characters[action.characterId].name} changed weapon to ${action.weapon}`,
