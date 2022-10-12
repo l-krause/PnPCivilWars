@@ -284,10 +284,12 @@ export default function BattleMap(props) {
 
     let aliveEnemies = 0, aliveAllies = 0;
     for (const char of Object.values(gameData.characters)) {
-        if (char.type === "player" || (char.type === "npc" && char.is_ally)) {
-            aliveAllies++;
-        } else {
-            aliveEnemies++;
+        if (char.status !== "dead") {
+            if (char.type === "player" || (char.type === "npc" && char.is_ally)) {
+                aliveAllies++;
+            } else {
+                aliveEnemies++;
+            }
         }
     }
 

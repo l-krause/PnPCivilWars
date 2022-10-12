@@ -21,10 +21,10 @@ class NPC(Character):
         from gamecontroller import GameController
         game_controller = GameController.instance()
 
+        if self.is_dead():
+            return
         if self.is_ko():
             self._death_roll()
-            return
-        if self.is_dead():
             return
         if self._stunned > 0:
             return
