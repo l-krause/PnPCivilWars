@@ -6,6 +6,7 @@ import "./battlemap.css";
 import NpcDialog from "../elements/npc-dialog";
 import ChangeCharDialog from "../elements/change-char-dialog";
 import ChangeHealthDialog from "../elements/change-health-dialog";
+import SwitchWeaponDialog from "../elements/switch-weapon-dialog";
 
 const MAX_LOG_SIZE = 250;
 
@@ -128,6 +129,8 @@ export default function BattleMap(props) {
     const [loaded, setLoaded] = useState(false);
     const [changeWeapon, setChangeWeapon] = useState(false);
     const [changeHp, setChangeHp] = useState(false);
+    const [weapon, setWeapon] = useState("");
+    const [weapons, setWeapons] = useState([]);
 
     const mapRef = useRef(null);
 
@@ -249,6 +252,10 @@ export default function BattleMap(props) {
 
     }, [api, character, role, activeChar]);
 
+    const onSwitchWeapon = () => {
+
+    }
+
     const tokens = Object.values(mapRef.current && loaded ? gameData.characters : {}).map(c => <Token
         key={"character-" + c.id}
         character={c}
@@ -320,6 +327,8 @@ export default function BattleMap(props) {
         <ChangeCharDialog changeChar={changeChar} setChangeChar={setChangeChar} selectedChar={selectedCharacter}
                           api={api}/>
         <ChangeHealthDialog changeHp={changeHp} setChangeHp={setChangeHp} character={selectedCharacter} api={api}/>
+        <SwitchWeaponDialog switchWeaponDialog={changeWeapon} setSwitchWeaponDialog={setChangeWeapon}
+                            activeWeapon={character.active_weapon} weapons={character.weapons} api={api}/>
     </div>
 
 }

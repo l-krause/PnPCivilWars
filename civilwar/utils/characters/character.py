@@ -130,7 +130,9 @@ class Character(JsonSerializable, ApiParameter, ABC):
             "pos": self._pos,
             "status": self.get_status(),
             "hp": self.get_hp(),
-            "max_hp": self._max_life
+            "max_hp": self._max_life,
+            "active_weapon": self._active_weapon.get_name(),
+            "weapons": [w.get_name() for w in self._weapons]
         }
 
         if self._token_shadow:
