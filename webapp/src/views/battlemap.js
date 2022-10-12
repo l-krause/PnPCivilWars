@@ -330,9 +330,9 @@ export default function BattleMap(props) {
         </div>
         <NpcDialog npcDialog={npcDialog} setNpcDialog={setNpcDialog} api={api}/>
         <ChangeCharDialog changeChar={changeChar} setChangeChar={setChangeChar}
-                          selectedCharacter={gameData.characters[selectedCharacter]} api={api}/>
+                          selectedCharacter={selectedCharacter} api={api}/>
         <ChangeHealthDialog changeHp={changeHp} setChangeHp={setChangeHp}
-                            character={gameData.characters[selectedCharacter]} api={api}/>
+                            character={setSelectedCharacter()} api={api}/>
         <SwitchWeaponDialog switchWeaponDialog={changeWeapon} setSwitchWeaponDialog={setChangeWeapon}
                             activeWeapon={gameData.characters[character.id].active_weapon}
                             weapons={gameData.characters[character.id].weapons} api={api}/>
