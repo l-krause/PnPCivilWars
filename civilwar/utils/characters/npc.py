@@ -45,6 +45,9 @@ class NPC(Character):
             if distance > required_distance:
                 self.move_towards(target_enemy, required_distance)
             game_controller.attack(self, target_enemy)
+            if self._multi_attack:
+                self._action_points += 1
+                game_controller.attack(self, target_enemy)
         else:
 
             # current weapon is ranged
