@@ -267,10 +267,6 @@ export default function BattleMap(props) {
 
     }, [api, character, role, activeChar]);
 
-    const onSwitchWeapon = () => {
-
-    }
-
     const tokens = Object.values(mapRef.current && loaded ? gameData.characters : {}).map(c => <Token
         key={"character-" + c.id}
         character={c}
@@ -285,7 +281,15 @@ export default function BattleMap(props) {
         color={entry.color}
     />);
 
-    console.log(gameData)
+
+    let aliveEnemies = 0, aliveAllies = 0;
+    for (const char of Object.values(gameData.characters)) {
+        if (char.type === "player" || (char.type === "npc" && char.is_ally)) {
+            aliveAllies++;
+        } else {
+            aliveEnemies++;
+        }
+    }
 
     return <div className="battle-view">
         <div className="battlemap-container">
@@ -298,6 +302,7 @@ export default function BattleMap(props) {
             <div className="status">
                 <img className="heart" src={"/img/heart.png"} alt={"heart icon"}/>
                 &nbsp; {gameData.characters[character.id].hp} / {gameData.characters[character.id].max_hp}
+                &nbsp; A: {aliveAllies} - E: {aliveEnemies}
                 <div>
                     Round {round} -
                     State: {gameState}
