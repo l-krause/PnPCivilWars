@@ -297,7 +297,7 @@ export default function BattleMap(props) {
         <div className="event-container">
             <div className="status">
                 <img className="heart" src={"/img/heart.png"} alt={"heart icon"}/>
-                &nbsp; {gameData.characters[character.id].hp} / {gameData.characters[character.id]max_hp}
+                &nbsp; {gameData.characters[character.id].hp} / {gameData.characters[character.id].max_hp}
                 <div>
                     Round {round} -
                     State: {gameState}
