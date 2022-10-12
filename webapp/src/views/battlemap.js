@@ -100,6 +100,15 @@ const reducer = (gameData, action) => {
                 color: "yellow"
             });
             break;
+        case "characterTransformed":
+            newGameData.characters[action.characterId].max_hp = action.max_hp;
+            newGameData.characters[action.characterId].hp = action.curr_hp;
+            let m = action.back ? `${newGameData.characters[action.characterId].name} transformed back (${action.curr_hp}/${action.max_hp})!`:
+                `${newGameData.characters[action.characterId].name} transformed to (${action.curr_hp}/${action.max_hp})!`;
+            newGameData.log.push({
+                message: m,
+                color: "yellow"
+            })
         case "logMessage":
             newGameData.log.push({
                 message: action.msg,

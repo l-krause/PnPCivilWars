@@ -310,10 +310,11 @@ def dm_kill(data):
 @param("modifier", required_type=int)
 @param("armor", required_type=int)
 def dm_change_char(data):
-    resp = GameController.instance().change_char(target=data["character"], max_hp=data["max_hp"], curr_hp=data["curr_hp"],
-                                                 dice=data["dice"], damage=data["damage"], modifier=data["modifier"],
-                                                 armor=data["armor"])
-    emit("changeSelChar", resp)
+    GameController.instance().change_char(target=data["character"], max_hp=data["max_hp"],
+                                          curr_hp=data["curr_hp"],
+                                          dice=data["dice"], damage=data["damage"], modifier=data["modifier"],
+                                          armor=data["armor"])
+    emit("changeSelChar", create_response())
 
 
 if __name__ == "__main__":

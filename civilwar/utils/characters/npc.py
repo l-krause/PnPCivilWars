@@ -25,6 +25,8 @@ class NPC(Character):
             return
         if self.is_dead():
             return
+        if self._stunned > 0:
+            return
 
         target_enemy = None
         enemies = self.get_enemies_with_distance(distance=self.get_movement_left() / OG_METER)

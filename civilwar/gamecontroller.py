@@ -212,15 +212,21 @@ class GameController:
         if resp["success"]:
             actor.use_action()
             self.send_game_event("characterAttack", {"attacker": actor.get_id(), "victim": target.get_id(),
-                                                   "hit": resp["data"]["hit"], "damage": resp["data"]["damage"]})
+                                                     "hit": resp["data"]["hit"], "damage": resp["data"]["damage"]})
             if target.is_ko():
+                if target.get_id() in self._changed_chars.keys():
+                    self._chars[target.get_id()] = self._changed_chars.pop(target.get_id())
+                    char = self._chars[target.get_id()]
+                    char.send_character_event("characterTransformed",
+                                              {"max_hp": char._max_life, "curr_hp": char._curr_life, "back": True})
+                    return resp
                 self.send_game_event("characterKO", {"victim": target.get_id()})
             if target.is_dead():
                 self.on_character_died(target, reason="Too low on hp")
 
         return resp
 
-    def move(self, target : Character, pos):
+    def move(self, target: Character, pos):
         print("GameController.move, target:", target, "pos:", pos)
         if target != self._turn_order.get_active():
             return create_error("It's not your characters turn yet")
@@ -296,10 +302,12 @@ class GameController:
     def change_char(self, target: Character, max_hp, curr_hp, armor, damage, modifier, dice):
         if target.get_id() in self._changed_chars.keys():
             self._chars[target.get_id()] = self._changed_chars.pop(target.get_id())
-            data = {"curr_hp": self._chars[target.get_id()]._curr_life, "max_hp": self._chars[target.get_id()]._max_life}
-            target.send_character_event("characterChangged", data)
+            data = {"curr_hp": self._chars[target.get_id()]._curr_life,
+                    "max_hp": self._chars[target.get_id()]._max_life,
+                    "back": True}
+            target.send_character_event("characterTransformed", data)
             return
-        self._changed_chars = copy.deepcopy(self._chars[target.get_id()])
+        self._changed_chars[target.get_id()] = copy.deepcopy(self._chars[target.get_id()])
         target._max_life = max_hp
         target._curr_life = curr_hp
         target._armor = armor
@@ -307,8 +315,10 @@ class GameController:
         weapon._dices = dice
         weapon._dice_type = damage
         weapon._additional = modifier
-        data = {"curr_hp": self._chars[target.get_id()]._curr_life, "max_hp": self._chars[target.get_id()]._max_life}
-        target.send_character_event("characterChangged", data)
+        data = {"curr_hp": self._chars[target.get_id()]._curr_life,
+                "max_hp": self._chars[target.get_id()]._max_life,
+                "back": False}
+        target.send_character_event("characterTransformed", data)
 
     @staticmethod
     def send_game_event(event, data=None):
