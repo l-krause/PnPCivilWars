@@ -310,7 +310,7 @@ export default function BattleMap(props) {
             <div className="question"><h4>How do you want to spend your action point?</h4></div>
             {role !== "dm" || (activeChar === character.id) ? <div className="player-interface">
                     <Button variant="contained" onClick={() => onAction("attack")}
-                            disabled={activeChar !== character.id}>Attack</Button>
+                            disabled={activeChar !== character.id || selectedCharacter === null}>Attack</Button>
                     <Button variant="contained" onClick={() => onAction("spell")}
                             disabled={activeChar !== character.id}>Spell</Button>
                     <Button variant="contained" onClick={() => api.sendRequest("dash", {}, (response) => {
@@ -331,11 +331,11 @@ export default function BattleMap(props) {
                     <Button variant="contained" onClick={() => onAction("start")}>Start</Button>
                     <Button variant="contained" onClick={() => onAction("continue")}>Continue</Button>
                     <Button variant="contained" onClick={() => onAction("reset")}>Reset</Button>
-                    <Button variant="contained" onClick={() => setChangeHp(true)}>Change HP</Button>
-                    <Button variant="contained" onClick={() => onAction("kill")}>Kill</Button>
-                    <Button variant="contained" onClick={() => onAction("stun")}>Stun</Button>
+                    <Button variant="contained" onClick={() => setChangeHp(true)} disabled={selectedCharacter === null}>Change HP</Button>
+                    <Button variant="contained" onClick={() => onAction("kill")} disabled={selectedCharacter === null}>Kill</Button>
+                    <Button variant="contained" onClick={() => onAction("stun")} disabled={selectedCharacter === null}>Stun</Button>
                     <Button variant="contained" onClick={() => setNpcDialog(true)}>Create NPCs</Button>
-                    <Button variant="contained" onClick={() => setChangeChar(true)}>Change Character</Button>
+                    <Button variant="contained" onClick={() => setChangeChar(true)} disabled={selectedCharacter === null}>Change Character</Button>
                 </div>}
         </div>
         <NpcDialog npcDialog={npcDialog} setNpcDialog={setNpcDialog} api={api}/>
