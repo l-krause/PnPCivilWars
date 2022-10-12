@@ -19,12 +19,14 @@ export default function ChangeCharDialog(props) {
     const changeSelCharacter = () => {
         let data = {
             "character": selectedCharacter,
-            "curr_hp": parseInt(changeHp),
-            "max_hp": parseInt(changeMaxHp),
-            "dice": parseInt(changeDice),
-            "damage": parseInt(changeDamage),
-            "modifier": parseInt(changeAdd),
-            "armor": parseInt(changeArmor)
+            "stats": {
+                "curr_hp": parseInt(changeHp),
+                "max_hp": parseInt(changeMaxHp),
+                "dice": parseInt(changeDice),
+                "damage": parseInt(changeDamage),
+                "modifier": parseInt(changeAdd),
+                "armor": parseInt(changeArmor)
+            }
         }
         api.sendRequest("changeSelChar", data, (response) => {
             if (response.success) {

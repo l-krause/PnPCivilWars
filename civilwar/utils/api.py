@@ -41,7 +41,6 @@ def broadcast_response(response):
 def has_character():
     def decorator(fn):
         def wrapped_function(*args, **kwargs):
-            # First check if user is authenticated.
             if session.get("character", None) is None:
                 return emit(request.event['message'], create_error("No character chosen yet"))
 

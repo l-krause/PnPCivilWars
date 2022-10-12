@@ -9,7 +9,8 @@ from flask_session import Session
 from flask_socketio import SocketIO, emit
 
 from gamecontroller import GameController
-from utils.api import create_response, create_error, json_serialize, param, has_role, has_character, broadcast_response
+from utils.api import create_response, create_error, param, has_role, has_character, broadcast_response
+from utils.character_stats import CharacterStats
 from utils.characters.character import Character
 from utils.position import Position
 
@@ -303,17 +304,14 @@ def dm_kill(data):
 @socketio.on('changeSelChar')
 @has_role("dm")
 @param("character", required_type=Character)
-@param("curr_hp", required_type=int)
-@param("max_hp", required_type=int)
-@param("dice", required_type=int)
-@param("damage", required_type=int)
-@param("modifier", required_type=int)
-@param("armor", required_type=int)
+@param("stats", required_type=CharacterStats)
 def dm_change_char(data):
-    GameController.instance().change_char(target=data["character"], max_hp=data["max_hp"],
-                                          curr_hp=data["curr_hp"],
-                                          dice=data["dice"], damage=data["damage"], modifier=data["modifier"],
-                                          armor=data["armor"])
+    target = data["character"]
+    if target.is_transformed():
+        target.retransform()
+    else:
+        target.transform(data["stats"])
+
     emit("changeSelChar", create_response())
 
 

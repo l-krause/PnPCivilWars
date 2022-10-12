@@ -5,7 +5,7 @@
       <paths name="dnd.romanh.de">
         <serverdata>
           <mappings>
-            <mapping deploy="/var/www/dnd.romanh.de" local="$PROJECT_DIR$" web="/" />
+            <mapping deploy="/var/www/dnd.romanh.de/civilwar" local="$PROJECT_DIR$" web="/" />
           </mappings>
         </serverdata>
       </paths>

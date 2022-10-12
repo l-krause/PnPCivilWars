@@ -21,8 +21,8 @@
   },
   "scripts": {
     "build": "npx parcel build",
-    "debug": "react-scripts --openssl-legacy-provider start",
-    "deploy": "scp -r dist public/img root@romanh.de:/var/www/dnd.romanh.de/static/"
+    "debug": "react-scripts start",
+    "deploy": "scp -r dist public/img root@romanh.de:/var/www/dnd.romanh.de/civilwar/static/"
   },
   "eslintConfig": {
     "extends": [

@@ -31,7 +31,6 @@ class GameController:
         # game turn order + round counter + characters
         self._turn_order = GameTurnOrder()
         self._chars = {}
-        self._changed_chars = {}
         self.mutex = Lock()
 
         # character configs
@@ -214,12 +213,8 @@ class GameController:
             self.send_game_event("characterAttack", {"attacker": actor.get_id(), "victim": target.get_id(),
                                                      "hit": resp["data"]["hit"], "damage": resp["data"]["damage"]})
             if target.is_ko():
-                if target.get_id() in self._changed_chars.keys():
-                    cached_char = self._changed_chars.pop(target.get_id())
-                    self.transform_back(target, cached_char)
-                    target.send_character_event("characterTransformed",
-                                              {"max_hp": target._max_life, "curr_hp": target._curr_life, "back": True})
-                    return resp
+                if target.is_transformed():
+                    target.retransform()
                 self.send_game_event("characterKO", {"victim": target.get_id()})
             if target.is_dead():
                 self.on_character_died(target, reason="Too low on hp")
@@ -298,38 +293,6 @@ class GameController:
         self.mutex.release()
         self.send_game_status()
         return create_response()
-
-    def transform_back(self, target: Character, cached_char: Character):
-        target._max_life = cached_char.max_hp
-        target._curr_life = cached_char.curr_hp
-        target._armor = cached_char.armor
-        cached_weapon = cached_char.get_active_weapon()
-        weapon = target.get_active_weapon()
-        weapon._dices = cached_weapon.dice
-        weapon._dice_type = cached_weapon.damage
-        weapon._additional = cached_weapon.modifier
-
-    def change_char(self, target: Character, max_hp, curr_hp, armor, damage, modifier, dice):
-        if target.get_id() in self._changed_chars.keys():
-            cached_char = self._changed_chars.pop(target.get_id())
-            self.transform_back(target, cached_char)
-            data = {"curr_hp": self._chars[target.get_id()]._curr_life,
-                    "max_hp": self._chars[target.get_id()]._max_life,
-                    "back": True}
-            target.send_character_event("characterTransformed", data)
-            return
-        self._changed_chars[target.get_id()] = copy.deepcopy(self._chars[target.get_id()])
-        target._max_life = max_hp
-        target._curr_life = curr_hp
-        target._armor = armor
-        weapon = target.get_active_weapon()
-        weapon._dices = dice
-        weapon._dice_type = damage
-        weapon._additional = modifier
-        data = {"curr_hp": self._chars[target.get_id()]._curr_life,
-                "max_hp": self._chars[target.get_id()]._max_life,
-                "back": False}
-        target.send_character_event("characterTransformed", data)
 
     @staticmethod
     def send_game_event(event, data=None):

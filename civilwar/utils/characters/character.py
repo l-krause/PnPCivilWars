@@ -2,6 +2,7 @@ import random
 from abc import abstractmethod, ABC
 
 from utils.api import create_error, ApiParameter, create_response
+from utils.character_stats import CharacterStats
 from utils.constants import MEELE_RANGE, OG_METER
 from utils.json_serializable import JsonSerializable
 from utils.position import Position
@@ -38,6 +39,8 @@ class Character(JsonSerializable, ApiParameter, ABC):
         self._spells = dictionary.get("spells", [])
         self._spell_slots = dictionary.get("spellSlots", [])
         self._available_slots = dictionary.get("spellSlots", [])
+
+        self._prev_stats = None
 
     @abstractmethod
     def get_name(self):
@@ -271,3 +274,40 @@ class Character(JsonSerializable, ApiParameter, ABC):
     def __repr__(self):
         is_dead = ", dead" if self.is_dead() else ""
         return f"{type(self).__name__}(id={self._id}, name={self.get_name()}, hp={self._curr_life}/{self._max_life}{is_dead})"
+
+    def get_stats(self):
+        weapon = self._active_weapon
+        return CharacterStats(self._curr_life, self._max_life, self._armor,
+                              weapon._dices, weapon._dice_type, weapon._additional)
+
+    def _apply_stats(self, stats):
+        self._max_life = stats.max_hp
+        self._curr_life = stats.curr_hp
+        self._armor = stats.armor
+
+        affected_weapon = self._active_weapon if stats._affected_weapon is None else stats._affected_weapon
+        affected_weapon._dices = stats.dice
+        affected_weapon._dice_type = stats.damage
+        affected_weapon._additional = stats.modifier
+
+    def transform(self, stats):
+        self._prev_stats = self.get_stats()
+        self._prev_stats._affected_weapon = self._active_weapon
+        self._apply_stats(stats)
+        self.send_character_event("characterTransformed", {
+            "curr_hp": self._curr_life,
+            "max_hp": self._max_life,
+            "back": False
+        })
+
+    def retransform(self):
+        self._apply_stats(self._prev_stats)
+        self._prev_stats = None
+        self.send_character_event("characterTransformed", {
+            "curr_hp": self._curr_life,
+            "max_hp": self._max_life,
+            "back": True
+        })
+
+    def is_transformed(self):
+        return self._prev_stats is not None
