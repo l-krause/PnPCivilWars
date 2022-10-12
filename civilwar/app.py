@@ -209,9 +209,12 @@ def api_pass_turn(data):
 def api_switch_weapon(data):
     game_controller = GameController.instance()
     character = game_controller.get_character(session["character"])
+    if character._stunned > 0:
+        emit("characterStunned", create_error("You are stunned"))
+        return
     weapon = character.get_weapon(data["name"])
     if not weapon:
-        resp = create_response("You do not own such weapon")
+        resp = create_error("You do not own such weapon")
     else:
         resp = character.switch_weapon(weapon)
 

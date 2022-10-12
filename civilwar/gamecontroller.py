@@ -202,7 +202,7 @@ class GameController:
     def attack(self, actor: Character, target: Character):
         if not actor.has_action():
             return create_error("No Action Points available")
-        if target._stunned > 0:
+        if actor._stunned > 0:
             return create_error("You are stunned")
 
         weapon = actor.get_active_weapon()
