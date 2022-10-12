@@ -92,7 +92,7 @@ class Character(JsonSerializable, ApiParameter, ABC):
 
         self._active_weapon = weapon
         self.use_action()
-        self.send_character_event("characterSwitchWeapon", {"weapon": weapon})
+        self.send_character_event("characterSwitchWeapon", {"weapon": weapon.get_name()})
         return create_response()
 
     def change_health(self, health):

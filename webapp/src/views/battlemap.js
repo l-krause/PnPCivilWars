@@ -93,6 +93,13 @@ const reducer = (gameData, action) => {
                 color: eColor
             })
             break;
+        case "characterSwitchWeapon:
+            newGameData.characters[action.characterId].active_weapon = action.weapon;
+            newGameData.log.push({
+                message: `${newGameData.characters[action.characterId].name} changed weapon to ${action.weapon}`,
+                color: "yellow"
+            });
+            break;
         case "logMessage":
             newGameData.log.push({
                 message: action.msg,
@@ -129,8 +136,6 @@ export default function BattleMap(props) {
     const [loaded, setLoaded] = useState(false);
     const [changeWeapon, setChangeWeapon] = useState(false);
     const [changeHp, setChangeHp] = useState(false);
-    const [weapon, setWeapon] = useState("");
-    const [weapons, setWeapons] = useState([]);
 
     const mapRef = useRef(null);
 
