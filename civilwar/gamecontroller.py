@@ -229,7 +229,7 @@ class GameController:
             return create_error("You are stunned")
         max_dist = target.get_movement_left() / OG_METER
 
-        new_pos = target.get_pos().normalize_distance(pos, max_dist, self.get_map_bounds())
+        new_pos = target.get_pos().normalize_distance(pos, max_dist/OG_METER, self.get_map_bounds())
         print("new pos:", new_pos)
         target.move(new_pos)
         return create_response()

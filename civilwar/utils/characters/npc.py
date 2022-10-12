@@ -12,6 +12,7 @@ class NPC(Character):
         super().__init__(character_id, dictionary, pos)
         self._name = name
         self._is_ally = is_ally
+        self._multi_attack = dictionary.get("multiAttack", False)
 
     def is_ally(self):
         return self._is_ally
@@ -48,18 +49,21 @@ class NPC(Character):
 
             # current weapon is ranged
             if self._active_weapon.is_ranged():
+                if self.get_active_weapon()._usages <= 0:
+                    self.switch_weapon(filter(lambda x: x.get_name() == "Longsword", self._weapons))
 
                 # check if there is an enemy in range
-                enemies = list(self.get_enemies_with_distance(distance=self._active_weapon.get_max_range()))
-                if len(enemies) > 0:
-                    game_controller.attack(self, enemies[0])
-                    return
+                else:
+                    enemies = list(self.get_enemies_with_distance(distance=self._active_weapon.get_max_range()))
+                    if len(enemies) > 0:
+                        game_controller.attack(self, enemies[0])
+                        return
 
             else:
 
                 # we have a ranged weapon, switch to it
                 ranged_weapon = self.get_ranged_weapon()
-                if ranged_weapon is not None:
+                if ranged_weapon is not None and ranged_weapon._usages > 0:
                     self.switch_weapon(ranged_weapon)
                     return
 

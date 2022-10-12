@@ -176,13 +176,13 @@ class Character(JsonSerializable, ApiParameter, ABC):
                 self.revive(reason="Nat 20")
             else:
                 self._won_death += 1
-                if self._won_death == 3:
+                if self._won_death >= 3:
                     self.revive(random.randint(1, 4), "Won 3 Death roles")
         else:
             self._lost_death += 1
             if roll == 1:
                 self._lost_death += 1
-            if self._lost_death == 3:
+            if self._lost_death >= 3:
                 self.kill(reason="Death Roll")
 
     def is_dead(self):

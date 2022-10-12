@@ -36,6 +36,7 @@
       "usages": 30
     }
   ],
+  "multiAttack": true,
   "activeWeapon": "Longsword",
   "multi": 2
 }
