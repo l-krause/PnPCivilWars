@@ -215,10 +215,10 @@ class GameController:
                                                      "hit": resp["data"]["hit"], "damage": resp["data"]["damage"]})
             if target.is_ko():
                 if target.get_id() in self._changed_chars.keys():
-                    self._chars[target.get_id()] = self._changed_chars.pop(target.get_id())
-                    char = self._chars[target.get_id()]
-                    char.send_character_event("characterTransformed",
-                                              {"max_hp": char._max_life, "curr_hp": char._curr_life, "back": True})
+                    cached_char = self._changed_chars.pop(target.get_id())
+                    self.transform_back(target, cached_char)
+                    target.send_character_event("characterTransformed",
+                                              {"max_hp": target._max_life, "curr_hp": target._curr_life, "back": True})
                     return resp
                 self.send_game_event("characterKO", {"victim": target.get_id()})
             if target.is_dead():
@@ -299,9 +299,20 @@ class GameController:
         self.send_game_status()
         return create_response()
 
+    def transform_back(self, target: Character, cached_char: Character):
+        target._max_life = cached_char.max_hp
+        target._curr_life = cached_char.curr_hp
+        target._armor = cached_char.armor
+        cached_weapon = cached_char.get_active_weapon()
+        weapon = target.get_active_weapon()
+        weapon._dices = cached_weapon.dice
+        weapon._dice_type = cached_weapon.damage
+        weapon._additional = cached_weapon.modifier
+
     def change_char(self, target: Character, max_hp, curr_hp, armor, damage, modifier, dice):
         if target.get_id() in self._changed_chars.keys():
-            self._chars[target.get_id()] = self._changed_chars.pop(target.get_id())
+            cached_char = self._changed_chars.pop(target.get_id())
+            self.transform_back(target, cached_char)
             data = {"curr_hp": self._chars[target.get_id()]._curr_life,
                     "max_hp": self._chars[target.get_id()]._max_life,
                     "back": True}
