@@ -170,7 +170,7 @@ class Character(JsonSerializable, ApiParameter, ABC):
         roll = random.randint(1, 20)
         if self._death_advantage:
             roll = max(roll, random.randint(1, 20))
-            self.on_death_roll(roll)
+        self.on_death_roll(roll)
         if roll > 10:
             if roll == 20:
                 self.revive(reason="Nat 20")
