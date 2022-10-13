@@ -52,7 +52,11 @@ class NPC(Character):
             # current weapon is ranged
             if self._active_weapon.is_ranged():
                 if self.get_active_weapon()._usages <= 0:
-                    self.switch_weapon(filter(lambda x: x.get_name() == "Longsword", self._weapons))
+                    try:
+                        longsword = next(filter(lambda x: x.get_name() == "Longsword", self._weapons))
+                        self.switch_weapon(longsword)
+                    except Exception as e:
+                        print("No longsword")
 
                 # check if there is an enemy in range
                 else:
