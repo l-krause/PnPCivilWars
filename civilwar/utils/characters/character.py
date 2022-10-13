@@ -100,13 +100,19 @@ class Character(JsonSerializable, ApiParameter, ABC):
 
     def change_health(self, health):
         self._curr_life = clamp(self._curr_life + health, -self._max_life, self._max_life)
-        if self._curr_life == -self._max_life:
-            self._dead = True
+        if self._curr_life <= 0:
+            if self.is_transformed():
+                self.retransform()
+                return
+            if self._curr_life == -self._max_life:
+                self.kill()
+            else:
+                self.send_game_event("characterKO", {"victim": self.get_id()})
 
     def move(self, new_pos):
         dist = self._pos.distance(new_pos)
         self._pos = new_pos
-        self._movement_left = max(0, (self._movement_left / OG_METER*OG_METER) - dist)
+        self._movement_left = max(0, (self._movement_left / (OG_METER*OG_METER)) - dist)
         self.send_character_event("characterMove", {"to": self._pos, "movementLeft": self._movement_left})
         return create_response()
 

@@ -238,7 +238,7 @@ def dm_change_health(data):
     game_controller = GameController.instance()
     character = game_controller.get_character(data["target"])
     if character is None:
-        emit("changeHealth", create_error("Character does"))
+        emit("changeHealth", create_error("Character does not exist"))
         return
     character.change_health(data["life"])
     character.send_character_event("characterChangedHp", {"hp": data["life"]})
