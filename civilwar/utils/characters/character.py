@@ -105,9 +105,9 @@ class Character(JsonSerializable, ApiParameter, ABC):
                 self.retransform()
                 return
             if self._curr_life == -self._max_life:
-                self.kill()
+                self.kill("too low on hp.")
             else:
-                self.send_game_event("characterKO", {"victim": self.get_id()})
+                self.send_character_event("characterKO", {})
 
     def move(self, new_pos):
         dist = self._pos.distance(new_pos)
