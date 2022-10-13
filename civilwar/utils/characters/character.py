@@ -147,7 +147,10 @@ class Character(JsonSerializable, ApiParameter, ABC):
         return self._id
 
     def turn_over(self):
-        if self.is_dead() or self.is_ko():
+        if self.is_dead():
+            return
+        if self.is_ko():
+            self._death_roll()
             return
 
         self._movement_left = self._movement

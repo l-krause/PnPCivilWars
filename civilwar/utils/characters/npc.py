@@ -24,7 +24,6 @@ class NPC(Character):
         if self.is_dead():
             return
         if self.is_ko():
-            self._death_roll()
             return
         if self._stunned > 0:
             return
