@@ -112,7 +112,7 @@ class Character(JsonSerializable, ApiParameter, ABC):
     def move(self, new_pos):
         dist = self._pos.distance(new_pos)
         self._pos = new_pos
-        self._movement_left = max(0, (self._movement_left / (OG_METER*OG_METER)) - dist)
+        self._movement_left = max(0, (self._movement_left / (OG_METER*OG_METER)) - dist) * (OG_METER*OG_METER)
         self.send_character_event("characterMove", {"to": self._pos, "movementLeft": self._movement_left})
         return create_response()
 
