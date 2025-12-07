@@ -1,5 +1,6 @@
 import datetime
 import logging
+import trio
 import os
 
 from dotenv import load_dotenv
@@ -19,7 +20,6 @@ load_dotenv()
 ORIGINS = ["https://dnd.romanh.de", "https://localhost:3000", "http://localhost:3000"]
 
 app = Flask(__name__)
-# app.config.from_object(__name__)
 app.config['SESSION_PERMANENT'] = True
 app.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(days=365)
 app.config['SESSION_COOKIE_NAME'] = 'session'
@@ -323,4 +323,7 @@ if __name__ == "__main__":
         os.makedirs(log_dir)
 
     logging.basicConfig(filename=log_file, level=logging.DEBUG)
-    app.run("localhost", 8001)
+    host = os.getenv("APP_HOST", "localhost")
+    port = int(os.getenv("APP_PORT", "3000"))
+    debug = os.getenv('APP_DEBUG', "0").lower() in ["true","1","yes"]
+    socketio.run(app, host=host, port=port, debug=debug)
