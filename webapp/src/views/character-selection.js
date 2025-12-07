@@ -1,23 +1,7 @@
 import {useCallback, useEffect, useState} from "react";
+import CharacterToken from "../elements/character-token";
+import DMToken from "../elements/dm-token";
 import {Alert, Box, Button, CircularProgress, styled, TextField} from "@mui/material";
-
-const CharacterToken = styled(Box)(({theme}) => ({
-    "& img": {
-        width: 128,
-        height: 128,
-        padding: theme.spacing(2),
-    },
-    cursor: "pointer",
-    display: "inline-block",
-    borderColor: "transparent",
-    borderWidth: 1,
-    borderRadius: 5,
-    borderStyle: "solid",
-    "&:hover": {
-        borderColor: "#ccc",
-        backgroundColor: "#f0f0f0"
-    }
-}));
 
 const CharacterContainer = styled(Box)(({theme}) => ({
     marginLeft: "auto",
@@ -98,6 +82,10 @@ export default function CharacterSelection(props) {
         }
     };
 
+    if (!characters) {
+        return <CircularProgress />
+    }
+
     return <>
         <CharacterContainer>
             <div><h2>Choose your character</h2></div>
@@ -108,9 +96,9 @@ export default function CharacterSelection(props) {
                             {Object.keys(characters).map((name) => renderCharacter(name, characters[name]))}
                         </div>
                         <CharacterName size={"small"} variant={"outlined"}
-                                       sx={{input: {color: 'white', borderColor: 'white'}}}
+                                       sx={{input: {color: 'white', borderColor: 'white', backgroundColor: '#3c3e42ff'}}}
                                        placeholder={"Charactername"}
-                                       inputProps={{min: 0, style: {textAlign: 'center'}}}
+                                       slotProps={{htmlInput: {min: 0, style: {textAlign: 'center'}}}}
                                        readOnly={true} value={characters[selectedCharacter]?.name || ""}/>
                         <StartButton variant={"outlined"} onClick={() => onChooseCharacter()}
                                      disabled={selectedCharacter === null}>
@@ -119,15 +107,19 @@ export default function CharacterSelection(props) {
                     </>
                     : <CircularProgress/>
                 }
-                <CharacterToken key={`Crab`}
-                                onClick={() => setSelectedCharacter(selectedCharacter === "Crab" ? null : "Crab")}
-                                style={selectedCharacter === "crab" ? {borderColor: "red"} : {}}>
-                    <img src={"/img/crab.png"} alt="Crab"/>
-                </CharacterToken>
-                {showPasswordPrompt ? <>
-                        <TextField type={"password"} value={password} onChange={e => setPassword(e.target.value)}/>
-                    </>
-                    : null}
+                <Box marginTop={2}>
+                    <DMToken 
+                        character={characters["crab"]}
+                        onClick={() => setSelectedCharacter(selectedCharacter === "Crab" ? null : "Crab")}
+                        isSelected={selectedCharacter === "Crab"} />
+                    {showPasswordPrompt ? <Box marginTop={2}>
+                            <TextField type={"password"} placeholder="DM Password" value={password} 
+                                slotProps={{htmlInput: {min: 0, style: {textAlign: 'center'}}}}
+                                sx={{input: {color: 'white', borderColor: 'white', backgroundColor: '#3c3e42ff'}}}
+                                onChange={e => setPassword(e.target.value)}/>
+                        </Box>
+                        : null}
+                </Box>
             </div>
             {error ?
                 <Alert severity={"error"} title={"An error occured"}>{error}</Alert> : <></>
