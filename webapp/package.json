@@ -17,7 +17,7 @@
   },
   "scripts": {
     "build": "npx parcel build",
-    "debug": "parcel public/index.html --port 3000",
+    "debug": "parcel serve public/index.html --port 3000",
     "deploy": "scp -r dist public/img root@romanh.de:/var/www/dnd.romanh.de/civilwar/static/"
   },
   "eslintConfig": {
@@ -40,6 +40,7 @@
   },
   "devDependencies": {
     "parcel": "^2.16.3",
+    "serve-static": "^2.2.0",
     "stream-browserify": "^3.0.0"
   },
   "@parcel/bundler-default": {
